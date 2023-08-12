@@ -1,4 +1,5 @@
 theme:
+  name: material
   language: zh
   palette:
     # Palette toggle for light mode
