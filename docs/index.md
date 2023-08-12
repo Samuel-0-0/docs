@@ -4,9 +4,7 @@ title: Welcome
 
 ???+ info "关于本站"
 
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla et euismod
-    nulla. Curabitur feugiat, tortor non consequat finibus, justo purus auctor
-    massa, nec semper lorem quam in massa.
+  本站会收录一些平时用到过的文档、记录，以防日后遗忘。
 
 
-Hello world ! 2333
+你好，欢迎到访━(*｀∀´*)ノ亻!
