@@ -1,4 +1,10 @@
 site_name: 三木奇奇怪怪的文档收录
+site_url: https://docs.529300529.xyz
+site_description: >-
+  各种文档、记录整理收录合集
+
+repo_name: Samuel-0-0/docs/
+repo_url: https://github.com/Samuel-0-0/docs/
 theme:
   name: material
   language: zh
@@ -33,3 +39,11 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+nav:
+    - Home: index.md
+    - 3D打印机:
+      - Voron打印机安装调试:
+        - V0: 3d_printer/voron/v0.md
+        - V2.4: 3d_printer/voron/v2.4.md
+      - Klipper安装及使用: 3d_printer/klipper.md
+      - 打印及切片软件调试: 3d_printer/slicer.md
