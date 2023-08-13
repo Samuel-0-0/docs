@@ -8,23 +8,35 @@ repo_url: https://github.com/Samuel-0-0/docs/
 theme:
   name: material
   language: zh
+  # 主题颜色
   palette:
-    # Palette toggle for light mode
+    # 明亮模式
     - media: "(prefers-color-scheme: light)"
       scheme: default
       toggle:
         icon: material/brightness-7
-        name: Switch to dark mode
-    # Palette toggle for dark mode
+        name: 切换到暗黑模式
+    # 暗黑模式
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: 切换到明亮模式
+  # 特征
   features:
+    # 代码块复制按钮
     - content.code.copy
+    # 代码块注解，使用方法：在代码要加注解的后面加"# (1)"
+    # 然后在代码后面加"1.  注解的内容"
     - content.code.annotate
+    # 导航全部展开
     - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
   icon:
     admonition:
       note: octicons/tag-16
@@ -39,9 +51,13 @@ theme:
       bug: octicons/bug-16
       example: octicons/beaker-16
       quote: octicons/quote-16
+# markdowm扩展
 markdown_extensions:
+  # 警示栏
   - admonition
+  # 警示栏可折叠
   - pymdownx.details
+  # 代码块
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -49,9 +65,12 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  # 列表
   - def_list
+  # 任务列表
   - pymdownx.tasklist:
       custom_checkbox: true
+# 导航栏
 nav:
     - Home: index.md
     - VAST系列产品手册:
