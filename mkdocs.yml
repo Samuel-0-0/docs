@@ -63,5 +63,8 @@ nav:
       - 打印机安装调试:
         - Voron 0.2: 3d_printer/voron/v0.md
         - Voron 2.4: 3d_printer/voron/v2.4.md
-      - Klipper安装及使用: 3d_printer/klipper.md
+      - Klipper安装及使用:
+        - 图形化一键脚本: 3d_printer/klipper/assistant.md
+        - 7寸触屏小主机: 3d_printer/klipper/7.md
+        - 其他: 3d_printer/klipper/klipper.md
       - 打印及切片软件调试: 3d_printer/slicer.md
