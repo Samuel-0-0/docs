@@ -1,4 +1,4 @@
-## Klipper近程挤出机校准：
+## Klipper近程挤出机校准
 针对已知的挤出机类型，获取rotation_distance的推荐值填入配置文件
 待热端在设定的挤出温度下稳定后，先执行：
 ``` { .yaml .copy .annotate }
