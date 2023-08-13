@@ -50,7 +50,13 @@ markdown_extensions:
   - pymdownx.superfences
 nav:
     - Home: index.md
-    - 3D打印机:
+    - VAST系列产品手册:
+      - v0裙边按钮+屏幕套件: vast/v0_skirt/readme.md
+      - v0控制板: vast/v0_D4/readme.md
+      - 电源计量与远程控制: vast/power/readme.md
+      - SB内嵌打印头控制CAN板: vast/sb_can/readme.md
+      - 水冷一体挤出热端控制套件: vast/water/readme.md
+    - 3D打印机相关:
       - 打印机安装调试:
         - Voron v0: 3d_printer/voron/v0.md
         - Voron v2.4: 3d_printer/voron/v2.4.md
