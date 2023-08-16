@@ -24,6 +24,10 @@ nav:
         - 7寸触屏小主机: 3d_printer/klipper/7.md
         - 其他: 3d_printer/klipper/klipper.md
       - 打印及切片软件调试: 3d_printer/slicer.md
+
+plugins:
+  - search
+
 theme:
   name: material
   language: zh
@@ -49,7 +53,7 @@ theme:
     # 然后在代码后面加"1.  注解的内容"
     - content.code.annotate
     # 导航全部展开
-    - navigation.expand
+    - navigation.indexes
     - navigation.sections
     - search.highlight
     - search.share
@@ -68,6 +72,7 @@ theme:
       bug: octicons/bug-16
       example: octicons/beaker-16
       quote: octicons/quote-16
+
 # markdowm扩展
 markdown_extensions:
   # 警示栏
@@ -88,10 +93,6 @@ markdown_extensions:
   # 任务列表
   - pymdownx.tasklist:
       custom_checkbox: true
-plugins:
-  - navigation.indexes
-  - search
-  - content.code.copy
 
 copyright: |
   &copy; 2023 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>
