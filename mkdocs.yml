@@ -50,9 +50,7 @@ theme:
     - content.code.annotate
     # 导航全部展开
     - navigation.expand
-    - navigation.indexes
-    - navigation.top
-    - navigation.tracking
+    - navigation.sections
     - search.highlight
     - search.share
     - search.suggest
@@ -76,6 +74,7 @@ markdown_extensions:
   - admonition
   # 警示栏可折叠
   - pymdownx.details
+  - md_in_html
   # 代码块
   - pymdownx.highlight:
       anchor_linenums: true
@@ -90,5 +89,9 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
 plugins:
-    - search
+  - navigation.indexes
+  - search
+  - content.code.copy
 
+copyright: |
+  &copy; 2023 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>
