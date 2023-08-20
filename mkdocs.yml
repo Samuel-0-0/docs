@@ -9,7 +9,8 @@ repo_url: https://github.com/Samuel-0-0/docs/
 # 导航栏
 nav:
     - Home: index.md
-    - VAST系列产品手册: vast/index.md
+    - VAST系列产品手册:
+      - vast/index.md
       - Stealthburner内嵌CAN控制板:
         - 概述: vast/sb-can/index.md
         - Canboot(可选): vast/sb-can/canboot.md
@@ -31,7 +32,8 @@ nav:
         - 硬件安装: vast/water/manual.md
         - Canboot(可选): vast/water/canboot.md
         - Klipper: vast/water/klipper.md
-    - 3D打印机调试: 3d_printer/index.md
+    - 3D打印机调试:
+      - 3d_printer/index.md
       - 打印机安装调试:
         - Voron 0.2: 3d_printer/voron/v0.md
         - Voron 2.4: 3d_printer/voron/v2.4.md
