@@ -11,9 +11,9 @@ nav:
     - Home: index.md
     - VAST系列产品手册:
       - Stealthburner内嵌CAN控制板:
-          - 概述: vast/sb-can/index.md
-          - Canboot(可选): vast/sb-can/canboot.md
-          - Klipper: vast/sb-can/klipper.md
+        - 概述: vast/sb-can/index.md
+        - Canboot(可选): vast/sb-can/canboot.md
+        - Klipper: vast/sb-can/klipper.md
       - 电源计量与远程控制:
         - 概述: vast/power/index.md
         - 固件: vast/power/firmware.md
@@ -68,8 +68,12 @@ theme:
     # 代码块注解，使用方法：在代码要加注解的后面加"# (1)"
     # 然后在代码后面加"1.  注解的内容"
     - content.code.annotate
-    - navigation.indexes
+    # 顶部导航菜单
+    - navigation.tabs
+    # 展开菜单
     - navigation.sections
+    # 返回顶部按钮
+    - navigation.top
     - search.highlight
     - search.share
     - search.suggest
