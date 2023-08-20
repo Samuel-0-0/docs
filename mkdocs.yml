@@ -74,6 +74,8 @@ theme:
     - navigation.tabs
     # 展开菜单
     - navigation.sections
+    # 节索引页
+    - navigation.indexes
     # 返回顶部按钮
     - navigation.top
     - search.highlight
