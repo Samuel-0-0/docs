@@ -13,7 +13,10 @@ nav:
       - Voron 0.2裙边按钮+屏幕套件: vast/v0_skirt/readme.md
       - Voron 0.2集线板+主控板套件: vast/v0_D4/readme.md
       - 电源计量与远程控制: vast/power/readme.md
-      - SB头内嵌CAN控制板: vast/sb_can/readme.md
+      - Stealthburner内嵌CAN控制板: 
+        - 概述: vast/sb-can/index.md
+        - Canboot(可选): vast/sb-can/canboot.md
+        - Klipper: vast/sb-can/klipper.md
       - 挤出与热端水冷一体套件(含CAN驱动板): vast/water/readme.md
     - 3D打印机相关:
       - 打印机安装调试:
