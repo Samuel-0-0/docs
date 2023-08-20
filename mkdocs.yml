@@ -11,9 +11,9 @@ nav:
     - Home: index.md
     - VAST系列产品手册:
       - Stealthburner内嵌CAN控制板:
-        - 概述: vast/sb-can/index.md
-        - Canboot(可选): vast/sb-can/canboot.md
-        - Klipper: vast/sb-can/klipper.md
+          - 概述: vast/sb-can/index.md
+          - Canboot(可选): vast/sb-can/canboot.md
+          - Klipper: vast/sb-can/klipper.md
       - 电源计量与远程控制:
         - 概述: vast/power/index.md
         - 固件: vast/power/firmware.md
@@ -26,12 +26,12 @@ nav:
         - 概述: vast/D4/index.md
         - Canboot(可选): vast/D4/canboot.md
         - Klipper: vast/D4/klipper.md
-      - 挤出与热端水冷一体套件(含控制板):
+      - 水冷套件(含控制板):
         - 概述: vast/water/index.md
         - 硬件安装: vast/water/manual.md
         - Canboot(可选): vast/water/canboot.md
         - Klipper: vast/water/klipper.md
-    - 3D打印机相关:
+    - 3D打印机调试:
       - 打印机安装调试:
         - Voron 0.2: 3d_printer/voron/v0.md
         - Voron 2.4: 3d_printer/voron/v2.4.md
