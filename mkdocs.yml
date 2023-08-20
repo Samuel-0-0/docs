@@ -10,14 +10,27 @@ repo_url: https://github.com/Samuel-0-0/docs/
 nav:
     - Home: index.md
     - VAST系列产品手册:
-      - Voron 0.2裙边按钮+屏幕套件: vast/v0_skirt/readme.md
-      - Voron 0.2集线板+主控板套件: vast/v0_D4/readme.md
-      - 电源计量与远程控制: vast/power/readme.md
-      - Stealthburner内嵌CAN控制板: 
+      - Stealthburner内嵌CAN控制板:
         - 概述: vast/sb-can/index.md
         - Canboot(可选): vast/sb-can/canboot.md
         - Klipper: vast/sb-can/klipper.md
-      - 挤出与热端水冷一体套件(含CAN驱动板): vast/water/readme.md
+      - 电源计量与远程控制:
+        - 概述: vast/power/index.md
+        - 固件: vast/power/firmware.md
+        - Klipper: vast/power/klipper.md
+      - Voron 0.2裙边按钮+屏幕套件:
+        - 概述: vast/v0-skirt/index.md
+        - Canboot(可选): vast/v0-skirt/canboot.md
+        - Klipper: vast/v0-skirt/klipper.md
+      - Voron 0.2集线板+主控板套件:
+        - 概述: vast/D4/index.md
+        - Canboot(可选): vast/D4/canboot.md
+        - Klipper: vast/D4/klipper.md
+      - 挤出与热端水冷一体套件(含控制板):
+        - 概述: vast/water/index.md
+        - 硬件安装: vast/water/manual.md
+        - Canboot(可选): vast/water/canboot.md
+        - Klipper: vast/water/klipper.md
     - 3D打印机相关:
       - 打印机安装调试:
         - Voron 0.2: 3d_printer/voron/v0.md
@@ -55,7 +68,6 @@ theme:
     # 代码块注解，使用方法：在代码要加注解的后面加"# (1)"
     # 然后在代码后面加"1.  注解的内容"
     - content.code.annotate
-    # 导航全部展开
     - navigation.indexes
     - navigation.sections
     - search.highlight
