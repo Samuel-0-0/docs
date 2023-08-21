@@ -73,13 +73,14 @@ theme:
     # 顶部导航菜单
     - navigation.tabs
     # 展开菜单
-    - navigation.sections
+    #- navigation.sections
     # 返回顶部按钮
     - navigation.top
     - search.highlight
     - search.share
     - search.suggest
   icon:
+    # 警示栏图标
     admonition:
       note: octicons/tag-16
       abstract: octicons/checklist-16
@@ -101,7 +102,7 @@ markdown_extensions:
   # 警示栏可折叠
   - pymdownx.details
   - md_in_html
-  # 代码块
+  # 代码显示样式
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
