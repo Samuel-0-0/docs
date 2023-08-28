@@ -1,6 +1,6 @@
-# 3D打印机相关项目汇总
+# 3D打印机相关MODS项目汇总
 
-本页主要收录一些3D打印机相关的项目。
+本页主要收录一些3D打印机相关的MODS项目。
 
 ## 基础标准件
 
@@ -31,7 +31,7 @@
 
 使用弹簧针替代导线，便于快速更换热端。
 
-![pic](https://raw.githubusercontent.com/falcon14141/Voron_Mods/main/Stealthburner%20POGO%20Toolhead/images/Pogo-CW2.png)
+![pic](https://raw.githubusercontent.com/falcon14141/Voron_Mods/master/Stealthburner%20POGO%20Toolhead/images/Pogo-CW2.png)
 
 项目地址：https://github.com/falcon14141/Voron_Mods/tree/master/Stealthburner%20POGO%20Toolhead
 
