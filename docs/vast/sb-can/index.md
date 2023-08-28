@@ -38,7 +38,7 @@
 | :----: | :----: | :----: |
 | TH1 | PA0 |   |
 | FAN1 | PA1 |   |
-| FAN2 | PA2 |   |
+| FAN0 | PA2 |   |
 | TH0 | PA3 |   |
 | ADXL345_CS | PA4 |   |
 | ADXL345_SCK | PA5 |   |

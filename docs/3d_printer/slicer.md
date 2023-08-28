@@ -37,22 +37,22 @@ PRINT_START EXTRUDER=[nozzle_temperature_initial_layer] BED=[bed_temperature_ini
 
 ### 参数的说明
 
-* PRINT_START：调用的宏名字
-* M190 S0：禁用热床预热，SuperSlicer和OrcaSlicer会默认在切片中加入预热的gcode，用此参数会禁用默认加入
-* M109 S0：禁用打印头预热，SuperSlicer和OrcaSlicer会默认在切片中加入预热的gcode，用此参数会禁用默认加入
-* EXTRUDER=XXX：切片设置中打印头的温度
-* BED=XXX：切片设置中热床的温度
-* CHAMBER=XXX：切片设置中仓温的温度
-* NOZZLE=XXX：切片设置中喷嘴的直径
-* FILAMENT=XXX：切片设置中耗材的类型
-* PRINT_MIN=XXX：切片中最小的打印坐标点
-* PRINT_MAX=XXX：切片中最大的打印坐标点
+- **PRINT_START：** 调用的宏名字
+- **M190 S0：** 禁用热床预热，SuperSlicer和OrcaSlicer会默认在切片中加入预热的gcode，用此参数会禁用默认加入
+- **M109 S0：** 禁用打印头预热，SuperSlicer和OrcaSlicer会默认在切片中加入预热的gcode，用此参数会禁用默认加入
+- **EXTRUDER=XXX：** 切片设置中打印头的温度
+- **BED=XXX：** 切片设置中热床的温度
+- **CHAMBER=XXX：** 切片设置中仓温的温度
+- **NOZZLE=XXX：** 切片设置中喷嘴的直径
+- **FILAMENT=XXX：** 切片设置中耗材的类型
+- **PRINT_MIN=XXX：** 切片中最小的打印坐标点
+- **PRINT_MAX=XXX：** 切片中最大的打印坐标点
 
 ### PRINT_START宏案例
 
 以下是一个比较简单的PRINT_START宏案例，前面提到的参数都有实际的对应用途，也加了注释便于理解。
 
-``` { .yaml .copy }
+``` yaml title="macros.cfg"
 [gcode_macro PRINT_START]
 description: 打印开始前进行的操作
 gcode:
