@@ -11,6 +11,10 @@
 
 ## V2.0
 
+![view](SB-CAN.jpg)
+
+### 尺寸
+
 ![size](SB-CAN SIZE.png)
 
 ### 硬件
@@ -67,6 +71,7 @@
 
 - [原理图](SB-CAN V2.0 SCH.pdf)
 - [制造文件](SB-CAN V2.0 GERBER.zip)
+- [立创开源硬件平台](https://oshwhub.com/washmi/vast-sb-broad)
 - [焊接辅助](SB-CAN V2.0 焊接辅助.html)
 - [BOM](SB-CAN V2.0 BOM.xlsx)
 - [3D模型](SB-CAN V2.0 3D.zip)
