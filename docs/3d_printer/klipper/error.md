@@ -36,7 +36,7 @@
 ip -d -s link show can0
 ```
 
-![mcu](error/6.png)
+![mcu](error/7.png)
 
 确定是txqueuelen的问题，修改
 
