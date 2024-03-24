@@ -32,6 +32,14 @@
 
 在3D打印机的原有基础上进行提升或者有相应辅助的MODS
 
+### Monolith Panels for Voron 2.4 and Trident
+
+全包封箱板扣件
+<div align=left>
+<img src="https://raw.githubusercontent.com/CloakedWayne/Monolith_Panels/master/Images/distant_view.png" height="400" />
+</div>
+项目地址：https://github.com/CloakedWayne/Monolith_Panels
+
 ### Stealthburner POGO Toolhead
 
 使用弹簧针替代导线，便于快速更换热端。
