@@ -1,4 +1,4 @@
-# 3D打印机相关MODS项目汇总
+# Voron 2.4相关MODS项目汇总
 
 本页主要收录一些3D打印机相关的MODS项目。
 
@@ -9,7 +9,6 @@
 3D打印机组装用到的各种标准件的模型库
 
 项目地址：https://github.com/PrintersForAnts/Voron-Construct
-
 
 
 
@@ -24,7 +23,6 @@
 <img src="https://raw.githubusercontent.com/Diyshift/3D-Printer/main/GT2%20Belt%20Tension%20Meter/Images/meteronbelt.JPG" height="400" />
 </div>
 项目地址：https://github.com/Diyshift/3D-Printer/tree/main/GT2%20Belt%20Tension%20Meter
-
 
 
 
@@ -136,58 +134,35 @@
 </div>
 项目地址：https://github.com/sorted01/Filametrix
 
-### V0 Auxiliary Cooling Fan
+### Voron 2.4 / Trident Canopy Top Hat - REMIX Split model, half printing time & 5g supports
 
-V0侧吹风扇
+仓顶增高
 <div align=left>
-<img src="https://raw.githubusercontent.com/JackJack3231/V0-Auxiliary-Fan/main/images/R1%20Lineup%20v3.png" height="400" />
+<img src="https://media.printables.com/media/prints/594894/images/4738693_7a2be3ed-882b-4974-8f13-ca10b336f254_1b66a85d-6b84-4663-b6c5-1bfefe6fa518/thumbs/inside/1280x960/jpeg/img_2003.webp" height="400" />
 </div>
-项目地址：https://github.com/JackJack3231/V0-Auxiliary-Fan
+项目地址：https://www.printables.com/model/594894-voron-24-trident-canopy-top-hat-remix-split-model-
 
-### V0_MotorFans
+### Flat Mesh Skirt - Voron Trident - 350/300/250mm
 
-V0电机散热
+底部裙边
 <div align=left>
-<img src="https://raw.githubusercontent.com/BladeScraper-Designs/VoronMods/main/V0.1/V0_MotorFans/IMG/Both_Installed.jpg" height="400" />
+<img src="https://media.printables.com/media/prints/644512/images/6116388_5ce922d9-26f3-4e73-8712-626d0ffd602a_b247bc09-3f93-4491-8d88-d1bc204d88fd/thumbs/inside/1280x960/webp/1000010187.webp" height="400" />
 </div>
-项目地址：https://github.com/BladeScraper-Designs/VoronMods/tree/main/V0.1/V0_MotorFans
+项目地址：https://www.printables.com/model/644512-flat-mesh-skirt-voron-trident-350300250mm
 
+### Roadrunner: a high resolution filament motion sensor
 
-## 3D打印机
-
-### Micron
-
-基于1515型材的微缩版Voron 2.4
+旋转编码器耗材运动检测
 <div align=left>
-<img src="https://raw.githubusercontent.com/PrintersForAnts/Micron/main/Images/Green-Micron-plus-Render.png" height="400" />
+<img src="https://raw.githubusercontent.com/EiNSTeiN-/roadrunner-filament-sensor/main/images/assembly.png" height="400" />
 </div>
-项目地址：https://github.com/PrintersForAnts/Micron
+项目地址：https://github.com/EiNSTeiN-/roadrunner-filament-sensor
 
-### VoronTrident-BeltedZ
+### Blobifier
 
-三叉戟的3Z皮带版本，使用的行星齿轮箱步进电机
+一款拉屎系统
 <div align=left>
-<img src="https://raw.githubusercontent.com/3DPrintingMods/VoronTrident-BeltedZ/master/images/genevamotion.jpg" height="400" />
+<img src="https://raw.githubusercontent.com/Dendrowen/Blobifier/main/Pictures/Render_Full.png" height="400" />
 </div>
-项目地址：https://github.com/3DPrintingMods/VoronTrident-BeltedZ
+项目地址：https://github.com/Dendrowen/Blobifier
 
-
-
-
-## 主题
-
-### mainsail_theme_flat
-
-一款mainsail主题
-<div align=left>
-<img src="https://user-images.githubusercontent.com/111509593/281571414-1e06e343-3d88-4541-9d05-25d2f3d1f0fa.png" height="400" />
-</div>
-项目地址：https://github.com/bumbeng/mainsail_theme_flat
-
-### Klipperscreen_blurry_theme
-
-一款模糊玻璃风格的Klipperscreen主题
-<div align=left>
-<img src="https://user-images.githubusercontent.com/111509593/231819493-aadc9808-b94f-4984-aed5-f4a70b33175d.png" height="400" />
-</div>
-项目地址：https://github.com/bumbeng/Klipperscreen_blurry_theme
