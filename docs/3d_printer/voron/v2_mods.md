@@ -166,3 +166,76 @@
 </div>
 项目地址：https://github.com/Dendrowen/Blobifier
 
+### EVA Fan Duct mit LED for Voron
+
+带灯的EVA模型散热出风口
+<div align=left>
+<img src="https://media.printables.com/media/prints/391744/images/3274122_495cd13e-74ba-4607-b4ee-ebe0ee899dbf/thumbs/inside/1600x1200/jpeg/20230206_192720-01.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/391744-eva-fan-duct-mit-led-fur-voron
+
+### Voron 2.4 Canopy
+
+顶部加高
+<div align=left>
+<img src="https://media.printables.com/media/prints/568090/images/4547850_34013b9b-d4bf-4a2d-8b8a-cf4d8a84fa6d/thumbs/inside/1280x960/png/canopy1.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/568090-voron-24-canopy
+
+### Voron 2.4 Belt hole covers for LDO kit
+
+简化版的皮带孔盖子
+<div align=left>
+<img src="https://media.printables.com/media/prints/313327/images/2718488_7a85d678-512d-45df-b614-f9cfe12e79a7/thumbs/inside/1280x960/jpg/img_20221108_202037.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/313327-voron-24-belt-hole-covers-for-ldo-kit
+
+### Orbiter 2 mit EBB36 Halter verstärkt mit Lüfter
+
+Orbiter 2的EBB36支架
+<div align=left>
+<img src="https://media.printables.com/media/prints/594796/images/4737802_06e3f547-2a95-41d4-b3ac-7ba9554601da_df07dd39-5ed9-4c37-a537-789e419b5522/thumbs/inside/1280x960/jpg/1.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/594796-orbiter-2-mit-ebb36-halter-verstarkt-mit-lufter
+
+### Voron Single-Door 270° Hinge
+
+用于型材门的270度铰链
+<div align=left>
+<img src="https://media.printables.com/media/prints/669765/images/5270067_3a8fe51a-0511-42e8-9bc7-e047339c898d_c80c01f3-aa47-41d5-b74f-5eff33316769/thumbs/inside/1280x960/jpg/20231204_204518.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/669765-voron-single-door-270deg-hinge
+
+### Cable Anchor for 2020 V-Slot
+
+2020型材固定扎带卡子
+<div align=left>
+<img src="https://media.printables.com/media/prints/694918/images/5463131_74c1ced3-fa4e-4e2b-947f-c782e3a702fb_cc69a9b1-48e6-45a6-85de-326b9d21b26c/thumbs/inside/1280x960/jpeg/img_5141.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/694918-cable-anchor-for-2020-v-slot
+
+### Držák LED Alu rohového profilu 16x16mm (LED holder Alu corner profile 16x16mm)
+
+16*16 LED灯条卡扣
+<div align=left>
+<img src="https://media.printables.com/media/prints/522521/images/4226654_41064f15-c2ec-4a46-97ed-b8a615c40859/thumbs/inside/1280x960/png/drzak-alu-led-v10.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/522521-drzak-led-alu-rohoveho-profilu-16x16mm-led-holder-
+
+### Záslepka LED Alu rohového profilu 16x16mm (Cap for LED holder Alu corner profile 16x16mm)
+
+16*16 LED灯条端盖
+<div align=left>
+<img src="https://media.printables.com/media/prints/522528/images/4226548_4e072da4-1c65-453e-a27d-08b074e55ff9/thumbs/inside/1280x960/png/zaslepka-alu-led-v4.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/522528-zaslepka-led-alu-rohoveho-profilu-16x16mm-cap-for-
+
+### 16x16mm LED-bar end-caps
+
+16*16 LED灯条端盖
+<div align=left>
+<img src="https://media.printables.com/media/prints/51304/images/506567_1055664c-4490-4cd5-ba1e-2cc13d3dfc1b/thumbs/inside/1280x960/png/15efef8a-bcd8-4b5a-a56e-29323aa7280a.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/51304-16x16mm-led-bar-end-caps
+
+

@@ -49,13 +49,35 @@ cat /etc/network/interfaces.d/can0
 其中"bitrate 1000000"中的1000000是波特率，波特率越高，每秒传送数据就越多，
 可以根据自己实际情况，设置成250000或者500000，建议使用1000000。
 
+??? info "关于txqueuelen大小"
+
+    [源文档](https://www.klipper3d.org/CANBUS_Troubleshooting.html#use-an-appropriate-txqueuelen-setting)
+    It is not recommended to use a `txqueuelen` significantly larger than 128.
+    A CAN bus running at a frequency of 1000000 will typically take around 120us
+    to transmit a CAN packet. Thus a queue of 128 packets is likely to take around
+    15-20ms to drain. A substantially larger queue could cause excessive spikes in
+    message round-trip-time which could lead to unrecoverable errors. Said another
+    way, Klipper's application retransmit system is more robust if it does not have
+    to wait for Linux to drain an excessively large queue of possibly stale data.
+    This is analogous to the problem of 
+    [bufferbloat](https://en.wikipedia.org/wiki/Bufferbloat) on internet routers.
+    在使用CAN总线时，不建议将txqueuelen设置大于128。CAN总线以1000000的频率运行时，发送
+    一个CAN数据包通常需要大约120微秒。因此，一个包含128个数据包的队列可能需要大约15-20毫
+    秒才能排空。如果队列远远大于这个大小，可能会导致消息往返时间出现过多的波动，进而可能导
+    致无法恢复的错误。换句话说，Klipper应用的重传系统在不必等待Linux排空可能过期的数据的
+    情况下更加健壮。这类似于互联网路由器上的“缓冲过载”问题。
+
+    在实践中会发现，缓冲设置为128会遇到timer too close报错，所以应用中实际可以适当加大此值。
+    
+
+
 如果你要修改，可以直接完整复制下方6行内容到终端执行：
 ``` bash
 sudo /bin/sh -c "cat > /etc/network/interfaces.d/can0" << EOF
 allow-hotplug can0
 iface can0 can static
   bitrate 1000000
-  up ip link set can0 txqueuelen 1000
+  up ip link set can0 txqueuelen 256
 EOF
 ```
 然后再次执行命令：

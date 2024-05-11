@@ -51,3 +51,35 @@ xol打印头的改进型
 </div>
 项目地址：https://github.com/SouthAsh1/Xol-metrix
 
+### Voron V0.2 mount for TZ V2 / TZ-V6-2.0
+
+TZ V2的安装支架
+<div align=left>
+<img src="https://media.printables.com/media/prints/704371/images/5568626_58637bed-b671-4c47-a57c-9ae6ec95d723_e8314d2f-d98c-491a-922f-9bbce10be23f/thumbs/inside/1280x960/png/image_2024-01-06_211208913.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/704371-voron-v02-mount-for-tz-v2-tz-v6-20
+
+### Bambulab Toolhead for Voron 0.2 mini Stealthburner
+
+拓竹热端支架
+<div align=left>
+<img src="https://media.printables.com/media/prints/370289/images/3120922_b7934588-50aa-43aa-a80b-f283ad7ad88a/thumbs/inside/1280x960/jpg/20230115_224151.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/370289-bambulab-toolhead-for-voron-02-mini-stealthburner
+
+### Snow Knob for the Voron 0.2
+
+热床螺母
+<div align=left>
+<img src="https://media.printables.com/media/prints/479061/images/3917222_98ff9ea4-526c-4d29-9f6e-ac49fad4492d/thumbs/inside/1280x960/png/bottomview.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/479061-snow-knob-for-the-voron-02
+
+### 1515 cable clip
+
+1515型材线卡
+<div align=left>
+<img src="https://media.printables.com/media/prints/800655/images/6199987_ad592c15-213c-4470-9ef2-d471fe88b275_4a816fd7-1972-45bc-b4c8-d1343907b1eb/thumbs/inside/1280x960/jpg/1515_clip.webp" height="400" />
+</div>
+项目地址：https://www.printables.com/model/800655-1515-cable-clip
+
