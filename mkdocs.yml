@@ -32,6 +32,9 @@ nav:
         - 硬件安装: vast/water/manual.md
         - Canboot(可选): vast/water/canboot.md
         - Klipper: vast/water/klipper.md
+    - SolidWorks:
+      - solidworks/index.md
+      - 设计相关: solidworks/solidworks.md
     - 3D打印机:
       - 3d_printer/index.md
       - 打印机安装调试:
@@ -45,10 +48,14 @@ nav:
         - 7寸触屏小主机: 3d_printer/klipper/7inch.md
         - 其他: 3d_printer/klipper/klipper.md
       - 打印及切片软件调试: 3d_printer/slicer.md
+      - 打印件及问题处理: 3d_printer/printing_issue.md
       - 3D打印机MODS:
         - Voron 0.2: 3d_printer/voron/v0_mods.md
         - Voron 2.4: 3d_printer/voron/v2_mods.md
         - 其他: 3d_printer/printers.md
+    - CNC:
+      - cnc/index.md
+      - 机械速查表: cnc/holes_thread_shaft.md
 
 plugins:
   - search
