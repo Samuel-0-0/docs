@@ -70,8 +70,8 @@ Slic3r和PrusaSlicer会将小于或等于0.10mm x 0.10mm的孔视为STL中的缺
 | 挤出宽度           |                                                   | 0.45mm     |
 | 层高               |                                                   | 0.20mm     |
 | 外周数量           |                                                   | 4          |
-| 挤出间距           | extrusion_width - layer_height * (1 - π/4)        | 0.4071mm   |
-| 外周总宽度         | extrusion_width + (num_perimeters-1) * extrusion_spacing | 1.67mm     |
+| 挤出间距           | 挤出宽度 - 层高 * (1 - π/4)        | 0.4071mm   |
+| 外周总宽度         | 挤出宽度 + (外周数量 - 1) * 挤出间距 | 1.67mm     |
 
 ### 顶部和底部厚度
 
@@ -79,7 +79,7 @@ Slic3r和PrusaSlicer会将小于或等于0.10mm x 0.10mm的孔视为STL中的缺
 | ------------------ | ------------------------ | ---------- |
 | 层高               |                          | 0.20mm     |
 | 顶部/底部层数      |                          | 5          |
-| 顶部/底部厚度      | num_top_bottom * layer_height | 1mm        |
+| 顶部/底部厚度      | 顶部/底部层数 * 层高 | 1mm        |
 
 ## 干净的垂直孔
 
