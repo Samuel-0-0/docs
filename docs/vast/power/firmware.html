@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VAST Power Installer</title>
+    <!-- <script type="module" src="js/install-button.js?module"> -->
+    <script type="module" src="https://unpkg.com/esp-web-tools@latest/dist/web/install-button.js?module">
+    </script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        header {
+            background-color: #e9f1fb;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        header h1 {
+            color: #2196f3;
+            font-size: 3rem;
+            margin: 0;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-top: 0.5rem;
+        }
+
+        main {
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .description p {
+            line-height: 1.6;
+        }
+
+        .description a {
+            color: #2196f3;
+            text-decoration: none;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .alert {
+            border: 1px solid #dc3545;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .alert strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: #721c24;
+            cursor: pointer;
+        }
+
+        .alert a {
+            color: #721c24;
+            text-decoration: underline;
+        }
+
+
+        .device-list {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            flex: 1;
+            min-width: 280px;
+            max-width: 470px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            background-color: #2196f3;
+            color: white;
+            padding: 0.75rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header input {
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 1rem;
+            color: #333;
+        }
+
+        .card-body p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .card-body a {
+            color: #2196f3;
+            text-decoration: none;
+        }
+
+        .card img {
+            width: auto;
+            height: 340px;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+            background-color: #f0f0f0;
+            margin-top: 3rem;
+        }
+
+        footer a {
+            color: #2196f3;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .device-list {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>VAST Power</h1>
+        <p>您访问的是VAST Power项目的安装程序页面，您可以在此初始化新设备。</p>
+        <p>此项目尚属建设阶段，暂不能正常使用</p>
+    </header>
+
+    <main>
+        <div class="description">
+            <p>
+                使用USB数据线将设备连接到计算机，选择您的设备，然后点击「连接设备」按钮。
+            </p>
+            <p>
+                默认情况下，连接按钮允许为已刷入固件的设备设置WiFi凭据。
+            </p>
+        </div>
+
+        <div class="device-list">
+            <div class="card" onclick="document.getElementById('cardPro').checked = true" style="cursor: pointer;">
+                <div class="card-header" role="button">
+                    <input id="cardPro" type="radio" name="type" value="pro" />
+                    <label for="cardPro">VAST Power Pro</label>
+                </div>
+                <div class="card-body">
+                    <p>
+                        除了具备常规的远程继电器控制功能，还包括本地语音控制。
+                        <br /><a href="#">点此查看更多详情</a>
+                    </p>
+                    <img src="image/pro.png"
+                        alt="VAST Power Pro Board">
+                </div>
+            </div>
+
+            <div class="card" onclick="document.getElementById('cardLite').checked = true" style="cursor: pointer;">
+                <div class="card-header" role="button">
+                    <input id="cardLite" type="radio" name="type" value="lite" />
+                    <label for="cardLite">VAST Power Lite</label>
+                </div>
+                <div class="card-body">
+                    <p>
+                        具备常规的远程继电器控制功能。
+                        <br /><a href="#">点此查看更多详情</a>
+                    </p>
+                    <img src="image/lite.png"
+                        alt="VAST Power Lite Board">
+                </div>
+            </div>
+        </div>
+
+        <div class="install-button-wrapper" style="text-align: center; margin-top: 2rem;">
+            <esp-web-install-button id="button_web_install" manifest="">
+                <button type="button" class="btn btn-primary" slot="activate">连接设备</button>
+                <span slot="not-allowed">
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <strong>不允许</strong>
+                        <div>仅支持从本地主机或安全网站进行刷写。</div>
+                    </div>
+                </span>
+                <span slot="notsupported">
+                    <div class="alert alert-dismissible alert-danger">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <strong>浏览器不支持</strong>
+                        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility">
+                            确保您使用兼容的浏览器
+                        </a>
+                    </div>
+                </span>
+            </esp-web-install-button>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2023-2025 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>
+    </footer>
+
+    <script>
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener("click", () => {
+                const radio = card.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+    
+                    const button = document.querySelector('esp-web-install-button');
+                    button.manifest = `./manifest_${radio.value}.json`;
+                    button.classList.remove('invisible');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

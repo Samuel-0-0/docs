@@ -17,7 +17,7 @@ nav:
         - Klipper: vast/sb-can/klipper.md
       - 电源计量与远程控制:
         - 概述: vast/power/index.md
-        - 固件: vast/power/firmware.md
+        - 固件: vast/power/firmware.html
         - Klipper: vast/power/klipper.md
       - Voron 0.2裙边按钮+屏幕套件:
         - 概述: vast/v0-skirt/index.md
@@ -131,4 +131,4 @@ markdown_extensions:
       custom_checkbox: true
 
 copyright: |
-  &copy; 2023 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>
+  &copy; 2023-2025 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>
