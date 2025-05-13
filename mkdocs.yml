@@ -19,19 +19,19 @@ nav:
         - 概述: vast/power/index.md
         - 固件: vast/power/firmware.html
         - Klipper: vast/power/klipper.md
-      - Voron 0.2裙边按钮+屏幕套件:
-        - 概述: vast/v0-skirt/index.md
-        - Canboot(可选): vast/v0-skirt/canboot.md
-        - Klipper: vast/v0-skirt/klipper.md
-      - Voron 0.2集线板+主控板套件:
-        - 概述: vast/D4/index.md
-        - Canboot(可选): vast/D4/canboot.md
-        - Klipper: vast/D4/klipper.md
-      - 水冷套件(含控制板):
-        - 概述: vast/water/index.md
-        - 硬件安装: vast/water/manual.md
-        - Canboot(可选): vast/water/canboot.md
-        - Klipper: vast/water/klipper.md
+#      - Voron 0.2裙边按钮+屏幕套件:
+#        - 概述: vast/v0-skirt/index.md
+#        - Canboot(可选): vast/v0-skirt/canboot.md
+#        - Klipper: vast/v0-skirt/klipper.md
+#      - Voron 0.2集线板+主控板套件:
+#        - 概述: vast/D4/index.md
+#        - Canboot(可选): vast/D4/canboot.md
+#        - Klipper: vast/D4/klipper.md
+#      - 水冷套件(含控制板):
+#        - 概述: vast/water/index.md
+#        - 硬件安装: vast/water/manual.md
+#        - Canboot(可选): vast/water/canboot.md
+#        - Klipper: vast/water/klipper.md
     - SolidWorks:
       - solidworks/index.md
       - 设计相关: solidworks/solidworks.md
