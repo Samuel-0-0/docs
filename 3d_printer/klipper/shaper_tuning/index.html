@@ -1,0 +1,2340 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="各种文档、记录整理收录合集">
+      
+      
+      
+        <link rel="canonical" href="https://docs.529300529.xyz/3d_printer/klipper/shaper_tuning/">
+      
+      
+        <link rel="prev" href="../../voron/v2/">
+      
+      
+        <link rel="next" href="../error/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.13">
+    
+    
+      
+        <title>加速度传感器应用 - 三木奇奇怪怪的文档收录</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+  
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+  
+  <style>:root{--md-admonition-icon--note:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1%207.775V2.75C1%201.784%201.784%201%202.75%201h5.025c.464%200%20.91.184%201.238.513l6.25%206.25a1.75%201.75%200%200%201%200%202.474l-5.026%205.026a1.75%201.75%200%200%201-2.474%200l-6.25-6.25A1.75%201.75%200%200%201%201%207.775m1.5%200c0%20.066.026.13.073.177l6.25%206.25a.25.25%200%200%200%20.354%200l5.025-5.025a.25.25%200%200%200%200-.354l-6.25-6.25a.25.25%200%200%200-.177-.073H2.75a.25.25%200%200%200-.25.25ZM6%205a1%201%200%201%201%200%202%201%201%200%200%201%200-2%22/%3E%3C/svg%3E');--md-admonition-icon--abstract:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M2.5%201.75v11.5c0%20.138.112.25.25.25h3.17a.75.75%200%200%201%200%201.5H2.75A1.75%201.75%200%200%201%201%2013.25V1.75C1%20.784%201.784%200%202.75%200h8.5C12.216%200%2013%20.784%2013%201.75v7.736a.75.75%200%200%201-1.5%200V1.75a.25.25%200%200%200-.25-.25h-8.5a.25.25%200%200%200-.25.25m13.274%209.537zl-4.557%204.45a.75.75%200%200%201-1.055-.008l-1.943-1.95a.75.75%200%200%201%201.062-1.058l1.419%201.425%204.026-3.932a.75.75%200%201%201%201.048%201.074M4.75%204h4.5a.75.75%200%200%201%200%201.5h-4.5a.75.75%200%200%201%200-1.5M4%207.75A.75.75%200%200%201%204.75%207h2a.75.75%200%200%201%200%201.5h-2A.75.75%200%200%201%204%207.75%22/%3E%3C/svg%3E');--md-admonition-icon--info:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M0%208a8%208%200%201%201%2016%200A8%208%200%200%201%200%208m8-6.5a6.5%206.5%200%201%200%200%2013%206.5%206.5%200%200%200%200-13M6.5%207.75A.75.75%200%200%201%207.25%207h1a.75.75%200%200%201%20.75.75v2.75h.25a.75.75%200%200%201%200%201.5h-2a.75.75%200%200%201%200-1.5h.25v-2h-.25a.75.75%200%200%201-.75-.75M8%206a1%201%200%201%201%200-2%201%201%200%200%201%200%202%22/%3E%3C/svg%3E');--md-admonition-icon--tip:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M3.499.75a.75.75%200%200%201%201.5%200v.996C5.9%202.903%206.793%203.65%207.662%204.376l.24.202c-.036-.694.055-1.422.426-2.163C9.1.873%2010.794-.045%2012.622.26%2014.408.558%2016%201.94%2016%204.25c0%201.278-.954%202.575-2.44%202.734l.146.508.065.22c.203.701.412%201.455.476%202.226.142%201.707-.4%203.03-1.487%203.898C11.714%2014.671%2010.27%2015%208.75%2015h-6a.75.75%200%200%201%200-1.5h1.376a4.5%204.5%200%200%201-.563-1.191%203.84%203.84%200%200%201-.05-2.063%204.65%204.65%200%200%201-2.025-.293.75.75%200%200%201%20.525-1.406c1.357.507%202.376-.006%202.698-.318l.009-.01a.747.747%200%200%201%201.06%200%20.75.75%200%200%201-.012%201.074c-.912.92-.992%201.835-.768%202.586.221.74.745%201.337%201.196%201.621H8.75c1.343%200%202.398-.296%203.074-.836.635-.507%201.036-1.31.928-2.602-.05-.603-.216-1.224-.422-1.93l-.064-.221c-.12-.407-.246-.84-.353-1.29a2.4%202.4%200%200%201-.507-.441%203.1%203.1%200%200%201-.633-1.248.75.75%200%200%201%201.455-.364c.046.185.144.436.31.627.146.168.353.305.712.305.738%200%201.25-.615%201.25-1.25%200-1.47-.95-2.315-2.123-2.51-1.172-.196-2.227.387-2.706%201.345-.46.92-.27%201.774.019%203.062l.042.19.01.05c.348.443.666.949.94%201.553a.75.75%200%201%201-1.365.62c-.553-1.217-1.32-1.94-2.3-2.768L6.7%205.527c-.814-.68-1.75-1.462-2.692-2.619a3.7%203.7%200%200%200-1.023.88c-.406.495-.663%201.036-.722%201.508.116.122.306.21.591.239.388.038.797-.06%201.032-.19a.75.75%200%200%201%20.728%201.31c-.515.287-1.23.439-1.906.373-.682-.067-1.473-.38-1.879-1.193L.75%205.677V5.5c0-.984.48-1.94%201.077-2.664.46-.559%201.05-1.055%201.673-1.353z%22/%3E%3C/svg%3E');--md-admonition-icon--success:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M13.78%204.22a.75.75%200%200%201%200%201.06l-7.25%207.25a.75.75%200%200%201-1.06%200L2.22%209.28a.75.75%200%200%201%20.018-1.042.75.75%200%200%201%201.042-.018L6%2010.94l6.72-6.72a.75.75%200%200%201%201.06%200%22/%3E%3C/svg%3E');--md-admonition-icon--question:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M0%208a8%208%200%201%201%2016%200A8%208%200%200%201%200%208m8-6.5a6.5%206.5%200%201%200%200%2013%206.5%206.5%200%200%200%200-13M6.92%206.085h.001a.749.749%200%201%201-1.342-.67c.169-.339.436-.701.849-.977C6.845%204.16%207.369%204%208%204a2.76%202.76%200%200%201%201.637.525c.503.377.863.965.863%201.725%200%20.448-.115.83-.329%201.15-.205.307-.47.513-.692.662-.109.072-.22.138-.313.195l-.006.004a6%206%200%200%200-.26.16%201%201%200%200%200-.276.245.75.75%200%200%201-1.248-.832c.184-.264.42-.489.692-.661q.154-.1.313-.195l.007-.004c.1-.061.182-.11.258-.161a1%201%200%200%200%20.277-.245C8.96%206.514%209%206.427%209%206.25a.61.61%200%200%200-.262-.525A1.27%201.27%200%200%200%208%205.5c-.369%200-.595.09-.74.187a1%201%200%200%200-.34.398M9%2011a1%201%200%201%201-2%200%201%201%200%200%201%202%200%22/%3E%3C/svg%3E');--md-admonition-icon--warning:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M6.457%201.047c.659-1.234%202.427-1.234%203.086%200l6.082%2011.378A1.75%201.75%200%200%201%2014.082%2015H1.918a1.75%201.75%200%200%201-1.543-2.575Zm1.763.707a.25.25%200%200%200-.44%200L1.698%2013.132a.25.25%200%200%200%20.22.368h12.164a.25.25%200%200%200%20.22-.368Zm.53%203.996v2.5a.75.75%200%200%201-1.5%200v-2.5a.75.75%200%200%201%201.5%200M9%2011a1%201%200%201%201-2%200%201%201%200%200%201%202%200%22/%3E%3C/svg%3E');--md-admonition-icon--failure:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M2.344%202.343za8%208%200%200%201%2011.314%2011.314A8.002%208.002%200%200%201%20.234%2010.089a8%208%200%200%201%202.11-7.746m1.06%2010.253a6.5%206.5%200%201%200%209.108-9.275%206.5%206.5%200%200%200-9.108%209.275M6.03%204.97%208%206.94l1.97-1.97a.749.749%200%200%201%201.275.326.75.75%200%200%201-.215.734L9.06%208l1.97%201.97a.749.749%200%200%201-.326%201.275.75.75%200%200%201-.734-.215L8%209.06l-1.97%201.97a.749.749%200%200%201-1.275-.326.75.75%200%200%201%20.215-.734L6.94%208%204.97%206.03a.75.75%200%200%201%20.018-1.042.75.75%200%200%201%201.042-.018%22/%3E%3C/svg%3E');--md-admonition-icon--danger:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M9.504.43a1.516%201.516%200%200%201%202.437%201.713L10.415%205.5h2.123c1.57%200%202.346%201.909%201.22%203.004l-7.34%207.142a1.25%201.25%200%200%201-.871.354h-.302a1.25%201.25%200%200%201-1.157-1.723L5.633%2010.5H3.462c-1.57%200-2.346-1.909-1.22-3.004zm1.047%201.074L3.286%208.571A.25.25%200%200%200%203.462%209H6.75a.75.75%200%200%201%20.694%201.034l-1.713%204.188%206.982-6.793A.25.25%200%200%200%2012.538%207H9.25a.75.75%200%200%201-.683-1.06l2.008-4.418.003-.006-.004-.009-.006-.006-.008-.001q-.005%200-.009.004%22/%3E%3C/svg%3E');--md-admonition-icon--bug:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M4.72.22a.75.75%200%200%201%201.06%200l1%20.999a3.5%203.5%200%200%201%202.441%200l.999-1a.748.748%200%200%201%201.265.332.75.75%200%200%201-.205.729l-.775.776c.616.63.995%201.493.995%202.444v.327q0%20.15-.025.292c.408.14.764.392%201.029.722l1.968-.787a.75.75%200%200%201%20.556%201.392L13%207.258V9h2.25a.75.75%200%200%201%200%201.5H13v.5q-.002.615-.141%201.186l2.17.868a.75.75%200%200%201-.557%201.392l-2.184-.873A5%205%200%200%201%208%2016a5%205%200%200%201-4.288-2.427l-2.183.873a.75.75%200%200%201-.558-1.392l2.17-.868A5%205%200%200%201%203%2011v-.5H.75a.75.75%200%200%201%200-1.5H3V7.258L.971%206.446a.75.75%200%200%201%20.558-1.392l1.967.787c.265-.33.62-.583%201.03-.722a1.7%201.7%200%200%201-.026-.292V4.5c0-.951.38-1.814.995-2.444L4.72%201.28a.75.75%200%200%201%200-1.06m.53%206.28a.75.75%200%200%200-.75.75V11a3.5%203.5%200%201%200%207%200V7.25a.75.75%200%200%200-.75-.75ZM6.173%205h3.654A.17.17%200%200%200%2010%204.827V4.5a2%202%200%201%200-4%200v.327c0%20.096.077.173.173.173%22/%3E%3C/svg%3E');--md-admonition-icon--example:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M5%205.782V2.5h-.25a.75.75%200%200%201%200-1.5h6.5a.75.75%200%200%201%200%201.5H11v3.282l3.666%205.76C15.619%2013.04%2014.543%2015%2012.767%2015H3.233c-1.776%200-2.852-1.96-1.899-3.458Zm-2.4%206.565a.75.75%200%200%200%20.633%201.153h9.534a.75.75%200%200%200%20.633-1.153L12.225%2010.5h-8.45ZM9.5%202.5h-3V6c0%20.143-.04.283-.117.403L4.73%209h6.54L9.617%206.403A.75.75%200%200%201%209.5%206Z%22/%3E%3C/svg%3E');--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1.75%202.5h10.5a.75.75%200%200%201%200%201.5H1.75a.75.75%200%200%201%200-1.5m4%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5m0%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5M2.5%207.75v6a.75.75%200%200%201-1.5%200v-6a.75.75%200%200%201%201.5%200%22/%3E%3C/svg%3E');}</style>
+
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#klippain-shaketune" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../../.." title="三木奇奇怪怪的文档收录" class="md-header__button md-logo" aria-label="三木奇奇怪怪的文档收录" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            三木奇奇怪怪的文档收录
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              加速度传感器应用
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到暗黑模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到暗黑模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到明亮模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到明亮模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Samuel-0-0/docs/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Samuel-0-0/docs/
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../vast/" class="md-tabs__link">
+          
+  
+  
+  VAST系列产品手册
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../solidworks/" class="md-tabs__link">
+          
+  
+  
+  SolidWorks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+  3D打印机
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../cnc/" class="md-tabs__link">
+          
+  
+  
+  CNC
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="三木奇奇怪怪的文档收录" class="md-nav__button md-logo" aria-label="三木奇奇怪怪的文档收录" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    三木奇奇怪怪的文档收录
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Samuel-0-0/docs/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Samuel-0-0/docs/
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    VAST系列产品手册
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            VAST系列产品手册
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vast/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    关于VAST系列产品
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Stealthburner内嵌CAN控制板
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Stealthburner内嵌CAN控制板
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vast/sb-can/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    概述
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vast/sb-can/canboot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Canboot(可选)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vast/sb-can/klipper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Klipper
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    电源计量与远程控制
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            电源计量与远程控制
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vast/power/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    概述
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vast/power/firmware.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    固件
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vast/power/klipper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Klipper
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    SolidWorks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            SolidWorks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../solidworks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    关于本页
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../solidworks/solidworks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    设计相关
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    3D打印机
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            3D打印机
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    关于本页
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    打印机安装调试
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            打印机安装调试
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../voron/v0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Voron 0.2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../voron/v2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Voron 2.4
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Klipper安装及使用
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Klipper安装及使用
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    加速度传感器应用
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    加速度传感器应用
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      初始化配置
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      注意事项
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      加速度计的安装位置对测量结果的影响
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带相对差值测量
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="皮带相对差值测量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      使用方法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      图形解读
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      结果分析
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带图表中可能出现1或2个峰的情况
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      图例
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="图例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      好的图例
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带张力有问题
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带路径有问题
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lis2dw" class="md-nav__link">
+    <span class="md-ellipsis">
+      频谱图灯光秀 (LIS2DW)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      输入整形测量
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="输入整形测量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      使用方法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      图形解读
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      结果分析
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="结果分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      泛泛而谈
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      常见误解
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      图例
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="图例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      好的图例
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    异常案例
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../canbus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CAN相关
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../assistant.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    图形化一键脚本
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../7inch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    7寸触屏小主机
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../klipper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    其他
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../slicer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    打印及切片软件调试
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../printing_issue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    打印件及问题处理
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    3D打印机MODS
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            3D打印机MODS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../voron/v0_mods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Voron 0.2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../voron/v2_mods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Voron 2.4
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../printers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    其他
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    CNC
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            CNC
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cnc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    关于本页
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cnc/holes_thread_shaft/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    机械速查表
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      初始化配置
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      注意事项
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      加速度计的安装位置对测量结果的影响
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带相对差值测量
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="皮带相对差值测量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      使用方法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      图形解读
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      结果分析
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带图表中可能出现1或2个峰的情况
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      图例
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="图例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      好的图例
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带张力有问题
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      皮带路径有问题
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lis2dw" class="md-nav__link">
+    <span class="md-ellipsis">
+      频谱图灯光秀 (LIS2DW)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      输入整形测量
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="输入整形测量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      使用方法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      图形解读
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      结果分析
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="结果分析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      泛泛而谈
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      常见误解
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      图例
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="图例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      好的图例
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="klippain-shaketune">使用klippain-shaketune检测并调整因震动/装配不合理对打印的影响</h1>
+<p>以下内容均删减整理自<a href="https://github.com/Frix-x/klippain-shaketune">klippain-shaketune</a>，中文翻译Samuel Wang (aka 三木)，转载中文内容请著名出处。</p>
+<h2 id="_1">初始化配置</h2>
+<p>1、使用命令安装klippain-shaketune
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>wget -O - https://raw.githubusercontent.com/Frix-x/klippain-shaketune/main/install.sh | bash
+</span></code></pre></div></p>
+<p>2、在klipper配置文件中引用klippain-shaketune的配置文件
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[include K-ShakeTune/*.cfg]
+</span></code></pre></div>
+3、请确保已经按照<a href="https://www.klipper3d.org/Measuring_Resonances.html">Measuring Resonances Klipper documentation</a>文档的说明配置好了加速度传感器，并添加了[resonance_tester]设置。</p>
+<h2 id="_2">注意事项</h2>
+<ul>
+<li>工具头风扇可能会对测试造成影响，测试时不要开启热端加热。</li>
+<li>测试时尽量模拟实际打印时的环境，如仓温。</li>
+<li>首先运行宏MEASURE_AXES_NOISE检查各轴输出值是否小于100，如果不是请先检查加速度计的安装和线缆干扰情况。</li>
+<li>每次测试的图形可能都会有微小差异，不要在意这些细节</li>
+</ul>
+<h2 id="_3">加速度计的安装位置对测量结果的影响</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">安装位置</th>
+<th style="text-align: left;">优势</th>
+<th style="text-align: left;">劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">直接在喷嘴尖端</td>
+<td style="text-align: left;">提供了全面的视角，能观察到所有机器振动，包括主要的共振，也包括工具头摆动和全局框架运动。非常适合诊断运动学问题和排除故障。</td>
+<td style="text-align: left;">导致数据更嘈杂，这可能会在机器不完美或不完全刚性的情况下使最终的输入成形滤波器选择变得复杂。</td>
+</tr>
+<tr>
+<td style="text-align: center;">靠近工具头的重心</td>
+<td style="text-align: left;">主要显示工具头和皮带的主要共振频率，允许为输入成形选择精确的滤波器。数据通常更干净，只有严重的机械问题或非常严重的工具头摆动才会在图表中可见。</td>
+<td style="text-align: left;">可能无法提供次要振动的详细信息（这些对振纹的影响相对较小），且可能在诊断不相关的机械问题时效果不佳。</td>
+</tr>
+<tr>
+<td style="text-align: center;">集成在CANBus板上的加速度计</td>
+<td style="text-align: left;">简单有效，不需要额外的安装，始终可用。可以帮助诊断如Bowden管、连接线束和电缆链等导致的问题。如果工具头非常坚固，测量结果与重心的测量非常接近。</td>
+<td style="text-align: left;">由于距离喷嘴尖端较远，并且可能受到附加组件的噪音影响，因此在详细分析或诊断机械问题方面不够准确。</td>
+</tr>
+</tbody>
+</table>
+<p>通常情况下，您应该尽量集中注意力在工具头/皮带的机械子系统上，以减轻共振问题（因为它对振纹和打印质量的影响最大），但是您不应忽视喷嘴尖端测量的重要性，以检测其他振动源。如果共振分析结果在不同的安装点之间有很大差异，建议加强工具头的刚性，以最大限度地减少摆动和振动。以下是一个方法来系统地解决机械问题，然后根据需要选择输入整形滤波器的日常策略：</p>
+<p>1、诊断阶段：从喷嘴尖端安装点开始，识别和排除机械问题，确保打印机组件健康，并且组装完好且优化良好。</p>
+<p>2、选择滤波器阶段：如果图表的大部分数据都比较清晰，您可以将焦点转移到靠近工具头重心的安装点，以获取关于主要共振的更干净的数据，这有助于准确设置输入整形滤波器。您还可以考虑使用CANBus板集成的加速度计，因为它简单易用，特别是如果工具头特别坚固且受摆动影响较小。</p>
+<h2 id="_4">皮带相对差值测量</h2>
+<p>适用于CoreXY机器，可以通过测量和绘制行为差异来帮助诊断皮带路径问题。还可用于皮带张力调整辅助。</p>
+<h3 id="_5">使用方法</h3>
+<p>在开始之前，请确保皮带正确张紧。例如，可以参考<a href="https://docs.vorondesign.com/tuning/secondary_printer_tuning.html#belt-tension">Voron皮带张紧文档</a>。这很关键：需要一个良好的起点，然后从中进行迭代！</p>
+<p>然后，调用COMPARE_BELTS_RESPONSES宏，并查看结果文件夹中的图形。以下是可用的参数：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">参数</th>
+<th style="text-align: center;">默认值</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">FREQ_START</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: left;">起始激励频率</td>
+</tr>
+<tr>
+<td style="text-align: center;">FREQ_END</td>
+<td style="text-align: center;">133</td>
+<td style="text-align: left;">最大激励频率</td>
+</tr>
+<tr>
+<td style="text-align: center;">HZ_PER_SEC</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;">每秒赫兹数</td>
+</tr>
+<tr>
+<td style="text-align: center;">KEEP_N_RESULTS</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;">运行测试后在结果文件夹中保留的结果总数。旧结果会自动清理</td>
+</tr>
+<tr>
+<td style="text-align: center;">KEEP_CSV</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">是否将CSV数据文件与PNG图形一起保留</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">图形解读</h3>
+<p><img alt="皮带测试图" src="belt_graph_explanation.png" /></p>
+<h3 id="_7">结果分析</h3>
+<p>这些图表上，两条曲线看起来相似并重叠成一个单一的曲线：尽量使它们在频率和振幅上紧密吻合。通常，皮带图表由一个或两个主峰组成（超过2个峰可能暗示机械问题）。在主峰周围出现“噪音”是可以接受的，但它应该在两条曲线上都有，并且振幅相当。请记住，当您拉紧皮带时，其峰值应该朝着右上角的对角线方向移动，振幅会显著变化，而频率略微变化。此外，主峰的幅度顺序通常应在大多数机器上介于~500k到~2M之间。</p>
+<p>除了实际的皮带张力之外，曲线的共振频率/振幅主要取决于三个参数：</p>
+<ul>
+<li>工具头的重量，在CoreXY、CrossXY和H-Bot机器上，A和B皮带的重量相同。因此，在这里不太可能产生任何影响。</li>
+<li>皮带的“弹性”，随着时间的推移会随着皮带磨损而发生变化。确保A和B皮带使用相同品牌和类型，并且它们是在相同的时间安装的：具有相似磨损水平的相似皮带！</li>
+<li>皮带路径长度，这就是为什么它们必须具有完全相同的齿数，以便在以相同张力拉紧时，一个皮带路径不会比另一个更长。这个具体的点非常重要：只要有一颗齿的差异就足以阻止获得良好的曲线重叠。这个问题需要重点关注。</li>
+</ul>
+<p>如果这三个参数都得到满足，那么曲线不可能有所不同，或者可以确定至少一个皮带路径存在潜在问题。此外，如果皮带图表的曲线幅度较低（没有明显的峰），而且噪音很多，那么可能也会有较差的输入整形器图表。因此，在继续之前，请确保拥有良好的皮带图表或修复皮带路径。首先检查皮带张力、轴承、龙门螺丝、皮带在滚轮上的对准等等。</p>
+<h3 id="12">皮带图表中可能出现1或2个峰的情况</h3>
+<p>1、对角线运动产生两个子系统：在这种情况下，我们观察到两个不同的子系统运动，一个是工具头沿X线性轴左右移动，另一个是工具头和X线性轴一起前后移动。实际上，我们观察到的不是一个单一的谐振系统，而是两个交织在一起的子系统运动。这种复杂性可能导致皮带图表中出现两个谐振频率（或峰值）。但由于两个子系统都使用相似的皮带、张力等参数，这些峰值有时会合并在一起，看起来像是一个峰。</p>
+<p>2、工具头持续连接到两个皮带：当进行对角线运动来刺激一个皮带时，另一个皮带保持静止并充当锚点。但由于其弹性，这个皮带并不保持刚性。它会向整个系统响应中引入其独特的特性，这可能会引入额外的噪音甚至第二个峰。</p>
+<p>总的来说，这两个因素共同作用可能会导致皮带图表中出现1或2个峰。这种情况下，需要仔细分析系统以理解这些峰的来源，并确定是否需要进一步调整皮带或其他参数以优化系统性能。</p>
+<h3 id="_8">图例</h3>
+<h4 id="_9">好的图例</h4>
+<p>以下图表被认为是良好的。它们都只有一个或两个峰，并且它们重叠得很好，形成了一个单一的曲线。皮带图表显示出了预期的行为，即相似的振荡频率和幅度，没有明显的异常或噪音。这是一个良好的信号，表明皮带系统工作正常，可以继续进行后续的<a href="#输入整形测量">输入整形图表</a>的步骤，以进一步优化系统性能。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">只有1个峰</th>
+<th style="text-align: center;">有2个峰</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><img alt="good_graph1" src="good_graph1.png" /></td>
+<td style="text-align: center;"><img alt="good_graph2" src="good_graph2.png" /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="_10">皮带张力有问题</h4>
+<p>图表显示由于不正确或不均匀的皮带张力而引起的振动模式或谐振频率的变化。这种情况下，您需要谨慎地调整皮带张力，以确保每个皮带都受到适当的张力，从而最大限度地减少振动和噪音，并确保机器的正常运行。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">描述</th>
+<th style="text-align: center;">案例图</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">A皮带张力略低于B皮带张力。可以通过仅将螺丝拧紧约半圈至一整圈来快速解决。通过对螺丝进行轻微的调整，您可以逐步调整A皮带的张力，直到与B皮带达到相同水平。这样可以确保两个皮带都受到适当的张力，从而优化系统的运行。</td>
+<td style="text-align: center;"><img alt="low_A_tension" src="low_A_tension.png" /></td>
+</tr>
+<tr>
+<td style="text-align: left;">B皮带张力明显低于A皮带张力。如果遇到这样的图表，建议回顾<a href="https://docs.vorondesign.com/tuning/secondary_printer_tuning.html#belt-tension">Voron皮带张力调整文档</a>，以获得更为可靠的基础。通过轻微地增加B皮带的张力并相应地降低A皮带的张力，可以尝试将它们调整到更平衡的状态，但要谨慎行事，以避免偏离推荐的110赫兹基准，以免影响系统的性能和寿命。</td>
+<td style="text-align: center;"><img alt="low_B_tension" src="low_B_tension.png" /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="_11">皮带路径有问题</h4>
+<p>如果发现即使在正确调整皮带张力的情况下，曲线的调整和重叠仍然不可行，可能存在其他问题导致这种情况。需要检查皮带路径是否存在异物阻碍、轴承是否正常运转、是否有磨损迹象以及皮带是否在运动中正确对齐。通过检查这些因素，可以确定并解决任何可能影响皮带运行的问题，从而使调整和曲线重叠成为可能。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">描述</th>
+<th style="text-align: center;">案例图</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">在这张图表上，有两个峰值。第一对峰几乎对齐，但第二个峰只出现在B皮带上，与A皮带明显偏离。由于第二个峰值仅在B皮带上出现，而A皮带没有，这可能意味着B皮带在其路径上遇到了障碍或其他问题，导致了这种偏离。需要仔细检查B皮带路径，确保没有任何阻碍物或其他因素影响了其运行，从而解决这个问题。</td>
+<td style="text-align: center;"><img alt="beltpath_problem1" src="beltpath_problem1.png" /></td>
+</tr>
+<tr>
+<td style="text-align: left;">这张图表相当复杂，显示了3个峰值。虽然所有对峰看起来都很好地对齐，并且张力正常，但图表显示了三个峰值而不仅仅是两个，因为[1]被分成了两个较小的峰值。这可能暗示着在系统中存在一些未知的复杂性或问题。为了确定这种情况的影响，建议生成<a href="#输入整形测量">输入整形图表</a>，这将有助于更好地理解并识别任何潜在的问题或改进机会。</td>
+<td style="text-align: center;"><img alt="beltpath_problem2" src="beltpath_problem2.png" /></td>
+</tr>
+<tr>
+<td style="text-align: left;">图表显示了信号强度较低（峰值约为300k，而典型值约为1M），噪音较多，这可能是由于皮带张力过低或存在其他问题，例如卡阻、摩擦等，导致工具头移动受到影响。建议首先回到<a href="https://docs.vorondesign.com/tuning/secondary_printer_tuning.html#belt-tension">Voron皮带张力调整文档</a>，确立稳健的皮带张力基础，然后生成<a href="#输入整形测量">输入整形图表</a>，以识别和解决任何可能存在的卡阻或其他问题。</td>
+<td style="text-align: center;"><img alt="beltpath_problem3" src="beltpath_problem3.png" /></td>
+</tr>
+</tbody>
+</table>
+<h4 id="lis2dw">频谱图灯光秀 (LIS2DW)</h4>
+<p>将LIS2DW整合为Klipper中的谐振测量设备正在变得越来越普遍，特别是因为一些制造商正在宣传其优于传统ADXL345的优势。它确实是一款新一代芯片，应该更适合测量传统的“加速度”。然而，对它们的数据表和实际测量的详细比较描绘了一个更加复杂的图景：LIS2DW具有更高的灵敏度，但它的采样率较低，并且产生显著的混叠，导致光谱图上出现“灯光秀”效应，其特征是与主要谐振平行的多个虚假谐振线，伴随着相交的干扰线扭曲了谐波轮廓。</p>
+<p>对于皮带图表来说，这可能会成为一个问题，因为它会给结果引入大量噪音，并使它们难以解释，可能会告诉你存在机械问题，实际上并不存在。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">ADXL345 测量结果</th>
+<th style="text-align: center;">LIS2DW 测量结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><img alt="chipcomp_adxl" src="chipcomp_adxl.png" /></td>
+<td style="text-align: center;"><img alt="chipcomp_s2dw" src="chipcomp_s2dw.png" /></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_12">输入整形测量</h2>
+<p>AXES_SHAPER_CALIBRATION 宏用于测量和绘制轴的行为，以调整 Klipper 的输入整形器系统。</p>
+<h3 id="_13">使用方法</h3>
+<p>在开始之前，请确保皮带已经正确张紧，并且您已经获得了良好清晰的皮带图表（参见前一节）。</p>
+<p>然后，调用 AXES_SHAPER_CALIBRATION 宏，并查看结果文件夹中的图表。以下是可用的参数：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">参数</th>
+<th style="text-align: center;">默认值</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">FREQ_START</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: left;">开始激励频率</td>
+</tr>
+<tr>
+<td style="text-align: center;">FREQ_END</td>
+<td style="text-align: center;">133</td>
+<td style="text-align: left;">最大激励频率</td>
+</tr>
+<tr>
+<td style="text-align: center;">HZ_PER_SEC</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;">每秒赫兹数</td>
+</tr>
+<tr>
+<td style="text-align: center;">AXIS</td>
+<td style="text-align: center;">"all"</td>
+<td style="text-align: left;">要测试的轴，可以是 "all"、"X" 或 "Y"</td>
+</tr>
+<tr>
+<td style="text-align: center;">SCV</td>
+<td style="text-align: center;">打印机方形拐角速度</td>
+<td style="text-align: left;">用于计算整形器建议的方形拐角速度。通常使用较高的SCV值会导致更平滑的效果和较低的最大加速度</td>
+</tr>
+<tr>
+<td style="text-align: center;">MAX_SMOOTHING</td>
+<td style="text-align: center;">None</td>
+<td style="text-align: left;">计算整形器建议时允许的最大平滑度</td>
+</tr>
+<tr>
+<td style="text-align: center;">KEEP_N_RESULTS</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;">运行测试后在结果文件夹中保留的结果总数。旧结果会自动清理</td>
+</tr>
+<tr>
+<td style="text-align: center;">KEEP_CSV</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">是否将CSV数据文件与PNG图形一起保留</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_14">图形解读</h3>
+<p><img alt="输入整形测试图" src="shaper_graph_explanation.png" /></p>
+<h3 id="_15">结果分析</h3>
+<h4 id="_16">泛泛而谈</h4>
+<p>为了有效地分析输入整形器图表，由于影响3D打印机性能或输入整形器测量的各种因素的多样性，没有一种通用的方法适用于所有情况。然而，以下是一些阅读图表的提示：</p>
+<ul>
+<li>一个具有单一而细小峰值且与背景噪声分离良好的图表是理想的，因为它可以很容易地通过输入整形器进行滤波。但是，根据机器及其机械配置的不同，有时无法获得这种形状。获得更好图表的关键是机械装配的清洁度，特别关注桌子、打印机底座、框架和工具头的刚度和硬度。</li>
+<li>至于皮带图表，重点是图表的形状，而不是数值。实际上，能量值并不提供太多有用信息。仅将其用于比较两个自己的图表，并在两次连续测试之间测量您的机械变化的影响，但永远不要用它与其他人或其他机器的图表进行比较。</li>
+</ul>
+<p><img alt="shaper_recommandations" src="shaper_recommandations.png" /></p>
+<p>关于如何设置输入整形器滤波器的详细说明，以及如何解释图表顶部右侧显示的自动计算数值的解释：</p>
+<p>1、 滤波算法：Klipper会自动计算这些线条。如果图表干净，这个计算通常效果不错。但如果你的图表杂乱无章，它就无法做出良好的建议。在继续之前最好先解决机械问题。每种滤波器都有其优缺点：</p>
+<ul>
+<li>ZV 是一种较轻的滤波器，通常会有一些残余振动。我建议只有在你想要以最高加速度值进行速度测试并同时保持零件表面的平滑度较低时才使用它。如果你的图表几乎完美并且不太在意一些残余振动，你可以尝试使用它。</li>
+<li>MZV 通常是机械调整良好的机器的首选。它是在保持较低残余振动的同时允许相当不错的加速度值的良好折衷方案。请记住，Klipper只会在图表良好的情况下建议使用MZV。</li>
+<li>EI 可以作为具有挑战性图表的备选方案。但首先，请尝试解决机械问题：几乎每台打印机都应该能够使用MZV。</li>
+<li>2HUMP_EI 和 3HUMP_EI 是最后的选择。通常会导致较高的平滑度，以抑制振荡，同时使用相对较低的加速度值。如果它们作为建议出现，很可能是你的机器存在潜在的机械问题（导致图表较差或“宽”的形状）。</li>
+</ul>
+<p>2、 推荐加速度（accel&lt;=...）：这不是一个独立的数值。还需要考虑 vibr 和 sm 值，因为它是三者之间的折衷方案。在使用推荐加速度时，它们将给出输入整形器后的残余振动百分比和平滑度。没有什么能阻止你使用更高的加速度值；它们不是一个限制。然而，在这种情况下，输入整形器可能无法抑制零件上的所有振荡，并且会产生更多的平滑度。最后，请记住，如果仍然存在较高水平的残余振动，高加速度值并不会有太大帮助：你应该先解决任何机械问题。</p>
+<p>3、 残余振动（vibr）：这直接与振荡有关。它对应于“整形器后”的信号的总值。理想情况下，你希望滤波器具有最小的残余振动。</p>
+<p>4、 整形器建议：这个脚本会根据你的图表提供一些量身定制的建议。选择符合你需求的一个：</p>
+<ul>
+<li>“性能”整形器是Klipper的原始建议，适用于高加速度，但有时会允许一些残余振动，同时最小化平滑度。如果你的目标是速度打印，并且你不太在意一些残余振荡，可以使用它。</li>
+<li>“低振动”整形器旨在确保最佳打印质量并尽量减少振荡。这对大多数用户来说应该是最好的选择。</li>
+<li>有时只会给出单一的建议作为“最佳”整形器。这意味着没有找到合适的“低振动”整形器（由于残余振动水平过高或平滑度过大），或者“性能”整形器也是具有最低振动水平的整形器之一。</li>
+</ul>
+<p>5、 阻尼比：显示在最后，这是根据你的数据估算的一个值，用于改善你机器的整形器建议。在 [input_shaper] 部分定义它（而不是Klipper的默认值0.1）可以进一步减少在高加速度和更高方形角速度下的振荡。</p>
+<p>然后将配置添加到你的打印件配置文件中：
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[input_shaper]
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>shaper_freq_x: ... # X轴滤波器的中心频率
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>shaper_type_x: ... # X轴滤波器的类型
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>shaper_freq_y: ... # Y轴滤波器的中心频率
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>shaper_type_y: ... # Y轴滤波器的类型
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>damping_ratio_x: ... # X轴阻尼比
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>damping_ratio_y: ... # Y轴阻尼比
+</span></code></pre></div></p>
+<h4 id="_17">常见误解</h4>
+<p>数据频率限制误解： 有些人建议通过手动编辑.csv文件将数据限制在100赫兹以内，认为超出这个范围的值是错误的。但这种做法可能会误导。激励和系统响应的频率是不同的，并不直接相关。你可能会在激励范围之外看到振动，并将其从文件中删除只会隐藏潜在问题。尽管这些高频振动可能并不总是影响打印质量，但它们可能是机械问题的信号。与其隐藏它们，不如解决这些问题。</p>
+<p>打印机组件选择误解： 我不建议使用额外轻的X轴横梁（铝制或碳纤维制）。虽然它们由于重量较轻可能看起来理想，但除了重量之外还有更多需要考虑的因素，比如刚性（参见<a href="https://github.com/Frix-x/klippain-shaketune/blob/main/docs/is_tuning_generalities.md#theory-behind-it">相关理论</a>）。这些轻型横梁可能更灵活，会在高加速度下产生负面影响，导致Y轴图表出现弯曲。</p>
+<p>轴向特性差异误解： 最后，要记住每个轴都有自己的特性，如重量和几何形状，这将导致它们之间的行为不同，并且需要不同的滤波器。只有当两个轴在机械上相似时，才可以为两个轴使用相同的输入整形设置：这对于一些机器，主要是十字门式配置，如<a href="https://github.com/CroXY3D/CroXY">CroXY</a>或<a href="https://github.com/Annex-Engineering">Annex-Engineering</a>打印机可能是有效的，但对于其他机器可能并不适用。</p>
+<h3 id="_18">图例</h3>
+<p>本节将分析一些从网上获取或与作者分享的随机图表，并试图突出其中的优点和不足，提供见解以帮助调整打印机的输入整形设置。作者指出，解释输入整形图表并非一门确切的学科。虽然我们可以从这些图表中做出合理推断，并指出潜在问题，但要准确确定问题的确切原因并不总是可行的。因此，读者应将即将出现的图表和评论视为在输入整形之旅中的指引，而不是绝对的真理。</p>
+<h4 id="_19">好的图例</h4>
+<p>这两个图表被认为是良好的，也是你所追求的目标。它们各自显示了一个明显突出的单一峰值，与背景噪音清晰地分隔开。请注意，X和Y图表峰值的主要频率不同。正如在<a href="#常见误解">常见误解</a>的最后一点所解释的那样，这种差异是预期的和正常的。频率谱图干净整洁，只有共振对角线可见。请注意，在测试期间风扇正在运转，如紫色垂直线所示（请参阅<a href="#风扇行为">风扇行为</a>部分）。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">好的X轴</th>
+<th style="text-align: center;">好的Y轴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><img alt="good_x" src="good_x.png" /></td>
+<td style="text-align: center;"><img alt="good_y" src="good_y.png" /></td>
+</tr>
+</tbody>
+</table>
+<h1 id="_20">翻译未完成 …… 等待后续</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2023-2025 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.copy", "content.code.annotate", "navigation.tabs", "navigation.top", "search.highlight", "search.share", "search.suggest"], "search": "../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>

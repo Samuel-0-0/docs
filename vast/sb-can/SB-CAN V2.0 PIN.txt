@@ -1,0 +1,24 @@
+TH1             PA0
+FAN1            PA1
+FAN2            PA2
+TH0             PA3
+ADXL345_CS      PA4
+ADXL345_SCK     PA5
+ADXL345_MISO    PA5
+ADXL345_MOSI    PA7
+TMC_EN          PB0
+TMC_DIR         PB1
+TMC_STEP        PB10
+TMC_UART        PB11
+CAN_TX          PB9
+CAN_RX          PB8
+HEAT            PB7
+Y               PB6          已上拉，配置需要加 ^
+X               PB5          已上拉，配置需要加 ^
+F               PB4          已上拉，配置需要加 ^
+PROBE           PB3          已上拉，配置需要加 ^
+RGB             PA9
+PT100_MOSI      PB15
+PT100_MISO      PB14
+PT100_SCK       PB13
+PT100_CS        PB12
