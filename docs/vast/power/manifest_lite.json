@@ -8,7 +8,7 @@
             "chipFamily": "ESP32",
             "parts": [
                 {
-                    "path": "firmware/vast-power-lite.bin",
+                    "path": "firmware/vast-power-lite.factory.bin",
                     "offset": "0"
                 }
             ]
