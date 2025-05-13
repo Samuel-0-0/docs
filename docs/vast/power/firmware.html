@@ -9,7 +9,12 @@
     <script type="module" src="https://unpkg.com/esp-web-tools@latest/dist/web/install-button.js?module">
     </script>
     <style>
+        html, body {
+            height: 100%;
+        }
         body {
+            display: flex;
+            flex-direction: column;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
@@ -37,6 +42,7 @@
         }
 
         main {
+            flex: 1;
             max-width: 960px;
             margin: 2rem auto;
             padding: 0 1rem;
