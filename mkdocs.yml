@@ -37,6 +37,7 @@ nav:
       - 设计相关: solidworks/solidworks.md
     - 3D打印机:
       - 3d_printer/index.md
+      - 系统检测: 3d_printer/neural_link.html
       - 打印机安装调试:
         - Voron 0.2: 3d_printer/voron/v0.md
         - Voron 2.4: 3d_printer/voron/v2.md
