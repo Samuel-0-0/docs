@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ATC_BLE_OEPL 上传器</title>
+    <title>ATC_BLE_OEPL 固件维护</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -769,7 +769,7 @@
     <button id="viewModeToggleButton" onclick="toggleViewMode()">高级视图</button>
 
     <div class="container">
-        <h1>ATC_BLE_OEPL 上传器</h1>
+        <h1>ATC_BLE_OEPL 固件维护</h1>
 
         <div class="top-controls">
             <div>
@@ -781,7 +781,7 @@
             </div>
             <div>
                 <label for="textInput">输入文本:</label>
-                <input type="text" id="textInput" placeholder="文本" value="Hello" />
+                <input type="text" id="textInput" placeholder="文本" value="示例" />
                 <button onclick="addText()">添加文本</button>
             </div>
             <div class="image-upload-wrapper">
@@ -822,7 +822,7 @@
         <div id="uart-log-area" style="display: none;">
             <div class="log-header">
                 <span>UART 日志:</span>
-                <button type="button" onclick="document.getElementById('uart-log').innerHTML = '';">Clear Log</button>
+                <button type="button" onclick="document.getElementById('uart-log').innerHTML = '';">清除日志</button>
             </div>
             <div id="uart-log"></div>
         </div>
@@ -831,7 +831,7 @@
         <div class="view-toggle-buttons">
             <button id="btn-show-ble" onclick="showView('ble')" class="active">BLE 连接</button>
             <button id="btn-show-config" onclick="showView('config')">硬件配置</button>
-            <button id="btn-show-lut" onclick="showView('lut')">LUT 游乐场</button>
+            <button id="btn-show-lut" onclick="showView('lut')">LUT 试验场</button>
             <button id="btn-show-debug" onclick="showView('debug')">调试</button>
             <button id="btn-show-uart" onclick="showView('uart')">UART 刷写器</button>
         </div>
@@ -840,7 +840,7 @@
             <div id="ble-upload">
                 <h2>BLE 连接</h2>
                 <div class="ble-config-options">
-                    <label for="namePrefix">电子纸前缀过滤器:</label>
+                    <label for="namePrefix">墨水屏前缀过滤器:</label>
                     <input type="text" id="namePrefix" value="ATC_" placeholder="ATC_（逗号分隔）" />
                     <span class="remember-group">
                         <input type="checkbox" id="rememberDeviceCheckbox" onchange="saveRememberDeviceSetting()" />
@@ -851,7 +851,7 @@
                     <button id="connectbutton" type="button" onclick="preConnect();">连接</button>
                     <button type="button" onclick="reConnect();">重新连接</button>
                     <button type="button" onclick="sendcmd('0005');"
-                        title="Read basic info, updates canvas if possible">读取屏幕信息</button>
+                        title="读取基本信息，若可能更新画布">读取屏幕信息</button>
                     <br>
                     <button id="mainUploadButton" type="button"
                         onclick="sendimg(document.getElementById('pixelData').value);">上传原始图像</button>
@@ -994,11 +994,11 @@
                             <label for="conf_epd_ENABLE_INVERT">反转启用引脚</label>
                         </div>
                         <hr style="border-color: #fff; margin: 6px 0;" />
-                        <div><label>Pull CFG Sleep:</label><select class="pull-type-select"
+                        <div><label>上拉 CFG Sleep:</label><select class="pull-type-select"
                                 id="conf_epd_PIN_CONFIG_SLEEP"></select></div>
-                        <div><label>Pull ENABLE:</label><select class="pull-type-select"
+                        <div><label>上拉 ENABLE:</label><select class="pull-type-select"
                                 id="conf_epd_PIN_ENABLE"></select></div>
-                        <div><label>Pull ENABLE Sleep:</label><select class="pull-type-select"
+                        <div><label>上拉 ENABLE Sleep:</label><select class="pull-type-select"
                                 id="conf_epd_PIN_ENABLE_SLEEP"></select></div>
                     </div>
                 </fieldset>
@@ -1053,7 +1053,7 @@
             </div>
 
             <div id="lut-upload" style="display: none;">
-                <h2>LUT 游乐场</h2>
+                <h2>LUT 试验场</h2>
                 <div id="uc-lut">
                     UC VCOM LUT Reg 0x20
                     <textarea id="uc_reg_20" rows="2">26 0A 39 39 A0 00 00 00 19 19 19 19 19 19 19 19</textarea><br />
@@ -1170,14 +1170,21 @@
             </div>
         </div>
     </div>
+    <footer class="footer">
+    <div class="footer-container">
+        <div>
+        中文翻译：Samuel Wang&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://atc1441.github.io/ATC_BLE_OEPL_Image_Upload.html">原版地址</a>
+        </div>
+    </div>
+    </footer>
     <script src="./pako.js"></script>
     <script>
 
 
         const deviceTypes = [
-            { id: 65535, name: "Dynamic (HW Config Tab)" },
+            { id: 65535, name: "动态（HW 配置标签）" },
             { id: 1, name: "1: 350 HS BWY UC" },
-            { id: 2, name: "2: 350 HS BWY UC Inverted" },
+            { id: 2, name: "2: 350 HS BWY UC 反转" },
             { id: 3, name: "3: 350 HS BWY SSD" },
             { id: 4, name: "4: 350 HS BW UC" },
             { id: 5, name: "5: 200 HS BWY SSD" },
@@ -1368,7 +1375,7 @@
 
         function rotateImageData(imageData, rotations) {
             if (!imageData || !imageData.data || !imageData.width || !imageData.height) {
-                console.error("Invalid ImageData object passed.");
+                console.error("无效的 ImageData 对象传入。");
                 return null;
             }
 
@@ -1434,7 +1441,7 @@
                     }
                     break;
                 default:
-                    console.error("Unexpected rotation value:", numRotations);
+                    console.error("意外的旋转值:", numRotations);
                     return null;
             }
             return new ImageData(rotatedData, newWidth, newHeight);
@@ -1523,7 +1530,7 @@
                 }
                 document.getElementById('pixelData').value = bytesToHex(byteDataCombined);
             } else {
-                console.error("rotateImageData returned null.");
+                console.error("rotateImageData 返回 null。");
             }
         }
 
@@ -1645,11 +1652,11 @@
             imgArray = "";
             imgArrayLen = 0;
             setStatus("已断开连接");
-            document.getElementById("connectbutton").innerHTML = 'Connect';
+            document.getElementById("connectbutton").innerHTML = '连接';
         }
 
         function handleError(error) {
-            console.error("BLE Error:", error);
+            console.error("BLE 错误:", error);
             addLog("BLE 错误: " + error.message);
             if (error.name === 'NotFoundError' || error.name === 'AbortError') {
                 addLog("连接已取消或未找到设备。");
@@ -1666,19 +1673,19 @@
                 const delay = 200;
                 addLog(`连接失败/丢失。正在重试连接尝试 ${reconnectTrys}/5，${delay}ms后...`);
                 setStatus(`连接失败。正在重试 ${reconnectTrys}/5...`);
-                document.getElementById("connectbutton").innerHTML = 'Retrying...';
+                document.getElementById("connectbutton").innerHTML = '重试中...';
                 bleDevice = deviceToRetry;
                 setTimeout(connect, delay);
             } else if (canRetry) {
                 addLog("重试后连接失败。");
                 setStatus("连接失败。");
-                document.getElementById("connectbutton").innerHTML = 'Connect';
+                document.getElementById("connectbutton").innerHTML = '连接';
                 reconnectTrys = 0;
                 bleDevice = null;
             } else {
                 addLog("连接失败 (无设备？)。");
                 setStatus("连接失败。");
-                document.getElementById("connectbutton").innerHTML = 'Connect';
+                document.getElementById("connectbutton").innerHTML = '连接';
                 reconnectTrys = 0;
             }
         }
@@ -1741,11 +1748,11 @@
         function setDisplayType(newType) {
             const typeInt = parseInt(newType);
             if (typeInt === 65535) {
-                addLog("Selected Dynamic Type. Use Config Tab.");
+                addLog("已选择动态类型。请使用配置选项卡。");
                 return;
             }
             if (isNaN(typeInt)) {
-                addLog("Invalid display type selected.");
+                addLog("选择的显示类型无效。");
                 return;
             }
             sendcmd("0004" + Number(newType).toString(16).padStart(4, '0').toUpperCase());
@@ -1754,7 +1761,7 @@
         function setBleAdvInterval(newAdvInt) {
             const intervalInt = parseInt(newAdvInt);
             if (isNaN(intervalInt)) {
-                addLog("Invalid ADV interval.");
+                addLog("无效的 ADV 间隔。");
                 return;
             }
             sendcmd("0008" + Number(newAdvInt).toString(16).padStart(4, '0').toUpperCase());
@@ -1825,7 +1832,7 @@
                 return bitField;
             }
             display() {
-                console.log(`Checksum: ${this.checksum}, Version: ${this.ver.toString(16).toUpperCase()}, Block ID: ${this.blockId}, Type: ${this.type}, Requested Parts: ${this.requestedParts.join('')}`);
+                console.log(`校验和: ${this.checksum}, 版本: ${this.ver.toString(16).toUpperCase()}, 块 ID: ${this.blockId}, 类型: ${this.type}, 请求的部分: ${this.requestedParts.join('')}`);
             }
         }
         const BLOCK_XFER_BUFFER_SIZE = BLOCK_DATA_SIZE + 3;
@@ -1855,20 +1862,20 @@
         }
 
         function nextBlkPart() {
-            addLog(`Sending packet: ${packets[packetIndex]}`);
+            addLog(`发送数据包: ${packets[packetIndex]}`);
             sendCommand(hexToBytes("0065" + packets[packetIndex]));
         }
         async function sendBlockData(blockId, largeHexData) {
             const blockSizeHex = (BLOCK_DATA_SIZE * 2);
             const totalBlocks = Math.ceil(largeHexData.length / blockSizeHex);
             if (blockId >= totalBlocks) {
-                addLog(`Block ID ${blockId} exceeds total blocks (${totalBlocks}).`);
+                addLog(`块 ID ${blockId} 超过总块数 (${totalBlocks})。`);
                 return;
             }
             const start = blockId * blockSizeHex;
             const end = start + blockSizeHex;
             const blockHexData = largeHexData.substring(start, end);
-            addLog(`Processing block ${blockId + 1}/${totalBlocks}...`);
+            addLog(`正在处理块 ${blockId + 1}/${totalBlocks}...`);
             const dataBytes = hexToByteArray(blockHexData);
             packets = [];
             totalPackets = Math.ceil(dataBytes.length / BLOCK_PART_DATA_SIZE);
@@ -1928,13 +1935,13 @@
 
         function hexStringToUint8Array(hexString) {
             if (hexString.length % 2 !== 0) {
-                throw new Error("Invalid Hex String: Odd length.");
+                throw new Error("无效的十六进制字符串：长度为奇数。");
             }
             const byteArray = new Uint8Array(hexString.length / 2);
             for (let i = 0; i < byteArray.length; i++) {
                 byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16);
                 if (isNaN(byteArray[i])) {
-                    throw new Error(`Invalid Hex String: '${hexString.substr(i * 2, 2)}' not parsable.`);
+                    throw new Error(`无效的十六进制字符串：'${hexString.substr(i * 2, 2)}' 无法解析。`);
                 }
             }
             return byteArray;
@@ -1956,7 +1963,7 @@
             imgArray = toHexUint32LE(unCompressedSize) + imgArray;
             imgArrayLen = imgArray.length;
             uploadPart = 0;
-            addLog('Sending Compressed image size: ' + imgArrayLen / 2 + ' of raw size: ' + unCompressedSize);
+            addLog('发送压缩图像大小: ' + imgArrayLen / 2 + '，原始大小: ' + unCompressedSize);
             const dataInfo = new AvailDataInfo(255, computeCRC32(imgArray), imgArrayLen / 2, 0x30, 0, 0);
             sendcmd("0064" + dataInfo.toHexString());
         }
@@ -1967,7 +1974,7 @@
             imgArray = cmdIMG.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
             imgArrayLen = imgArray.length;
             uploadPart = 0;
-            addLog('Sending image size: ' + imgArrayLen / 2);
+            addLog('发送图像大小: ' + imgArrayLen / 2);
             const dataInfo = new AvailDataInfo(255, computeCRC32(imgArray), imgArrayLen / 2, (secondColorEnabled || thirdColorEnabled) ? 0x21 : 0x20, 0, 0);
             sendcmd("0064" + dataInfo.toHexString());
         }
@@ -1982,7 +1989,7 @@
                 return;
             }
             uploadPart = 0;
-            addLog('Sending Firmware size: ' + imgArrayLen / 2);
+            addLog('发送固件大小: ' + imgArrayLen / 2);
             const dataInfo = new AvailDataInfo(255, 123, imgArrayLen / 2, 0x03, 0, 0);
             sendcmd("0064" + dataInfo.toHexString());
         }
@@ -2011,7 +2018,7 @@
             }
             var allLength = (ourUC_LUT.length / 2).toString(16).padStart(4, '0');
             ourUC_LUT = allLength + ourUC_LUT;
-            addLog('Sending UC LUT size: ' + ourUC_LUT.length / 2);
+            addLog('发送 UC LUT 大小: ' + ourUC_LUT.length / 2);
             document.getElementById("lutData").value = ourUC_LUT;
             sendCustomLUT(ourUC_LUT);
         }
@@ -2023,7 +2030,7 @@
             ourSSD_LUT += curLUT32len + "0132" + curLUT32;
             var allLength = (ourSSD_LUT.length / 2).toString(16).padStart(4, '0');
             ourSSD_LUT = allLength + ourSSD_LUT;
-            addLog('Sending SSD LUT size: ' + ourSSD_LUT.length / 2);
+            addLog('发送 SSD LUT 大小: ' + ourSSD_LUT.length / 2);
             document.getElementById("lutData").value = ourSSD_LUT;
             sendCustomLUT(ourSSD_LUT);
         }
@@ -2032,7 +2039,7 @@
             imgArray = curLUT.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
             imgArrayLen = imgArray.length;
             uploadPart = 0;
-            addLog('Sending Custom LUT size: ' + imgArrayLen / 2);
+            addLog('发送自定义 LUT 大小: ' + imgArrayLen / 2);
             const dataInfo = new AvailDataInfo(255, computeCRC32(imgArray), imgArrayLen / 2, 0xB0, 0, 0);
             sendcmd("0064" + dataInfo.toHexString());
         }
@@ -2046,12 +2053,12 @@
         };
 
         async function flashFirmwareFromServerViaBLE() {
-            addLog("Attempting to flash ATC_BLE_OEPL.bin from server via BLE...");
+            addLog("尝试通过 BLE 从服务器刷写 ATC_BLE_OEPL.bin...");
             setStatus("BLE: 正在加载 ATC_BLE_OEPL.bin...");
             try {
                 const response = await fetch("./ATC_BLE_OEPL.bin", { mode: 'cors' });
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Make sure ATC_BLE_OEPL.bin is in the same folder as the HTML file.`);
+                    throw new Error(`HTTP 错误! 状态: ${response.status} - ${response.statusText}。确保 ATC_BLE_OEPL.bin 与 HTML 文件在同一文件夹中。`);
                 }
                 const serverBleFirmwareBuffer = await response.arrayBuffer();
                 addLog(`BLE: 成功从服务器加载 ATC_BLE_OEPL.bin (${serverBleFirmwareBuffer.byteLength} 字节)。`);
@@ -2061,7 +2068,7 @@
             } catch (error) {
                 addLog(`BLE: 从服务器加载或刷写固件时出错: ${error.message}`);
                 setStatus(`BLE 错误: ${error.message}`);
-                console.error("BLE server firmware load/flash error:", error);
+                console.error("BLE 服务器固件加载/刷写错误:", error);
             }
         }
         function selectFirmwareVoid() {
@@ -2074,7 +2081,7 @@
                     sendFw(bytesToHex(byteArray));
                 };
                 reader.onerror = function (e) {
-                    addLog("Error reading firmware file: " + e);
+                    addLog("读取固件文件时出错: " + e);
                     setStatus("读取固件文件时出错");
                 };
                 reader.readAsArrayBuffer(file);
@@ -2105,12 +2112,12 @@
                             sendBlockData(blockRequest.blockId, imgArray);
                         }, 50);
                     } catch (e) {
-                        addLog("Error parsing Block Request (00C6): " + e.message);
+                        addLog("解析块请求 (00C6) 时出错: " + e.message);
                         setStatus("错误: 错误的块请求");
                     }
                     break;
                 case "00C4":
-                    addLog(`Part Error Block ${currentBlockId} Part ${packetIndex}. Retrying...`);
+                    addLog(`第 ${currentBlockId} 块第 ${packetIndex} 部分出错。正在重试...`);
                     setStatus(`部分错误重试 ${packetIndex}...`);
                     setTimeout(nextBlkPart, 100);
                     break;
@@ -2120,12 +2127,12 @@
                     if (packetIndex < totalPackets) {
                         nextBlkPart();
                     } else {
-                        addLog(`Block ${currentBlockId} ACKed. Waiting for next request...`);
+                        addLog(`块 ${currentBlockId} 已确认。等待下一个请求...`);
                         setStatus(`块 ${currentBlockId} 已发送。`);
                     }
                     break;
                 case "00C7":
-                    addLog("Upload OK.");
+                    addLog("上传成功。");
                     setStatus("上传完成。");
                     imgArray = "";
                     imgArrayLen = 0;
@@ -2133,7 +2140,7 @@
                     sendcmd("0003");
                     break;
                 case "00C8":
-                    addLog("Device: Data already present.");
+                    addLog("设备: 数据已存在。");
                     setStatus("数据已存在。");
                     imgArray = "";
                     imgArrayLen = 0;
@@ -2148,12 +2155,12 @@
                     packets = [];
                     break;
                 case "0005":
-                    addLog("Display Info (0005) received. Parsing...");
+                    addLog("已收到显示信息 (0005)。正在解析...");
                     try {
                         const payloadBytes = hexToBytes(payloadHex);
                         const minLen = 31;
                         const configVersion = getUint32FromBytes(payloadBytes, 4);
-                        addLog(`Device Config Version: ${configVersion}`);
+                        addLog(`设备配置版本: ${configVersion}`);
                         if (payloadBytes.length >= minLen) {
                             const colors = getUint8FromBytes(payloadBytes, 30);
                             const isInvertedWH = getUint8FromBytes(payloadBytes, 19) === 1;
@@ -2165,22 +2172,22 @@
                                 h = getUint16FromBytes(payloadBytes, 22);
                                 w = getUint16FromBytes(payloadBytes, 24);
                             }
-                            addLog(`Parsed Display - W:${w}, H:${h}, Colors:${colors}, Inverted Flag:${isInvertedWH}`);
+                            addLog(`已解析显示 - 宽:${w}, 高:${h}, 颜色数:${colors}, 反转标志:${isInvertedWH}`);
                             if (w > 0 && h > 0 && w < 4000 && h < 4000) {
                                 document.getElementById('widthInput').value = w;
                                 document.getElementById('heightInput').value = h;
                                 document.getElementById('secondColorCheckbox').checked = (colors >= 2);
                                 document.getElementById('thirdColorCheckbox').checked = (colors >= 3);
                                 doAll();
-                                addLog("Canvas updated with display info.");
+                                addLog("画布已使用显示信息更新。");
                             } else {
-                                addLog("Parsed W/H seems invalid or zero.");
+                                addLog("解析的宽高无效或为零。");
                             }
                         } else {
-                            addLog(`Display info payload too short (${payloadBytes.length} bytes). Minimum expected ${minLen}.`);
+                            addLog(`显示信息有效负载过短 (${payloadBytes.length} 字节)。最小预期 ${minLen} 字节。`);
                         }
                     } catch (e) {
-                        addLog("Error parsing Display Info (0005): " + e);
+                        addLog("解析显示信息 (0005) 时出错: " + e);
                         setStatus("错误: 错误的显示信息");
                     }
                     break;
@@ -2214,7 +2221,7 @@
                     setStatus("动态配置错误。");
                     break;
                 case "00D1":
-                    addLog("Debug Status Info (00D1) received.");
+                    addLog("收到调试状态信息 (00D1)。");
                     try {
                         const payloadBytes = hexToBytes(payloadHex);
                         if (payloadBytes.length >= 6) {
@@ -2230,7 +2237,7 @@
                             const timeString = timestamp.toLocaleTimeString();
                             const dateTimeString = timestamp.toLocaleString();
 
-                            const statusString = `Status - Battery: ${batteryVoltage}mV, Raw ADC: ${adcTempRaw}, ADC Temp: ${signedAdcTemp}°C, EPD Temp: ${signedEpdTemp}°C`;
+                            const statusString = `状态 - 电池: ${batteryVoltage}mV, 原始ADC: ${adcTempRaw}, ADC温度: ${signedAdcTemp}°C, EPD温度: ${signedEpdTemp}°C`;
                             addLog(statusString);
                             document.getElementById('status-battery').textContent = `${batteryVoltage} mV`;
                             document.getElementById('status-adc-raw').textContent = `${adcTempRaw}`;
@@ -2241,10 +2248,10 @@
                             addChartData(timeString, batteryVoltage, adcTempRaw, signedAdcTemp, signedEpdTemp);
 
                         } else {
-                            addLog(`Debug info payload too short (${payloadBytes.length} bytes). Expected 6.`);
+                            addLog(`调试信息有效负载过短 (${payloadBytes.length} 字节)。预期 6 字节。`);
                         }
                     } catch (e) {
-                        addLog("Error parsing Debug Status Info (00D1): " + e);
+                        addLog("解析调试状态信息 (00D1) 时出错: " + e);
                     }
                     break;
                 case "0063":
@@ -2255,13 +2262,13 @@
                     setStatus("命令错误 (FFFF)。");
                     break;
                 default:
-                    addLog("Unhandled CMD: " + cmdHex + " Payload: " + payloadHex.substring(0, 40) + "...");
+                    addLog("未处理的命令: " + cmdHex + " 负载: " + payloadHex.substring(0, 40) + "...");
                     break;
             }
         }
         
         function readDebugStatus() {
-            addLog("Requesting battery and temperature status...");
+            addLog("正在请求电池和温度状态...");
             sendcmd('00160000');
         }
 
@@ -2274,7 +2281,7 @@
         }
 
         function disconnect() {
-            addLog('Device disconnected.');
+            addLog('设备已断开连接。');
             if (bleDevice && bleDevice.removeEventListener) {
                 bleDevice.removeEventListener('gattserverdisconnected', disconnect);
             }
@@ -2284,10 +2291,10 @@
 
         function preConnect() {
             if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
-                addLog("Disconnecting...");
+                addLog("正在断开连接...");
                 setStatus("正在断开连接...");
                 bleDevice.removeEventListener('gattserverdisconnected', disconnect);
-                document.getElementById("connectbutton").innerHTML = 'Connect';
+                document.getElementById("connectbutton").innerHTML = '连接';
                 bleDevice.gatt.disconnect();
             } else {
                 reconnectTrys = 0;
@@ -2309,22 +2316,22 @@
                     setStatus("错误: 无效过滤器");
                     return;
                 }
-                addLog("Requesting device with filters: " + JSON.stringify(deviceoptions.filters));
-                setStatus("Requesting device...");
-                document.getElementById("connectbutton").innerHTML = 'Scanning...';
+                addLog("使用筛选器请求设备: " + JSON.stringify(deviceoptions.filters));
+                setStatus("请求设备...");
+                document.getElementById("connectbutton").innerHTML = '扫描中...';
                 navigator.bluetooth.requestDevice(deviceoptions)
                     .then(device => {
-                        addLog(`Found: ${device.name || 'Unknown device'} (${device.id})`);
-                        setStatus(`Found ${device.name || 'device'}`);
+                        addLog(`找到: ${device.name || '未知设备'} (${device.id})`);
+                        setStatus(`找到 ${device.name || '设备'}`);
                         bleDevice = device;
                         bleDevice.addEventListener('gattserverdisconnected', disconnect);
                         connect();
                     })
                     .catch(error => {
                         if (error.name === 'NotFoundError' || error.name === 'AbortError') {
-                            addLog("No device selected/found.");
-                            setStatus("No device selected");
-                            document.getElementById("connectbutton").innerHTML = 'Connect';
+                            addLog("未选择/未找到设备。");
+                            setStatus("未选择设备");
+                            document.getElementById("connectbutton").innerHTML = '连接';
                         } else {
                             handleError(error);
                         }
@@ -2334,13 +2341,13 @@
 
         function reConnect() {
             if (!bleDevice) {
-                addLog("No previous device to reconnect. Use Connect.");
-                setStatus("No device selected");
+                addLog("没有上次设备可重新连接。请使用连接。");
+                setStatus("未选择设备");
                 return;
             }
-            addLog("Reconnecting to: " + (bleDevice.name || bleDevice.id));
+            addLog("正在重新连接: " + (bleDevice.name || bleDevice.id));
             if (bleDevice.gatt && bleDevice.gatt.connected) {
-                addLog("Already connected. Disconnecting first...");
+                addLog("已连接。先断开连接...");
                 bleDevice.removeEventListener('gattserverdisconnected', disconnect);
                 bleDevice.gatt.disconnect();
                 setTimeout(() => {
@@ -2358,43 +2365,43 @@
 
         function connect() {
             if (!bleDevice) {
-                addLog("Connect called, but no device selected.");
+                addLog("已调用连接，但未选择设备。");
                 return;
             }
             if (bleDevice.gatt && bleDevice.gatt.connected) {
-                addLog("Already connected.");
-                document.getElementById("connectbutton").innerHTML = 'Disconnect';
+                addLog("已连接。");
+                document.getElementById("connectbutton").innerHTML = '断开连接';
                 return;
             }
-            addLog("Connecting to GATT Server on: " + (bleDevice.name || bleDevice.id) + "...");
-            setStatus("Connecting...");
-            document.getElementById("connectbutton").innerHTML = 'Connecting...';
+            addLog("正在连接到 GATT 服务器: " + (bleDevice.name || bleDevice.id) + "...");
+            setStatus("连接中...");
+            document.getElementById("connectbutton").innerHTML = '连接中...';
             bleDevice.gatt.connect()
                 .then(server => {
-                    addLog('> GATT Server connected');
+                    addLog('> GATT 服务器已连接');
                     gattServer = server;
                     return gattServer.getPrimaryService(0x1337);
                 })
                 .then(service => {
-                    addLog('> Service 0x1337 found');
+                    addLog('> 找到服务 0x1337');
                     Theservice = service;
                     return Theservice.getCharacteristic(0x1337);
                 })
                 .then(characteristic => {
-                    addLog('> Characteristic 0x1337 found');
+                    addLog('> 找到特征 0x1337');
                     writeCharacteristic = characteristic;
                     return writeCharacteristic.startNotifications();
                 })
                 .then(() => {
-                    addLog('> Notifications started');
+                    addLog('> 已开始通知');
                     writeCharacteristic.addEventListener('characteristicvaluechanged', bleNotificationHandler);
                     addLog('连接成功！');
-                    setStatus('Connected');
-                    document.getElementById("connectbutton").innerHTML = 'Disconnect';
+                    setStatus('已连接');
+                    document.getElementById("connectbutton").innerHTML = '断开连接';
                     reconnectTrys = 0;
                     if (bleDevice && bleDevice.name) {
                         localStorage.setItem('lastDeviceName', bleDevice.name);
-                        addLog(`Stored last device name: ${bleDevice.name}`);
+                        addLog(`已保存最后设备名称: ${bleDevice.name}`);
                         if (document.getElementById('rememberDeviceCheckbox').checked) {
                             document.getElementById('namePrefix').value = bleDevice.name;
                         }
@@ -2402,7 +2409,7 @@
                     setTimeout(() => {
                         readDynamicConfig();
 						if (currentView === 'debug') {
-							addLog("Connection established while in Debug view, starting polling.");
+							addLog("在调试视图中已建立连接，开始轮询。");
 							startDebugPolling();
 						}
                     }, 450);
@@ -2419,7 +2426,7 @@
             const today = new Date();
             const time = ("0" + today.getHours()).slice(-2) + ":" + ("0" + today.getMinutes()).slice(-2) + ":" + ("0" + today.getSeconds()).slice(-2) + " : ";
             logArea.innerHTML = time + logTXT + '<br>' + logArea.innerHTML;
-            console.log("BLE Log: " + time + logTXT);
+            console.log("BLE 日志: " + time + logTXT);
             const maxLogLines = 150;
             const lines = logArea.innerHTML.split('<br>');
             if (lines.length > maxLogLines + 1) {
@@ -2429,7 +2436,7 @@
 
         function getUint8FromBytes(bytes, offset) {
             if (offset >= bytes.length) {
-                console.warn(`getUint8 OOB: offset ${offset}, length ${bytes.length}`);
+                console.warn(`getUint8 越界: 偏移 ${offset}, 长度 ${bytes.length}`);
                 return 0;
             }
             return bytes[offset];
@@ -2437,7 +2444,7 @@
 
         function getUint16FromBytes(bytes, offset) {
             if (offset + 1 >= bytes.length) {
-                console.warn(`getUint16 OOB: offset ${offset}, length ${bytes.length}`);
+                console.warn(`getUint16 越界: 偏移 ${offset}, 长度 ${bytes.length}`);
                 return 0;
             }
             return (bytes[offset] | (bytes[offset + 1] << 8));
@@ -2445,7 +2452,7 @@
 
         function getUint32FromBytes(bytes, offset) {
             if (offset + 3 >= bytes.length) {
-                console.warn(`getUint32 OOB: offset ${offset}, length ${bytes.length}`);
+                console.warn(`getUint32 越界: 偏移 ${offset}, 长度 ${bytes.length}`);
                 return 0;
             }
             return (bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)) >>> 0;
@@ -2465,12 +2472,12 @@
 
         function hexToUint8Array(hex) {
             if (typeof hex !== 'string') {
-                console.error("hexToUint8Array expects a string.");
+                console.error("hexToUint8Array 需要一个字符串。");
                 return new Uint8Array(0);
             }
             const cleanHex = hex.replace(/[^0-9a-fA-F]/g, '');
             if (cleanHex.length % 2 !== 0) {
-                console.warn("Odd hex string length:", cleanHex.length, "String (first 50 chars):", cleanHex.substring(0, 50) + "...");
+                console.warn("奇怪的十六进制字符串长度:", cleanHex.length, "字符串（前50个字符）:", cleanHex.substring(0, 50) + "...");
             }
             const byteLength = Math.floor(cleanHex.length / 2);
             const bytes = new Uint8Array(byteLength);
@@ -2478,7 +2485,7 @@
                 const byteHex = cleanHex.substr(i * 2, 2);
                 bytes[i] = parseInt(byteHex, 16);
                 if (isNaN(bytes[i])) {
-                    console.error(`Invalid hex byte "${byteHex}" at position ${i * 2}`);
+                    console.error(`无效的十六进制字节 "${byteHex}"，位置 ${i * 2}`);
                     bytes[i] = 0;
                 }
             }
@@ -2488,7 +2495,7 @@
         function hexToBytes(hex) {
             if (typeof hex !== 'string') hex = '';
             if (hex.length % 2 !== 0) {
-                console.warn("Odd hex string provided:", hex);
+                console.warn("提供了奇数长度的十六进制字符串:", hex);
                 hex = '0' + hex;
             }
             const bytes = new Uint8Array(hex.length / 2);
@@ -2496,7 +2503,7 @@
                 try {
                     bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
                 } catch (e) {
-                    console.error("Hex parse error", e);
+                    console.error("十六进制解析错误", e);
                     bytes[i] = 0;
                 }
             }
@@ -2597,7 +2604,7 @@
                 let defaultSettingsHex = "";
                 const hwTypeHex = document.getElementById('conf_hw_type').value.trim().toUpperCase() || "0";
                 if (!/^[0-9A-F]{1,4}$/.test(hwTypeHex)) {
-                    throw new Error("Invalid HW Type Hex value");
+                    throw new Error("无效的硬件类型十六进制值");
                 }
                 defaultSettingsHex += toHexUint16LE(parseInt(hwTypeHex, 16));
                 defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_screen_functions').value) || 0);
@@ -2617,7 +2624,7 @@
                 defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_ADC_pinout').value) || 0x0000);
                 defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_UART_pinout').value) || 0x0000);
                 if (defaultSettingsHex.length !== SIZEOF_DEFAULT_SETTINGS * 2) {
-                    throw new Error("Default settings constructed length mismatch");
+                    throw new Error("默认设置构造长度不匹配");
                 }
                 payload += defaultSettingsHex;
                 if (document.getElementById('conf_epd_pinout_enabled').checked) {
@@ -2638,7 +2645,7 @@
                     pinoutHex += toHexUint8(parseInt(document.getElementById('conf_epd_PIN_ENABLE').value));
                     pinoutHex += toHexUint8(parseInt(document.getElementById('conf_epd_PIN_ENABLE_SLEEP').value));
                     if (pinoutHex.length !== SIZEOF_SCREEN_PINOUT * 2) {
-                        throw new Error("EPD pinout constructed length mismatch");
+                        throw new Error("EPD 引脚构造长度不匹配");
                     }
                     payload += pinoutHex;
                 } else {
@@ -2651,7 +2658,7 @@
                     pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_led_B').value));
                     pinoutHex += toHexUint8(document.getElementById('conf_led_inverted').checked ? 1 : 0);
                     if (pinoutHex.length !== SIZEOF_LED_PINOUT * 2) {
-                        throw new Error("LED pinout constructed length mismatch");
+                        throw new Error("LED 引脚构造长度不匹配");
                     }
                     payload += pinoutHex;
                 } else {
@@ -2664,7 +2671,7 @@
                     pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_nfc_CS').value));
                     pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_nfc_IRQ').value));
                     if (pinoutHex.length !== SIZEOF_NFC_PINOUT * 2) {
-                        throw new Error("NFC pinout constructed length mismatch");
+                        throw new Error("NFC 引脚构造长度不匹配");
                     }
                     payload += pinoutHex;
                 } else {
@@ -2677,7 +2684,7 @@
                     pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_flash_MISO').value));
                     pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_flash_MOSI').value));
                     if (pinoutHex.length !== SIZEOF_FLASH_PINOUT * 2) {
-                        throw new Error("Flash pinout constructed length mismatch");
+                        throw new Error("Flash 引脚构造长度不匹配");
                     }
                     payload += pinoutHex;
                 } else {
@@ -2697,21 +2704,21 @@
             let offset = 0;
 
             function readUint16LE_internal(len = 4) {
-                if (offset + len > hexData.length) throw new Error(`Read out of bounds (Uint16LE)`);
+                if (offset + len > hexData.length) throw new Error(`越界读取 (Uint16LE)`);
                 const val = fromHexUint16LE(hexData.substring(offset, offset + len));
                 offset += len;
                 return val;
             }
 
             function readUint8_internal(len = 2) {
-                if (offset + len > hexData.length) throw new Error(`Read out of bounds (Uint8)`);
+                if (offset + len > hexData.length) throw new Error(`越界读取 (Uint8)`);
                 const val = fromHexUint8(hexData.substring(offset, offset + len));
                 offset += len;
                 return val;
             }
 
             function readUint32LE_internal(len = 8) {
-                if (offset + len > hexData.length) throw new Error(`Read out of bounds (Uint32LE)`);
+                if (offset + len > hexData.length) throw new Error(`越界读取 (Uint32LE)`);
                 const val = fromHexUint32LE(hexData.substring(offset, offset + len));
                 offset += len;
                 return val;
@@ -2719,7 +2726,7 @@
             try {
                 const minExpectedLength = (2 + SIZEOF_DEFAULT_SETTINGS) * 2;
                 if (hexData.length < minExpectedLength) {
-                    throw new Error(`Payload too short (${hexData.length / 2}B), expected at least ${minExpectedLength / 2}B for base config.`);
+                    throw new Error(`有效负载过短 (${hexData.length / 2}B)，基础配置至少需要 ${minExpectedLength / 2}B。`);
                 }
                 document.getElementById('conf_screen_type').value = readUint16LE_internal();
                 document.getElementById('conf_hw_type').value = readUint16LE_internal().toString(16).padStart(4, '0').toUpperCase();
@@ -2815,7 +2822,7 @@
                 }
             } catch (e) {
                 addLog("解析动态配置时出错: " + e.message);
-                console.error("Parsing error:", e, "Raw Hex:", hexData, "Current Offset:", offset);
+                console.error("解析错误:", e, "原始十六进制:", hexData, "当前偏移:", offset);
             } finally {
                 doAll();
             }
@@ -2895,14 +2902,14 @@
             const namePrefixInput = document.getElementById('namePrefix');
             const isEnabled = checkbox.checked;
             localStorage.setItem('rememberDeviceEnabled', isEnabled);
-            addLog(`Remember device setting ${isEnabled ? 'enabled' : 'disabled'}.`);
+            addLog(`记住设备设置已${isEnabled ? '启用' : '禁用'}。`);
             if (isEnabled) {
                 const lastDeviceName = localStorage.getItem('lastDeviceName');
                 if (lastDeviceName) {
                     namePrefixInput.value = lastDeviceName;
-                    addLog(`Prefix filter set to remembered device: ${lastDeviceName}`);
+                    addLog(`前缀过滤器设置为记住的设备: ${lastDeviceName}`);
                 } else {
-                    addLog(`Remember device enabled, but no device name stored yet.`);
+                    addLog(`记住设备已启用，但尚未存储设备名称。`);
                 }
             }
         }
@@ -2924,7 +2931,7 @@
             } else {
                 button.textContent = '简单视图';
                 if (uploadCompressedBtn) {
-                    uploadCompressedBtn.textContent = 'Upload Compressed Image';
+                    uploadCompressedBtn.textContent = '上传压缩图像';
                 }
 				localStorage.setItem('viewMode', 'advanced');
                 showView('ble');
@@ -2936,11 +2943,11 @@
                 return;
             }
             if (!bleDevice || !bleDevice.gatt || !bleDevice.gatt.connected) {
-                addLog("Cannot start auto-read: Not connected.");
+                addLog("无法开始自动读取：未连接。");
                 return;
             }
             debugPollingInterval = setInterval(readDebugStatus, 3000);
-            addLog("Started automatic status reading every 3 seconds.");
+            addLog("已开始每 3 秒自动读取状态。");
             readDebugStatus();
         }
 
@@ -2948,7 +2955,7 @@
             if (debugPollingInterval) {
                 clearInterval(debugPollingInterval);
                 debugPollingInterval = null;
-                addLog("Stopped automatic status reading.");
+                addLog("已停止自动状态读取。");
             }
         }
 		
@@ -2967,7 +2974,7 @@
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Battery Voltage (mV)',
+                        label: '电池电压 (mV)',
                         data: [],
                         borderColor: voltageColor,
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -2976,7 +2983,7 @@
                         pointRadius: 4,
                         borderWidth: 2,
                     }, {
-                        label: 'ADC Raw',
+                        label: 'ADC 原始值',
                         data: [],
                         borderColor: adcRawColor,
                         backgroundColor: 'rgba(255, 159, 64, 0.2)',
@@ -2985,7 +2992,7 @@
                         pointRadius: 4,
                         borderWidth: 2,
                     }, {
-                        label: 'ADC Temp (°C)',
+                        label: 'ADC 温度 (°C)',
                         data: [],
                         borderColor: tempColor,
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -2994,7 +3001,7 @@
                         pointRadius: 4,
                         borderWidth: 2,
                     }, {
-                        label: 'EPD Temp (°C)',
+                        label: 'EPD 温度 (°C)',
                         data: [],
                         borderColor: epdTempColor,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -3016,7 +3023,7 @@
                             display: true,
                             title: {
                                 display: true,
-                                text: 'Time'
+                                text: '时间'
                             }
                         },
                         y_voltage: {
@@ -3024,7 +3031,7 @@
                             position: 'left',
                             title: {
                                 display: true,
-                                text: 'Voltage (mV)',
+                                text: '电压 (mV)',
                                 color: voltageColor
                             },
                             ticks: {
@@ -3038,7 +3045,7 @@
                             position: 'right',
                             title: {
                                 display: true,
-                                text: 'Temperature (°C)',
+                                text: '温度 (°C)',
                                 color: tempColor
                             },
                             ticks: {
@@ -3055,7 +3062,7 @@
                             position: 'right',
                             title: {
                                 display: true,
-                                text: 'ADC Raw Value',
+                                text: 'ADC 原始值',
                                 color: adcRawColor
                             },
                             ticks: {
@@ -3095,19 +3102,19 @@
         }
 
         async function loadServerFirmware(uartLogCallback) {
-            uartLogCallback("Attempting to load ATC_BLE_OEPL.bin from server...");
+            uartLogCallback("尝试从服务器加载 ATC_BLE_OEPL.bin...");
             try {
                 const response = await fetch("./ATC_BLE_OEPL.bin", {
                     mode: 'cors'
                 });
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Make sure ATC_BLE_OEPL.bin is in the same folder as the HTML and the server is configured for CORS if needed.`);
+                    throw new Error(`HTTP 错误！状态码: ${response.status} - ${response.statusText}。请确保 ATC_BLE_OEPL.bin 与 HTML 位于同一文件夹中，并在需要时正确配置服务器的 CORS。`);
                 }
                 serverFirmwareBuffer = await response.arrayBuffer();
                 uartLogCallback(`成功从服务器加载 ATC_BLE_OEPL.bin (${serverFirmwareBuffer.byteLength} 字节)。当 UART 端口打开时将自动选择。`);
             } catch (error) {
-                uartLogCallback(`Error loading firmware from server: ${error.message}`);
-                console.error("Server firmware load error:", error);
+                uartLogCallback(`从服务器加载固件时出错: ${error.message}`);
+                console.error("服务器固件加载错误:", error);
                 serverFirmwareBuffer = null;
             }
         }
@@ -3152,16 +3159,16 @@
             rememberCheckbox.checked = rememberEnabled;
             if (rememberEnabled && lastDeviceName) {
                 namePrefixInput.value = lastDeviceName;
-                addLog(`Loaded remembered device name: ${lastDeviceName}`);
+                addLog(`已加载记住的设备名称: ${lastDeviceName}`);
             } else if (rememberEnabled) {
-                addLog(`Remember device is enabled, no device name stored.`);
+                addLog(`记住设备已启用，但尚未存储设备名称。`);
             } else {
-                addLog(`Remember device is disabled.`);
+                addLog(`记住设备已禁用。`);
             }
 
             showView('ble');
-            addLog("Page loaded. Ready.");
-            setStatus("Ready");
+            addLog("页面已加载。就绪。");
+            setStatus("就绪");
 
 
             loadServerFirmware(addLog);
@@ -3197,7 +3204,7 @@
 
 
             function uartLog(data) {
-                console.log("UART Log: " + data);
+                console.log("UART 日志: " + data);
                 const logArea = uart$("uart-log");
                 if (logArea) {
                     const timestamp = new Date().toLocaleTimeString();
@@ -3226,29 +3233,29 @@
             function setUartFirmware(firmwareBuffer, sourceName) {
                 uartFirmwareArray = firmwareBuffer;
                 if (!uartFirmwareArray) {
-                    uartLog(`No firmware data from ${sourceName}.`);
+                    uartLog(`来自 ${sourceName} 的固件数据为空。`);
                     uart_fwriter_btn.disabled = true;
                     uart_bwrite_and_type_btn.disabled = true;
-                    uart_swrite_span.innerHTML = 'Open COM & Select file';
+                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
                     return false;
                 }
 
-                uartLog(`Firmware from ${sourceName} selected, size: ${uartFirmwareArray.byteLength} bytes`);
+                uartLog(`从 ${sourceName} 选择了固件，大小: ${uartFirmwareArray.byteLength} 字节`);
                 if (uartFirmwareArray.byteLength < 16 || (new Uint32Array(uartFirmwareArray.slice(8, 12)))[0] !== 0x544C4E4B) {
-                    uartLog(`Selected data from ${sourceName} is not a Telink firmware .bin`);
-                    alert(`Selected data from ${sourceName} is not a Telink firmware .bin`);
+                    uartLog(`从 ${sourceName} 选择的数据不是 Telink 固件 .bin`);
+                    alert(`从 ${sourceName} 选择的数据不是 Telink 固件 .bin`);
                     uartFirmwareArray = null;
                     uart_fwriter_btn.disabled = true;
                     uart_bwrite_and_type_btn.disabled = true;
-                    uart_swrite_span.innerHTML = 'Open COM & Select file';
+                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
                     return false;
                 }
                 if (uart_connect_btn.opened) {
                     uart_fwriter_btn.disabled = false;
                     uart_bwrite_and_type_btn.disabled = false;
-                    uart_swrite_span.innerHTML = `Ready to write (${sourceName})`;
+                    uart_swrite_span.innerHTML = `准备写入 (${sourceName})`;
                 } else {
-                    uart_swrite_span.innerHTML = `Open COM port first (${sourceName} loaded)`;
+                    uart_swrite_span.innerHTML = `请先打开 COM 端口 (${sourceName} 已加载)`;
                 }
                 return true;
             }
@@ -3325,7 +3332,7 @@
             }
 
             async function uartSectorErase(addr) {
-                uartLog(`Erasing sector at 0x${uartHex(addr, 6)}...`);
+                uartLog(`正在擦除扇区地址 0x${uartHex(addr, 6)}...`);
                 await uartFlashWriteEnable();
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x20])));
@@ -3355,13 +3362,13 @@
 
             async function uartActivate(tim) {
                 let blk = uart_sws_wr_addr(0x0602, new Uint8Array([0x05]));
-                let s = 'Reset DTR/RTS (100 ms)';
+                let s = '重置 DTR/RTS (100 毫秒)';
                 uart_swrite_span.innerHTML = s;
                 uartLog(s);
                 await uartSerialController.reset(100);
-                uartLog('Soft Reset MCU');
+                uartLog('软复位 MCU');
                 await uartSoftResetMSU();
-                s = 'Activate (' + (tim / 1000.0) + ' sec)...';
+                s = '激活 (' + (tim / 1000.0) + ' 秒)...';
                 uart_swrite_span.innerHTML = s;
                 uartLog(s);
                 let t = new Date().getTime();
@@ -3375,62 +3382,62 @@
 
             async function uartFlashWrite() {
                 if (uartFirmwareArray == null || uart_connect_btn.opened == false) {
-                    uartLog("FlashWrite: No firmware or port not open.");
+                    uartLog("刷写固件失败：没有固件或端口未打开。");
                     return false;
                 }
                 let t = new Date().getTime();
-                uartLog("Starting firmware flash process...");
+                uartLog("开始固件刷写过程...");
                 try {
                     await uartActivate(uart_uatime_select.value);
                     await uartFlashWriteEnable();
                     await uartFlashUnlock();
                     await uartDelay(1500);
-                    uartLog('Write ' + uartFirmwareArray.byteLength + ' bytes into Flash...');
+                    uartLog('写入 ' + uartFirmwareArray.byteLength + ' 字节到 Flash...');
                     let len = uartFirmwareArray.byteLength;
                     let addr = 0;
                     let sblk = 256;
                     while (len > 0) {
                         if ((addr & 0x0fff) == 0) {
-                            let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash Sector Erase at 0x' + uartHex(addr, 6);
+                            let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash 扇区擦除 0x' + uartHex(addr, 6);
                             uartLog(s);
                             uart_swrite_span.innerHTML = s;
                             await uartSectorErase(addr);
                         }
                         if (len < sblk) sblk = len;
-                        let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash Write ' + sblk + ' bytes at 0x' + uartHex(addr, 6);
+                        let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash 写入 ' + sblk + ' 字节到 0x' + uartHex(addr, 6);
 
                         uart_swrite_span.innerHTML = s;
                         await uartWriteFlashBlk(addr, new Uint8Array(uartFirmwareArray.slice(addr, addr + sblk)));
                         addr += sblk;
                         len -= sblk;
                     }
-                    uart_swrite_span.innerHTML = 'FW Write OK';
-                    uartLog('Firmware flash Done (' + ((new Date().getTime() - t) / 1000.0) + ' sec).');
+                    uart_swrite_span.innerHTML = '固件写入完成';
+                    uartLog('固件刷写完成 (' + ((new Date().getTime() - t) / 1000.0) + ' 秒).');
 
                     return true;
                 } catch (error) {
-                    uartLog(`Error during firmware flash: ${error}`);
-                    uart_swrite_span.innerHTML = 'Error flashing FW!';
-                    console.error("Error during firmware flash:", error);
+                    uartLog(`固件刷写过程中出错: ${error}`);
+                    uart_swrite_span.innerHTML = '固件刷写出错！';
+                    console.error("固件刷写过程中出错:", error);
                     return false;
                 }
             }
 
             async function writeDeviceTypeSettings(doActivate) {
                 if (uart_connect_btn.opened == false) {
-                    uartLog("Write Device Type: Port not open.");
-                    alert("UART Port is not open.");
+                    uartLog("写入设备类型：端口未打开。");
+                    alert("UART 端口未打开。");
                     return false;
                 }
                 const selectedHwTypeValue = parseInt(uart_device_type_select.value);
                 if (isNaN(selectedHwTypeValue)) {
-                    uartLog("Invalid device type selected for OTP write.");
-                    alert("Please select a valid device type.");
+                    uartLog("选择的设备类型无效，无法写入 OTP。");
+                    alert("请选择有效的设备类型。");
                     return false;
                 }
 
-                uartLog(`Preparing to write device type settings to 0x${UART_SETTINGS_ADDR.toString(16)}...`);
-                uartLog(`Selected OEPL HW Type: 0x${selectedHwTypeValue.toString(16).padStart(4, '0')} (${uart_device_type_select.options[uart_device_type_select.selectedIndex].text})`);
+                uartLog(`准备将设备类型设置写入到地址 0x${UART_SETTINGS_ADDR.toString(16)}...`);
+                uartLog(`已选择 OEPL 硬件类型: 0x${selectedHwTypeValue.toString(16).padStart(4, '0')} (${uart_device_type_select.options[uart_device_type_select.selectedIndex].text})`);
 
                 const buffer = new ArrayBuffer(SIZEOF_SETTINGS_DEFAULT_TYPE_STRUCT);
                 const dataView = new DataView(buffer);
@@ -3445,11 +3452,11 @@
                     crc ^= uint8ArrayView[i];
                 }
                 dataView.setUint8(SIZEOF_SETTINGS_DEFAULT_TYPE_STRUCT - 1, crc);
-                uartLog(`Payload (Hex): ${Array.from(uint8ArrayView).map(b => b.toString(16).padStart(2, '0')).join('')}`);
+                uartLog(`有效负载 (十六进制): ${Array.from(uint8ArrayView).map(b => b.toString(16).padStart(2, '0')).join('')}`);
 
                 const t_start = new Date().getTime();
                 try {
-                    uart_swrite_span.innerHTML = 'Writing Device Type...';
+                    uart_swrite_span.innerHTML = '正在写入设备类型...';
                     if (doActivate == 1)
                         await uartActivate(uart_uatime_select.value);
                     await uartFlashWriteEnable();
@@ -3458,17 +3465,17 @@
 
                     await uartSectorErase(UART_SETTINGS_ADDR);
 
-                    uartLog(`Writing ${uint8ArrayView.length} bytes to 0x${UART_SETTINGS_ADDR.toString(16)}...`);
+                    uartLog(`写入 ${uint8ArrayView.length} 字节到 0x${UART_SETTINGS_ADDR.toString(16)}...`);
                     await uartWriteFlashBlk(UART_SETTINGS_ADDR, uint8ArrayView);
 
-                    uart_swrite_span.innerHTML = 'Device Type Written OK!';
+                    uart_swrite_span.innerHTML = '设备类型写入成功！';
                     uartLog(`设备类型设置成功写入到 0x${UART_SETTINGS_ADDR.toString(16)} (${((new Date().getTime() - t_start) / 1000.0).toFixed(2)} 秒)。`);
 
                     return true;
                 } catch (error) {
-                    uartLog(`Error writing device type settings: ${error}`);
-                    uart_swrite_span.innerHTML = 'Error writing type!';
-                    console.error("Error writing device type:", error);
+                    uartLog(`写入设备类型设置时出错: ${error}`);
+                    uart_swrite_span.innerHTML = '写入设备类型出错！';
+                    console.error("写入设备类型时出错:", error);
                     return false;
                 }
             }
@@ -3479,7 +3486,7 @@
             }
 
             uart_connect_btn.addEventListener('pointerdown', () => {
-                if (uart_connect_btn.value == 'Close') {
+                if (uart_connect_btn.value == '关闭') {
                     uartDeviceStop();
                 } else {
                     uartSerialController.init();
@@ -3491,7 +3498,7 @@
 
                 await window.loadServerFirmware(uartLog);
                 if (serverFirmwareBuffer) {
-                    setUartFirmware(serverFirmwareBuffer, "Server");
+                    setUartFirmware(serverFirmwareBuffer, "服务器");
                 }
                 uart_load_server_fw_btn.disabled = false;
             };
@@ -3509,9 +3516,9 @@
                 const success = await uartFlashWrite();
                 if (success) {
                     uartLog('独立固件刷写成功。软重置 MCU。');
-                    uart_swrite_span.innerHTML = 'FW OK! Resetting...';
+                    uart_swrite_span.innerHTML = '固件写入成功！正在重置...';
                     await uartSoftResetMSU();
-                    uart_swrite_span.innerHTML = 'FW OK! Done.';
+                    uart_swrite_span.innerHTML = '固件写入成功。';
                 }
 
                 uart_connect_btn.disabled = false;
@@ -3539,9 +3546,9 @@
                 const success = await writeDeviceTypeSettings(1);
                 if (success) {
                     uartLog('独立类型写入成功。软重置 MCU。');
-                    uart_swrite_span.innerHTML = 'Type OK! Resetting...';
+                    uart_swrite_span.innerHTML = '类型写入成功！正在重置...';
                     await uartSoftResetMSU();
-                    uart_swrite_span.innerHTML = 'Type OK! Done.';
+                    uart_swrite_span.innerHTML = '类型写入成功。';
                 }
 
                 uart_connect_btn.disabled = false;
@@ -3569,12 +3576,12 @@
                 let fw_ok = false;
                 let type_ok = false;
 
-                uartLog("Starting Combined Write: Firmware first...");
+                uartLog("开始组合写入：先写入固件...");
                 fw_ok = await uartFlashWrite();
 
                 if (fw_ok) {
                     uartLog("组合写入: 固件成功。继续到设备类型...");
-                    uart_swrite_span.innerHTML = 'FW OK, writing Type...';
+                    uart_swrite_span.innerHTML = '固件成功，正在写入类型...';
                     type_ok = await writeDeviceTypeSettings(0);
                 } else {
                     uartLog("组合写入: 固件失败。跳过设备类型。");
@@ -3582,13 +3589,13 @@
 
                 if (fw_ok && type_ok) {
                     uartLog("组合写入: 固件和设备类型成功。软重置 MCU。");
-                    uart_swrite_span.innerHTML = 'Flash & Type OK! Resetting...';
+                    uart_swrite_span.innerHTML = '固件与类型写入成功！正在重置...';
                     await uartSoftResetMSU();
-                    uart_swrite_span.innerHTML = 'Flash & Type OK! Done.';
+                    uart_swrite_span.innerHTML = '固件与类型写入成功。';
                 } else if (fw_ok && !type_ok) {
-                    uartLog("组合写入: 固件成功，但设备类型失败。软重置 MCU (固件可能已应用)。");
+                    uartLog("组合写入: 固件成功，但设备类型失败。软重置 MCU（固件可能已应用）。");
                     await uartSoftResetMSU();
-                    uart_swrite_span.innerHTML = uart_swrite_span.innerHTML.replace('!', '! Done (with Type Error).');
+                    uart_swrite_span.innerHTML = uart_swrite_span.innerHTML.replace('!', '！已完成（类型错误）。');
                 } else {
                     uartLog("组合写入: 固件失败。");
                 }
@@ -3617,13 +3624,13 @@
                 uart_write_device_type_btn.disabled = true;
 
                 await uartActivate(uart_uatime_select.value);
-                uart_swrite_span.innerHTML = 'Unlocking...';
-                uartLog('Flash Unlocking...');
+                uart_swrite_span.innerHTML = '正在解锁...';
+                uartLog('Flash 正在解锁...');
                 await uartFlashWriteEnable();
                 await uartFlashUnlock();
                 await uartDelay(100);
-                uart_swrite_span.innerHTML = 'Unlocked!';
-                uartLog('Unlock Done.');
+                uart_swrite_span.innerHTML = '已解锁！';
+                uartLog('解锁完成。');
 
                 uart_connect_btn.disabled = false;
                 uart_bunlock_btn.disabled = false;
@@ -3648,13 +3655,13 @@
                 uart_write_device_type_btn.disabled = true;
 
                 await uartActivate(uart_uatime_select.value);
-                uart_swrite_span.innerHTML = 'Erasing...';
-                uartLog('Flash Erase All (approx. 3.5 sec)...');
+                uart_swrite_span.innerHTML = '正在擦除...';
+                uartLog('Flash 正在全部擦除（约 3.5 秒）...');
                 await uartFlashWriteEnable();
                 await uartFlashEraseAll();
                 await uartDelay(3500);
-                uart_swrite_span.innerHTML = 'Erased!';
-                uartLog('Erase Done.');
+                uart_swrite_span.innerHTML = '已擦除！';
+                uartLog('擦除完成。');
 
                 uart_connect_btn.disabled = false;
                 uart_bunlock_btn.disabled = false;
@@ -3679,11 +3686,11 @@
                 uart_write_device_type_btn.disabled = true;
 
                 await uartActivate(uart_uatime_select.value);
-                uartLog('Soft Reset MCU');
-                uart_swrite_span.innerHTML = 'Resetting...';
+                uartLog('软复位 MCU');
+                uart_swrite_span.innerHTML = '正在重置...';
                 await uartSoftResetMSU();
-                uart_swrite_span.innerHTML = 'Reset Done.';
-                uartLog('Reset Done.');
+                uart_swrite_span.innerHTML = '重置完成。';
+                uartLog('重置完成。');
 
                 uart_connect_btn.disabled = false;
                 uart_bunlock_btn.disabled = false;
@@ -3704,13 +3711,13 @@
             uart_ufile_input.addEventListener("change", function () {
                 var reader = new FileReader();
                 reader.onload = function () {
-                    setUartFirmware(this.result, "Local File");
+                    setUartFirmware(this.result, "本地文件");
                 }
                 if (this.files[0] != null)
                     reader.readAsArrayBuffer(this.files[0]);
                 else {
-                    uartLog("No file selected via input.");
-                    setUartFirmware(null, "Local File");
+                    uartLog("未通过输入选择文件。");
+                    setUartFirmware(null, "本地文件");
                 }
             }, false);
 
@@ -3725,13 +3732,13 @@
                                 bufferSize: 240,
                             });
                             this.writer = this.port.writable.getWriter();
-                            uartLog('DTR, RTS on.');
+                            uartLog('DTR, RTS 已开启。');
                             await this.port.setSignals({
                                 dataTerminalReady: false,
                                 requestToSend: false
                             });
-                            uart_connect_btn.value = 'Close';
-                            uartLog('USB-COM opened.');
+                            uart_connect_btn.value = '关闭';
+                            uartLog('USB-COM 已打开。');
                             uart_connect_btn.opened = true;
                             uart_berase_btn.disabled = false;
                             uart_bunlock_btn.disabled = false;
@@ -3741,19 +3748,19 @@
 
 
                             if (serverFirmwareBuffer && !uartFirmwareArray) {
-                                setUartFirmware(serverFirmwareBuffer, "Server (Auto)");
+                                setUartFirmware(serverFirmwareBuffer, "服务器（自动）");
                             } else if (uartFirmwareArray) {
                                 uart_fwriter_btn.disabled = false;
                                 uart_bwrite_and_type_btn.disabled = false;
-                                uart_swrite_span.innerHTML = `Ready to write (${document.getElementById('uart_file').files.length > 0 ? "Local File" : (serverFirmwareBuffer && uartFirmwareArray === serverFirmwareBuffer ? "Server" : "File")})`;
+                                uart_swrite_span.innerHTML = `准备写入 (${document.getElementById('uart_file').files.length > 0 ? "本地文件" : (serverFirmwareBuffer && uartFirmwareArray === serverFirmwareBuffer ? "服务器" : "文件")})`;
                             } else {
-                                uart_swrite_span.innerHTML = 'Select firmware file';
+                                uart_swrite_span.innerHTML = '选择固件文件';
                             }
 
 
                             if (typeof init_cb == 'function') await init_cb(this.port);
                         } catch (err) {
-                            uartLog('Error opening serial port: ' + err);
+                            uartLog('打开串口时出错: ' + err);
                             uart_berase_btn.disabled = true;
                             uart_bunlock_btn.disabled = true;
                             uart_breset_btn.disabled = true;
@@ -3761,11 +3768,11 @@
                             uart_bwrite_and_type_btn.disabled = true;
                             uart_load_server_fw_btn.disabled = true;
                             uart_write_device_type_btn.disabled = true;
-                            uart_swrite_span.innerHTML = 'Open COM & Select file';
+                            uart_swrite_span.innerHTML = '打开 COM 并选择文件';
                         }
                         uart_connect_btn.disabled = false;
                     } else {
-                        const errorMsg = 'Web serial API not enabled. Enable via chrome://flags/#enable-experimental-web-platform-features (or similar for your browser).';
+                        const errorMsg = 'Web Serial API 未启用。请通过 chrome://flags/#enable-experimental-web-platform-features 启用，或使用浏览器中类似的设置。';
                         uartLog(errorMsg);
                         alert(errorMsg);
                         uart_connect_btn.disabled = false;
@@ -3777,20 +3784,20 @@
                         uart_bwrite_and_type_btn.disabled = true;
                         uart_load_server_fw_btn.disabled = true;
                         uart_write_device_type_btn.disabled = true;
-                        uart_swrite_span.innerHTML = 'Web Serial API Error';
+                        uart_swrite_span.innerHTML = 'Web Serial API 错误';
                     }
                 }
                 async write_raw(data) {
                     return await this.writer.write(data);
                 }
                 async reset(t_ms) {
-                    uartLog('DTR, RTS off.');
+                    uartLog('DTR, RTS 已关闭。');
                     await this.port.setSignals({
                         dataTerminalReady: true,
                         requestToSend: true
                     });
                     await uartDelay(t_ms);
-                    uartLog('DTR, RTS on.');
+                    uartLog('DTR, RTS 已恢复。');
                     return await this.port.setSignals({
                         dataTerminalReady: false,
                         requestToSend: false
@@ -3799,29 +3806,29 @@
                 async close() {
                     uart_fwriter_btn.disabled = true;
                     uart_bwrite_and_type_btn.disabled = true;
-                    uart_swrite_span.innerHTML = 'Open COM & Select file';
+                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
                     if (this.writer) {
                         try {
                             await this.writer.close();
                         } catch (e) {
-                            uartLog("Writer close error: " + e);
+                            uartLog("关闭写入器时出错: " + e);
                         }
                     }
                     if (this.port) {
                         try {
                             await this.port.close();
                         } catch (e) {
-                            uartLog("Port close error: " + e);
+                            uartLog("关闭端口时出错: " + e);
                         }
                     }
-                    uart_connect_btn.value = 'Open';
+                    uart_connect_btn.value = '打开';
                     uart_connect_btn.opened = false;
                     uart_bunlock_btn.disabled = true;
                     uart_berase_btn.disabled = true;
                     uart_breset_btn.disabled = true;
                     uart_load_server_fw_btn.disabled = true;
                     uart_write_device_type_btn.disabled = true;
-                    uartLog('USB-COM closed.');
+                    uartLog('USB-COM 已关闭。');
                     uart_connect_btn.disabled = false;
                 }
             }
