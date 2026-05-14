@@ -61,7 +61,8 @@ nav:
       - inkplate/index.md
       - 墨水屏模板设计器: inkplate/oepl_json_designer/index.html
       - MDI图标字库预览: inkplate/oepl_json_designer/MaterialDesignIcons_cheatsheet.html
-      - 墨水屏ATC固件: inkplate/ATC_BLE_OEPL/ATC_BLE_OEPL_Image_Upload.html
+      - ATC固件工具原版汉化: inkplate/ATC_BLE_OEPL/ATC_BLE_OEPL_Image_Upload.html
+      - ATC固件单体配置: inkplate/ATC_BLE_OEPL/ATC_BLE_OEPL_Flash_Config.html
       - 硬件MODS: inkplate/mods.md
 
 plugins:

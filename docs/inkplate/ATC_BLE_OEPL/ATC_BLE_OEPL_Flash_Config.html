@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>ATC_BLE_OEPL 固件管理工具</title>
+    <style>
+        :root { --bg: #1e1e1e; --surface: #2a2a2a; --border: #444; --text: #d4d4d4; --accent: #007acc; --btn-bg: #3c3c3c; --btn-hover: #505050; --log-bg: #0f1117; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+        h2, h3 { color: var(--accent); margin-top: 0; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem; }
+        button, select, input[type="file"], input[type="text"], textarea, input[type="button"] { 
+            background: var(--btn-bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; margin: 3px; cursor: pointer; font-family: inherit;
+        }
+        button:hover, input[type="button"]:hover { background: var(--btn-hover); }
+        button:disabled, input[type="button"]:disabled { opacity: 0.5; pointer-events: none; }
+        textarea, #log, #uart-log { font-family: 'Consolas', monospace; font-size: 0.8rem; background: var(--log-bg); color: #ccc; padding: 8px; border-radius: 4px; margin-top: 8px; width: 100%; box-sizing: border-box; }
+        #log, #uart-log { height: 200px; overflow-y: auto; white-space: pre-wrap; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 800px) { .grid-2col { grid-template-columns: 1fr; } }
+        .preset-grid { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+        .preset-chip { font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; background: var(--btn-bg); border: 1px solid var(--border); cursor: pointer; }
+        .preset-chip:hover, .preset-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .progress-bar { height: 6px; background: var(--accent); width: 0%; border-radius: 3px; margin: 8px 0; }
+        label { font-size: 0.85rem; color: #aaa; display: inline-block; margin: 4px 0 2px; }
+        .uart-control-group { margin-bottom: 10px; display: flex; flex-wrap: wrap; align-items: center; }
+        .uart-control-group label { min-width: 100px; }
+        .note { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h2>ATC_BLE_OEPL 固件管理工具</h2>
+    <p class="note">✅ 请通过 <strong>HTTPS</strong> 访问以保证串口/蓝牙功能可用。</p>
+
+    <!-- ==================== BLE 动态配置区 ==================== -->
+    <div class="card">
+        <h3>BLE 动态配置</h3>
+        <div class="preset-grid" id="presetContainer"></div>
+        <label>或粘贴自定义 Payload(92 位十六进制)：</label>
+        <div style="display:flex; gap:5px;">
+            <textarea id="customPayload" rows="2" style="flex:1;" placeholder="140063000200..."></textarea>
+            <button onclick="useCustomPayload()">使用自定义</button>
+        </div>
+        <div style="margin-top:8px;">
+            <button id="btnBleConnect" onclick="bleConnect()">🔗 连接 BLE 设备</button>
+            <button id="btnBleRead" onclick="bleReadConfig()" disabled>📖 读取配置</button>
+            <button id="btnBleWrite" onclick="bleWriteConfig()" disabled>💾 写入配置</button>
+            <button id="btnBleDisconnect" onclick="bleDisconnect()" disabled>⏏ 断开</button>
+            <span id="bleStatus" style="margin-left:10px; color:gray;">未连接</span>
+        </div>
+        <pre id="log">BLE 日志将显示在这里...</pre>
+    </div>
+
+    <!-- ==================== UART 固件烧录区 ==================== -->
+    <div class="card" style="background: #007acc; border-color: #0056b3;">
+        <h3 style="color: white;">UART 固件烧录</h3>
+        <div class="uart-control-group" style="color: white;">
+            <label style="color: white;">1. USB-COM:</label>
+            <input type="button" id="uart_butOpen" value="打开" style="background: white; color: #007acc; border: 1px solid #0056b3;">
+            <label for="uart_ubaud" style="min-width:auto; margin-left:10px; color: white;">波特率:</label>
+            <select id="uart_ubaud" title="最佳: 460800 波特">
+                <option value="460800">460800</option>
+                <option value="921600" selected>921600</option>
+                <option value="2000000">2000000</option>
+            </select>
+            <label for="uart_uatime" style="min-width:auto; margin-left:10px; color: white;">激活时间:</label>
+            <select id="uart_uatime" title="激活时间">
+                <option value="100">100 ms</option>
+                <option value="1000">1 sec</option>
+                <option value="2000" selected>2 sec</option>
+                <option value="3000">3 sec</option>
+            </select>
+        </div>
+        <hr style="border-color: #aae;" />
+
+        <div class="uart-control-group firmware-source-group">
+            <label for="uart_file" style="color: white;">2. 固件:</label>
+            <input type="file" accept=".bin" id="uart_file" style="flex-grow: 1;" />
+            <input type="button" id="uart_butLoadFromServer" value="加载 ATC_BLE_OEPL.bin"
+                   title="从服务器加载 ATC_BLE_OEPL.bin" style="background: white; color: #007acc;">
+        </div>
+
+        <div class="uart-control-group">
+            <label style="color: white;">3. 操作:</label>
+            <input type="button" title="将固件写入闪存" id="uart_butWrite" value="写入固件" disabled>
+            <span id="uart_swrite" style="color: white; margin-left: 10px;">请先打开 COM 端口并选择固件文件</span>
+        </div>
+        <hr style="border-color: #aae;" />
+        <div class="uart-control-group">
+            <label style="color: white; visibility:hidden;">&nbsp;</label>
+            <input type="button" title="解锁闪存" id="uart_butUnlock" value="解锁闪存" disabled>
+            <input type="button" title="擦除所有闪存" id="uart_butErase" value="擦除所有闪存" disabled>
+            <input type="button" id="uart_butReset" title="软重置 MCU" value="软重置 MCU" disabled>
+        </div>
+        <pre id="uart-log" style="background: white; color: #333; border: 1px solid #0056b3; margin-top: 10px;">UART 日志将显示在这里...</pre>
+    </div>
+
+    <script>
+        // ======================== BLE 预设配置库 ========================
+        const PRESETS = [
+            {
+                id: "01",
+                name: "Ali8250_4in2BWR_SSD(400x300, SSD)",
+                payload: "1400630002000001002C019001000000000200010000004D3784006737840000000000000000000801000002000803010000000403000080038001000000000000000000001001200140020000000000000000000000000000000000"
+            },
+            {
+                id: "02",
+                name: "Ali8250_4in2BWR_UC(400x300, UC)",
+                payload: "1400630002000001002C01900100000000020001000000010000000100000000000000000000000801000002000803010000000403000080038001000000000000000000001001200140020000000000000000000000000000000000"
+            },
+            {
+                id: "03",
+                name: "HS8359_2in13BWR_SSD(256x128, SSD, Stellar-M3N@ E31HA)",
+                payload: "1000550002000001000001800000000000020001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "04",
+                name: "HS8359_2in13BW_SSD(256x128, SSD, Stellar-M E31H)",
+                payload: "1900540002000001000001800000000000010001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "05",
+                name: "HS9118_2in13BWR_UC(250x122, UC, Nebular-213R-N M3LW FCC-213)",
+                payload: "130055000100000100FA00800000000000020001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "06",
+                name: "HS9118_2in13BWR_UC(250x122, UC, Nebular-213R-N D3LW FCC-213K)",
+                payload: "130055000100000000FA00800000000000020001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "07",
+                name: "HS9118_2in13BWRY_UC-Pro(250x128, UC-Pro, Nebular-213R-N M3LW FCC-213)",
+                payload: "260055000500000000FA00800000000000030001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "08",
+                name: "HS8359_2in13BWR_SSD(256x128, SSD, Nowa-213R-N)",
+                payload: "1000550002000001000001800000000000020001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "09",
+                name: "HS9118_4in2BWR_SSD(400x300, SSD, Nebular-420R-N M5LW M5LWG)",
+                payload: "1400630002000001002C01900100000000020001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "10",
+                name: "HS9118_4in2BWRY_UC-Pro(400x300, UC-Pro, Nebular-420R-N M3LW)",
+                payload: "1500630005000000002C01900100000000030001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "11",
+                name: "Endor_4in2BWR_SSD(400x300, SSD, BLOZI-Endor)",
+                payload: "1400630002000001002c019001000000000200010000004d3784006737840000000000000000002001000020021002400200001001000002010200100300000100000002000403080310030000000000000000000000000000000000"
+            },
+            {
+                id: "12",
+                name: "Endor_5in83BWR_UC(648x480, UC, BLOZI-Endor)",
+                payload: "2c0050000100000100e0018802000000000200010000004d3784006737840000000000763784002001000020021002400200001001000002010200100300000100000002000403080310030000000000000000002001800340018001"
+            }
+        ];
+        let currentBlePayload = PRESETS[0]?.payload ?? "";
+        let bleDevice, bleServer, bleChar;
+
+        function logBle(msg) { const el = document.getElementById('log'); el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`; el.scrollTop = el.scrollHeight; }
+        function setBleStatus(s) { document.getElementById('bleStatus').textContent = s; }
+
+        function buildPresetChips() {
+            const container = document.getElementById('presetContainer');
+            container.innerHTML = '';
+            PRESETS.forEach((p, idx) => {
+                const chip = document.createElement('span');
+                chip.className = 'preset-chip' + (idx === 0 ? ' active' : '');
+                chip.textContent = p.name;
+                chip.onclick = () => {
+                    document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    currentBlePayload = p.payload;
+                    document.getElementById('customPayload').value = p.payload;
+                    logBle('已切换预设：' + p.name);
+                };
+                container.appendChild(chip);
+            });
+            if (PRESETS.length > 0) document.getElementById('customPayload').value = PRESETS[0].payload;
+        }
+
+        function useCustomPayload() {
+            const raw = document.getElementById('customPayload').value.trim();
+            if (raw.length !== 184 || !/^[0-9A-Fa-f]+$/.test(raw)) { alert('payload 必须为 92 字节(184 个十六进制字符)'); return; }
+            currentBlePayload = raw.toUpperCase();
+            document.getElementById('customPayload').value = currentBlePayload;
+            logBle('已使用自定义 payload');
+        }
+
+        async function bleConnect() {
+            const UUID = 0x1337;
+            try {
+                logBle('正在搜索 ATC_ 设备...');
+                bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'ATC_' }], optionalServices: [UUID] });
+                logBle(`已选择: ${bleDevice.name}`);
+                bleServer = await bleDevice.gatt.connect();
+                const service = await bleServer.getPrimaryService(UUID);
+                bleChar = await service.getCharacteristic(UUID);
+                await bleChar.startNotifications();
+                bleChar.addEventListener('characteristicvaluechanged', e => {
+                    const val = new Uint8Array(e.target.value.buffer);
+                    const hex = Array.from(val).map(b => b.toString(16).padStart(2,'0')).join('');
+                    logBle('设备响应: ' + hex);
+                    if (val.length>=2 && val[0]===0x00&&val[1]===0xCD) logBle('   ↳ 读取响应 (0x00CD)');
+                    if (val.length>=2 && val[0]===0x00&&val[1]===0xCE) logBle('   ↳ 配置保存成功 (0x00CE)');
+                });
+                logBle('连接成功');
+                setBleStatus('已连接: ' + bleDevice.name);
+                document.getElementById('btnBleRead').disabled = false;
+                document.getElementById('btnBleWrite').disabled = false;
+                document.getElementById('btnBleDisconnect').disabled = false;
+                document.getElementById('btnBleConnect').disabled = true;
+            } catch(e) { logBle('连接失败: '+e); }
+        }
+
+        async function bleReadConfig() { if (!bleChar) return; logBle('发送读取命令 (0011)'); await bleChar.writeValueWithoutResponse(new Uint8Array([0x00,0x11])); }
+        async function bleWriteConfig() {
+            if (!bleChar || currentBlePayload.length !== 184) { alert('payload 无效'); return; }
+            const bytes = new Uint8Array(currentBlePayload.match(/../g).map(b=>parseInt(b,16)));
+            await bleChar.writeValueWithoutResponse(new Uint8Array([0x00,0x10,...bytes]));
+            logBle('发送写入命令 (0010 + 92字节)');
+        }
+        function bleDisconnect() {
+            if (bleServer) bleServer.disconnect();
+            bleDevice = bleServer = bleChar = null;
+            logBle('已断开'); setBleStatus('未连接');
+            ['btnBleRead','btnBleWrite','btnBleDisconnect'].forEach(id=>document.getElementById(id).disabled=true);
+            document.getElementById('btnBleConnect').disabled = false;
+        }
+    </script>
+
+    <!-- ==================== UART 功能脚本(基于原版 ATC 工具精简) ==================== -->
+    <script>
+        (function () {
+            "use strict";
+            var uartFirmwareArray = null;
+            function uart$(id) { return document.getElementById(id); }
+            const uart_connect_btn = uart$('uart_butOpen');
+            const uart_fwriter_btn = uart$('uart_butWrite');
+            const uart_swrite_span = uart$('uart_swrite');
+            const uart_bunlock_btn = uart$('uart_butUnlock');
+            const uart_berase_btn = uart$('uart_butErase');
+            const uart_breset_btn = uart$('uart_butReset');
+            const uart_ubaud_select = uart$('uart_ubaud');
+            const uart_uatime_select = uart$('uart_uatime');
+            const uart_ufile_input = uart$('uart_file');
+            const uart_load_server_fw_btn = uart$('uart_butLoadFromServer');
+
+            function uartLog(data) {
+                const logArea = uart$("uart-log");
+                if (logArea) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    logArea.innerHTML = `${timestamp}: ${data}<br>` + logArea.innerHTML;
+                    const maxLogLines = 150;
+                    const lines = logArea.innerHTML.split('<br>');
+                    if (lines.length > maxLogLines + 1) {
+                        logArea.innerHTML = lines.slice(0, maxLogLines).join('<br>') + '<br>';
+                    }
+                }
+            }
+
+            function uartDelay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+            function uartHex(number, length) { return number.toString(16).toUpperCase().padStart(length, '0'); }
+
+            function setUartFirmware(buffer, sourceName) {
+                uartFirmwareArray = buffer;
+                if (!buffer) {
+                    uartLog(`来自 ${sourceName} 的无固件数据。`);
+                    uart_fwriter_btn.disabled = true;
+                    uart_swrite_span.innerHTML = '打开 COM 端口并选择文件';
+                    return false;
+                }
+                uartLog(`已选择来自 ${sourceName} 的固件，大小：${buffer.byteLength} 字节`);
+                if (buffer.byteLength < 16 || (new Uint32Array(buffer.slice(8,12)))[0] !== 0x544C4E4B) {
+                    uartLog(`所选数据不是 Telink 固件 .bin 文件`);
+                    alert(`所选数据不是 Telink 固件 .bin 文件`);
+                    uartFirmwareArray = null;
+                    uart_fwriter_btn.disabled = true;
+                    uart_swrite_span.innerHTML = '打开 COM 端口并选择文件';
+                    return false;
+                }
+                if (uart_connect_btn.opened) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_swrite_span.innerHTML = `准备写入 (${sourceName})`;
+                } else {
+                    uart_swrite_span.innerHTML = `请先打开 COM 端口 (${sourceName} 已加载)`;
+                }
+                return true;
+            }
+
+            // SWS 协议模拟
+            function uart_sws_wr_addr(addr, data) {
+                let d = new Uint8Array(10);
+                let h = new Uint8Array([0x5a, (addr>>16)&0xff, (addr>>8)&0xff, addr&0xff, 0x00]);
+                let pkt = new Uint8Array((data.byteLength+6)*10);
+                d[0]=0x80; d[9]=0xfe;
+                h.forEach((el,n)=>{
+                    let m=0x80, idx=1;
+                    do { d[idx] = (el&m)?0x80:0xfe; idx++; m>>=1; } while(m);
+                    pkt.set(d, n*10); d[0]=0xfe;
+                });
+                data.forEach((el,n)=>{
+                    let m=0x80, idx=1;
+                    do { d[idx] = (el&m)?0x80:0xfe; idx++; m>>=1; } while(m);
+                    pkt.set(d, (n+5)*10);
+                });
+                d.fill(0x80,0,9); pkt.set(d,(data.byteLength+5)*10);
+                return pkt;
+            }
+
+            async function uartFlashByteCmd(cmd) {
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([cmd&0xff,0x01])));
+            }
+            async function uartFlashWriteEnable() { return uartFlashByteCmd(0x06); }
+            async function uartFlashWakeUp() { return uartFlashByteCmd(0xab); }
+
+            async function uartFlashUnlock() {
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d,new Uint8Array([0x00])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([0x01])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([0x00,0x01])));
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d,new Uint8Array([0x00])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([0x01])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([0x00])));
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([0x00,0x01])));
+            }
+
+            async function uartFlashEraseAll() { return uartFlashByteCmd(0x60); }
+
+            async function uartSectorErase(addr) {
+                uartLog(`正在擦除扇区 0x${uartHex(addr,6)}...`);
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d,new Uint8Array([0x00])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([0x20])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([(addr>>16)&0xff])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([(addr>>8)&0xff])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,new Uint8Array([addr&0xff,0x01])));
+                return await uartDelay(300);
+            }
+
+            async function uartWriteFlashBlk(addr, data) {
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d,new Uint8Array([0x00])));
+                let blk = new Uint8Array(4+data.byteLength);
+                blk[0]=0x02; blk[1]=(addr>>16)&0xff; blk[2]=(addr>>8)&0xff; blk[3]=addr&0xff;
+                blk.set(data,4);
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c,blk));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d,new Uint8Array([0x01])));
+                return await uartDelay(10);
+            }
+
+            async function uartSoftResetMSU() {
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x06f,new Uint8Array([0x20])));
+            }
+
+            async function uartActivate(tim) {
+                let blk = uart_sws_wr_addr(0x0602, new Uint8Array([0x05]));
+                uartLog('重置 DTR/RTS (100 ms)');
+                await uartSerialController.reset(100);
+                uartLog('软重置 MCU');
+                await uartSoftResetMSU();
+                uartLog('激活 (' + (tim/1000.0) + ' 秒)...');
+                let t = Date.now();
+                while (Date.now() - t < tim) { await uartSerialController.write_raw(blk); }
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x00b2, new Uint8Array([55])));
+                await uartSerialController.write_raw(blk);
+                return await uartFlashWakeUp();
+            }
+
+            async function uartFlashWrite() {
+                if (!uartFirmwareArray || !uart_connect_btn.opened) {
+                    uartLog("FlashWrite: 无固件或端口未打开。");
+                    return false;
+                }
+                uartLog("开始固件烧录流程...");
+                try {
+                    await uartActivate(uart_uatime_select.value);
+                    await uartFlashWriteEnable();
+                    await uartFlashUnlock();
+                    await uartDelay(1500);
+                    let len = uartFirmwareArray.byteLength;
+                    let addr = 0;
+                    while (len > 0) {
+                        if ((addr & 0x0fff) == 0) {
+                            uart_swrite_span.innerHTML = `正在擦除扇区 0x${uartHex(addr,6)}`;
+                            await uartSectorErase(addr);
+                        }
+                        let sblk = Math.min(256, len);
+                        await uartWriteFlashBlk(addr, new Uint8Array(uartFirmwareArray.slice(addr, addr+sblk)));
+                        addr += sblk;
+                        len -= sblk;
+                        uart_swrite_span.innerHTML = `${Math.floor(addr/(uartFirmwareArray.byteLength)*100)}% 已写入`;
+                    }
+                    uartLog('固件烧录完成。');
+                    uart_swrite_span.innerHTML = '固件写入成功';
+                    return true;
+                } catch (e) {
+                    uartLog('错误: ' + e);
+                    uart_swrite_span.innerHTML = '固件刷写错误！';
+                    return false;
+                }
+            }
+
+            class UARTSerialController {
+                async init() {
+                    if ('serial' in navigator) {
+                        try {
+                            uart_connect_btn.disabled = true;
+                            this.port = await navigator.serial.requestPort();
+                            await this.port.open({
+                                baudRate: parseInt(uart_ubaud_select.value),
+                                bufferSize: 240,
+                            });
+                            this.writer = this.port.writable.getWriter();
+                            uartLog('DTR, RTS 开启。');
+                            await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
+                            uart_connect_btn.value = '关闭';
+                            uart_connect_btn.opened = true;
+                            uart_berase_btn.disabled = false;
+                            uart_bunlock_btn.disabled = false;
+                            uart_breset_btn.disabled = false;
+                            if (uartFirmwareArray) { uart_fwriter_btn.disabled = false; }
+                            uartLog('USB-COM 已打开。');
+                        } catch (err) {
+                            uartLog('打开串口错误: ' + err);
+                            uart_connect_btn.opened = false;
+                        }
+                        uart_connect_btn.disabled = false;
+                    } else {
+                        alert('Web Serial API 不支持。请使用 Chrome/Edge 并确保 HTTPS 访问。');
+                    }
+                }
+                async write_raw(data) { return await this.writer.write(data); }
+                async reset(t_ms) {
+                    await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
+                    await uartDelay(t_ms);
+                    await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
+                }
+                async close() {
+                    uart_fwriter_btn.disabled = true;
+                    uart_swrite_span.innerHTML = '打开 COM 端口并选择文件';
+                    if (this.writer) { try { await this.writer.close(); } catch(e) {} }
+                    if (this.port) { try { await this.port.close(); } catch(e) {} }
+                    uart_connect_btn.value = '打开';
+                    uart_connect_btn.opened = false;
+                    uart_bunlock_btn.disabled = true;
+                    uart_berase_btn.disabled = true;
+                    uart_breset_btn.disabled = true;
+                    uartLog('USB-COM 已关闭。');
+                }
+            }
+            var uartSerialController = new UARTSerialController();
+
+            // 按钮事件
+            uart_connect_btn.addEventListener('pointerdown', () => {
+                if (uart_connect_btn.value == '关闭') {
+                    uartSerialController.close();
+                } else {
+                    uartSerialController.init();
+                }
+            });
+
+            uart_load_server_fw_btn.onclick = async function() {
+                uart_load_server_fw_btn.disabled = true;
+                try {
+                    const resp = await fetch("https://atc1441.github.io/ATC_BLE_OEPL.bin");
+                    if (resp.ok) {
+                        const buf = await resp.arrayBuffer();
+                        setUartFirmware(buf, "服务器");
+                    } else {
+                        uartLog("从服务器加载固件失败。");
+                    }
+                } catch(e) { uartLog("错误: " + e); }
+                uart_load_server_fw_btn.disabled = false;
+            };
+
+            uart_fwriter_btn.onclick = async function() {
+                uart_fwriter_btn.disabled = true;
+                uart_bunlock_btn.disabled = true;
+                uart_berase_btn.disabled = true;
+                uart_breset_btn.disabled = true;
+                uart_connect_btn.disabled = true;
+                const ok = await uartFlashWrite();
+                if (ok) {
+                    uartLog('正在重置 MCU...');
+                    await uartSoftResetMSU();
+                    uart_swrite_span.innerHTML = '固件成功！完成。';
+                }
+                uart_connect_btn.disabled = false;
+                uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false;
+                uart_breset_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray) {
+                    uart_fwriter_btn.disabled = false;
+                }
+            };
+
+            uart_bunlock_btn.onclick = async function() {
+                uart_bunlock_btn.disabled = true; uart_connect_btn.disabled = true; uart_fwriter_btn.disabled = true;
+                await uartActivate(uart_uatime_select.value);
+                await uartFlashWriteEnable();
+                await uartFlashUnlock();
+                await uartDelay(100);
+                uartLog('解锁完成。');
+                uart_connect_btn.disabled = false; uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false; uart_breset_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray) uart_fwriter_btn.disabled = false;
+            };
+
+            uart_berase_btn.onclick = async function() {
+                uart_berase_btn.disabled = true; uart_connect_btn.disabled = true; uart_fwriter_btn.disabled = true;
+                await uartActivate(uart_uatime_select.value);
+                uartLog('正在擦除所有闪存...');
+                await uartFlashWriteEnable();
+                await uartFlashEraseAll();
+                await uartDelay(3500);
+                uartLog('擦除完成。');
+                uart_connect_btn.disabled = false; uart_berase_btn.disabled = false;
+                uart_bunlock_btn.disabled = false; uart_breset_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray) uart_fwriter_btn.disabled = false;
+            };
+
+            uart_breset_btn.onclick = async function() {
+                uart_breset_btn.disabled = true; uart_connect_btn.disabled = true; uart_fwriter_btn.disabled = true;
+                await uartActivate(uart_uatime_select.value);
+                uartLog('软重置 MCU');
+                await uartSoftResetMSU();
+                uart_connect_btn.disabled = false; uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false; uart_breset_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray) uart_fwriter_btn.disabled = false;
+            };
+
+            uart_ufile_input.onclick = function() { uart_ufile_input.value = ""; };
+            uart_ufile_input.addEventListener("change", function() {
+                var reader = new FileReader();
+                reader.onload = function() {
+                    setUartFirmware(this.result, "本地文件");
+                }
+                if (this.files[0]) reader.readAsArrayBuffer(this.files[0]);
+                else { uartLog("未选择文件。"); setUartFirmware(null, "本地文件"); }
+            });
+
+            // 初始化
+            window.addEventListener('DOMContentLoaded', function() {
+                buildPresetChips();   // 修复预设不显示
+                logBle('就绪');
+                uartLog('UART 模块就绪。');
+            });
+        })();
+    </script>
+</body>
+</html>
