@@ -59,10 +59,9 @@ nav:
       - 机械速查表: cnc/holes_thread_shaft.md
     - 墨水屏:
       - inkplate/index.md
-      - 墨水屏模板设计器: inkplate/oepl_json_designer/index.html
+      - ATC_BLE_OEPL固件维护: inkplate/ATC_BLE_OEPL/ATC_BLE_OEPL.html
+      - ATC模板设计器: inkplate/oepl_json_designer/index.html
       - MDI图标字库预览: inkplate/oepl_json_designer/MaterialDesignIcons_cheatsheet.html
-      - ATC固件工具原版汉化: inkplate/ATC_BLE_OEPL/ATC_BLE_OEPL_Image_Upload.html
-      - ATC固件单体配置: inkplate/ATC_BLE_OEPL/ATC_BLE_OEPL_Flash_Config.html
       - 硬件MODS: inkplate/mods.md
 
 plugins:
@@ -139,4 +138,4 @@ markdown_extensions:
       custom_checkbox: true
 
 copyright: |
-  &copy; 2023-2025 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>
+  &copy; 2023-2026 <a href="https://github.com/Samuel-0-0"  target="_blank" rel="noopener">Samuel Wang (三木)</a>

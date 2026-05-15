@@ -5,60 +5,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ATC_BLE_OEPL 固件维护工作站</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ---------------- CSS 变量定义 (暗/亮色主题) ---------------- */
         :root {
             /* 亮色模式 (默认) */
-            --bg-body: #f0f2f5;
+            --bg-body: #eef2f6;
             --bg-surface: #ffffff;
-            --bg-sidebar: #ffffff;
-            --bg-log: #1e1e1e;
-            --text-main: #202124;
-            --text-muted: #5f6368;
-            --text-log: #4af626;
-            --border-color: #dadce0;
-            --primary: #1a73e8;
-            --primary-hover: #1557b0;
-            --success: #0f9d58;
-            --success-hover: #0b8043;
-            --danger: #d93025;
-            --danger-hover: #b31412;
+            --bg-sidebar: #f8f9fa;
+            --bg-log: #212529;
+            --text-main: #333333;
+            --text-muted: #6c757d;
+            --text-log: #f8f9fa;
+            --border-color: #dee2e6;
+            --primary: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --success: #198754;
+            --success-hover: #157347;
+            --danger: #dc3545;
+            --danger-hover: #c82333;
             --input-bg: #ffffff;
-            --input-border: #cccccc;
-            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --input-border: #ced4da;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             --radius-lg: 12px;
             --radius-md: 8px;
-            --radius-sm: 6px;
+            --radius-sm: 4px;
         }
 
         [data-theme="dark"] {
             /* 暗色模式 */
             --bg-body: #121212;
             --bg-surface: #1e1e1e;
-            --bg-sidebar: #252526;
+            --bg-sidebar: #181818;
             --bg-log: #0d0d0d;
-            --text-main: #e8eaed;
-            --text-muted: #9aa0a6;
-            --text-log: #4af626;
-            --border-color: #3c4043;
-            --primary: #8ab4f8;
-            --primary-hover: #aecbfa;
-            --success: #81c995;
-            --success-hover: #5bb974;
-            --danger: #f28b82;
-            --danger-hover: #ee675c;
-            --input-bg: #2d2e30;
-            --input-border: #5f6368;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --text-log: #d4d4d4;
+            --border-color: #333333;
+            --primary: #3d8bfd;
+            --primary-hover: #2b77e5;
+            --success: #20c997;
+            --success-hover: #1aa179;
+            --danger: #e35d6a;
+            --danger-hover: #c94b57;
+            --input-bg: #2b2b2b;
+            --input-border: #444444;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-
-        /* ---------------- 滚动条美化 ---------------- */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.4); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.6); }
 
         /* ---------------- 基础样式 ---------------- */
         * { box-sizing: border-box; }
@@ -89,6 +83,7 @@
             border: 1px solid var(--border-color);
         }
 
+        /* 侧边栏 */
         .sidebar {
             width: 260px;
             background-color: var(--bg-sidebar);
@@ -105,12 +100,10 @@
         }
 
         .sidebar-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.2rem;
             color: var(--primary);
             margin: 0;
             line-height: 1.4;
-            text-align: center;
         }
 
         .sidebar-nav {
@@ -122,22 +115,19 @@
         .nav-btn {
             width: 100%;
             text-align: left;
-            padding: 22px 16px;
+            padding: 12px 16px;
             margin-bottom: 6px;
             background: transparent;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-md);
             color: var(--text-main);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
         }
 
-        .nav-btn:hover { background-color: rgba(26, 115, 232, 0.08); color: var(--primary); }
+        .nav-btn:hover { background-color: rgba(13, 110, 253, 0.1); color: var(--primary); }
         .nav-btn.active { background-color: var(--primary); color: white; }
 
         .sidebar-footer {
@@ -150,16 +140,18 @@
             align-items: center;
         }
 
+        /* 主内容区 */
         .main-container {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background-color: var(--bg-body); /* 区分主区和面板 */
+            background-color: var(--bg-surface);
         }
 
+        /* 顶部状态栏 */
         .top-header {
-            height: 60px;
+            height: 64px;
             padding: 0 24px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
@@ -167,36 +159,31 @@
             align-items: center;
             background-color: var(--bg-surface);
             flex-shrink: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
         .status-badge {
-            background-color: rgba(26, 115, 232, 0.1);
+            background-color: rgba(13, 110, 253, 0.1);
             color: var(--primary);
-            padding: 0 16px;
-            height: 30px;
-            display: inline-flex;
-            align-items: center;
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            border: 1px solid rgba(26, 115, 232, 0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 1px solid rgba(13, 110, 253, 0.2);
+            transition: all 0.3s;
         }
 
         .theme-toggle {
             background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 0 12px;
-            height: 30px;
-            border-radius: var(--radius-sm);
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
         }
-        .theme-toggle:hover { background-color: var(--bg-body); }
+        .theme-toggle:hover { background-color: var(--bg-sidebar); }
 
+        /* 视图内容区 */
         .content-scroll-area {
             flex-grow: 1;
             padding: 24px;
@@ -208,194 +195,83 @@
         .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .view-section.active { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ---------------- 排版与控件规范统一 ---------------- */
-        h2 { margin-top: 0; color: var(--text-main); font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; }
-        h3 { margin-top: 0; color: var(--text-main); font-size: 1.05rem; font-weight: 600; padding-bottom: 10px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        /* ---------------- UI 控件样式 ---------------- */
+        h2 { margin-top: 0; color: var(--primary); font-size: 1.5rem; border-bottom: 2px solid rgba(13, 110, 253, 0.1); padding-bottom: 10px; margin-bottom: 20px; }
+        h3 { margin-top: 20px; color: var(--text-main); }
         
         .card {
-            background-color: var(--bg-surface);
+            background-color: var(--bg-sidebar);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
 
-        .control-group { margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        .control-group { margin-bottom: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
         
-        label { font-weight: 500; color: var(--text-muted); font-size: 0.85rem; white-space: nowrap; }
+        label { font-weight: 500; color: var(--text-muted); font-size: 0.9rem; min-width: 90px; }
         
-        /* 统一输入框与下拉菜单 */
-        input[type="text"], input[type="number"], select, input[type="file"] {
+        input[type="text"], input[type="number"], select, textarea, input[type="file"] {
             background-color: var(--input-bg);
             color: var(--text-main);
             border: 1px solid var(--input-border);
             border-radius: var(--radius-sm);
-            padding: 0 10px;
+            padding: 8px 12px;
             font-family: inherit;
-            font-size: 0.85rem;
-            height: 32px; /* 统一高度 */
-            transition: all 0.2s;
-            outline: none;
-        }
-        textarea {
-            background-color: var(--input-bg);
-            color: var(--text-main);
-            border: 1px solid var(--input-border);
-            border-radius: var(--radius-sm);
-            padding: 8px 10px;
-            font-family: 'Consolas', monospace;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            outline: none;
-            width: 100%;
-            resize: vertical;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1); }
-        
-        /* 定制美化 Checkbox */
-        input[type="checkbox"] {
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border: 1.5px solid var(--input-border);
-            border-radius: 4px;
-            background-color: var(--input-bg);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        input[type="checkbox"]:checked { background-color: var(--primary); border-color: var(--primary); }
-        input[type="checkbox"]:checked::after { content: ''; width: 4px; height: 8px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px;}
-        .checkbox-label { cursor: pointer; color: var(--text-main); display: inline-flex; align-items: center; margin-right: 8px; }
-
-        /* 定制美化文件上传按钮 */
-        input[type="file"] { padding: 3px; cursor: pointer; }
-        input[type="file"]::file-selector-button {
-            height: 100%;
-            border: none;
-            background: var(--bg-body);
-            color: var(--text-main);
-            padding: 0 12px;
-            margin-right: 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        input[type="file"]::file-selector-button:hover { background: var(--border-color); }
-
-        /* 统一按钮 */
-        button, input[type="button"] {
-            background-color: var(--bg-surface);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            padding: 0 16px;
-            height: 32px; /* 统一高度 */
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        button:hover, input[type="button"]:hover { background-color: var(--bg-body); border-color: var(--text-muted); }
-        button:active, input[type="button"]:active { transform: scale(0.98); }
-        button:disabled, input[type="button"]:disabled { background-color: var(--bg-body); color: var(--text-muted); cursor: not-allowed; opacity: 0.6; border-color: var(--border-color); }
-        
-        /* 强动作按钮 */
-        #mainUploadButton, #connectbutton, .btn-primary { background-color: var(--primary); color: #fff; border-color: var(--primary); }
-        #mainUploadButton:hover, #connectbutton:hover, .btn-primary:hover { background-color: var(--primary-hover); }
-        
-        .btn-success { background-color: var(--success); color: white; border-color: var(--success); }
-        .btn-success:hover { background-color: var(--success-hover); color: white; }
-        .btn-danger { background-color: var(--danger); color: white; border-color: var(--danger); }
-        .btn-danger:hover { background-color: var(--danger-hover); color: white; }
-
-        /* ---------------- 特定模块排版 ---------------- */
-        
-        #myCanvas { border: 1px solid var(--border-color); background-color: #fff; display: block; margin: 15px auto; max-width: 100%; height: auto; border-radius: var(--radius-sm); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        
-        .preset-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .preset-chip { 
-            font-size: 0.85rem; padding: 0 14px; height: 28px; display: inline-flex; align-items: center; border-radius: 6px; 
-            background: var(--bg-body); border: 1px solid var(--border-color); 
-            cursor: pointer; transition: all 0.2s; color: var(--text-main); font-weight: 500;
-        }
-        .preset-chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(26, 115, 232, 0.05); }
-        .preset-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        .checkbox-group-container { display: flex; flex-wrap: wrap; gap: 16px; background: var(--bg-body); padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
-
-        /* --- 自定义硬件配置页网格排版 (核心优化区) --- */
-        fieldset { border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; background-color: var(--bg-surface); }
-        legend { font-weight: 600; color: var(--primary); background: rgba(26, 115, 232, 0.08); padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; border: 1px solid rgba(26, 115, 232, 0.15); }
-
-        .config-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
-        
-        .pinout-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
-            margin-top: 12px;
-            align-items: center;
-        }
-        .pinout-item {
-            display: flex;
-            align-items: center;
-            background: var(--bg-body);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            padding: 4px 8px;
+            font-size: 0.9rem;
             transition: border-color 0.2s;
         }
-        .pinout-item:hover { border-color: var(--primary); }
-        .pinout-item label {
-            flex: 0 0 80px;
-            text-align: right;
-            padding-right: 10px;
-            margin: 0;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        .pinout-item select, .pinout-item input {
-            flex: 1;
-            width: 100%;
-            min-width: 0;
-            height: 28px; /* 网格内稍微紧凑点 */
-            padding: 0 8px;
-            border-color: transparent; /* 去除内部边框显的更干净 */
-            background: var(--bg-surface);
-        }
-        .pinout-item select:focus, .pinout-item input:focus { border-color: var(--primary); }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
         
-        .pinout-full-width { grid-column: 1 / -1; }
-        
-        .pinout-divider {
-            grid-column: 1 / -1;
-            border-top: 1px dashed var(--border-color);
-            margin-top: 8px;
-            padding-top: 16px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 12px;
-        }
+        input[type="checkbox"] { margin-right: 6px; width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-label { min-width: auto; cursor: pointer; color: var(--text-main); display: inline-flex; align-items: center;}
 
-        .lut-group label { display: block; margin: 12px 0 6px 0; font-weight: 600; color: var(--primary); font-size: 0.85rem; }
+        button, input[type="button"] {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        button:hover, input[type="button"]:hover { background-color: var(--primary-hover); }
+        button:active, input[type="button"]:active { transform: scale(0.98); }
+        button:disabled, input[type="button"]:disabled { background-color: var(--text-muted); cursor: not-allowed; opacity: 0.7; }
+        
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: var(--success-hover); }
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+
+        textarea { width: 100%; box-sizing: border-box; resize: vertical; font-family: monospace; }
+        
+        /* ---------------- 特定模块样式 ---------------- */
+        
+        /* Canvas */
+        #myCanvas { border: 1px solid var(--border-color); background-color: #fff; display: block; margin: 15px auto; max-width: 100%; height: auto; border-radius: var(--radius-sm); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        /* BLE 预设面板 */
+        .preset-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .preset-chip { 
+            font-size: 0.8rem; padding: 6px 12px; border-radius: 20px; 
+            background: var(--bg-sidebar); border: 1px solid var(--input-border); 
+            cursor: pointer; transition: all 0.2s; color: var(--text-main);
+        }
+        .preset-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .preset-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Fieldset & Legend */
+        fieldset { border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 15px; margin-bottom: 20px; }
+        legend { font-weight: bold; color: var(--primary); padding: 0 8px; }
 
         /* ---------------- 日志区域样式 ---------------- */
         .logs-panel {
-            height: 240px;
+            height: 220px;
             background-color: var(--bg-log);
             border-top: 1px solid var(--border-color);
             display: flex;
@@ -408,34 +284,29 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 16px;
-            background-color: rgba(0,0,0,0.3);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background-color: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .log-header span { color: #8ab4f8; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; }
-        .log-header button { height: 26px; padding: 0 12px; font-size: 0.75rem; background-color: #333; color: #ddd; border: 1px solid #444; }
-        .log-header button:hover { background-color: #444; color: #fff; }
+        .log-header span { color: #aaa; font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+        .log-header button { padding: 4px 10px; font-size: 0.8rem; background-color: #444; }
+        .log-header button:hover { background-color: #555; }
 
         #log, #uart-log {
             flex-grow: 1;
-            padding: 12px 16px;
+            padding: 10px 16px;
             overflow-y: auto;
             color: var(--text-log);
-            font-family: 'JetBrains Mono', 'Consolas', monospace; /* 优化为更专业的代码字体 */
-            font-size: 0.75rem; /* 字体调小 */
-            line-height: 1.5;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
             margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
         }
         .log-container { display: none; height: 100%; flex-direction: column; }
         .log-container.active { display: flex; }
 
         /* ---------------- 调试图表 ---------------- */
-        #debug-chart-container { width: 100%; min-height: 400px; margin-top: 10px; }
-        .status-box { flex: 1; min-width: 120px; text-align: center; padding: 15px; background: var(--bg-body); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
-        .status-box label { display: block; margin-bottom: 8px; font-size: 0.8rem; }
-        .status-box div { font-size: 1.5rem; font-weight: 700; }
-
+        #debug-chart-container { width: 100%; min-height: 400px; margin-top: 20px; }
+        
         /* 响应式调整 */
         @media (max-width: 900px) {
             .app-wrapper { flex-direction: column; height: 100vh; margin: 0; border-radius: 0; border: none;}
@@ -450,20 +321,20 @@
     <div class="app-wrapper">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>ATC_BLE_OEPL<br>固件维护工作站</h1>
+                <h1>ATC_BLE_OEPL<br>维护工作站</h1>
             </div>
             <nav class="sidebar-nav">
-                <button class="nav-btn" data-target="view-uart" onclick="showView('uart')">⚡ UART 刷写器</button>
+                <button class="nav-btn active" data-target="view-canvas" onclick="showView('canvas')">🖼️ 图像测试</button>
                 <button class="nav-btn" data-target="view-ble" onclick="showView('ble')">🔗 BLE 连接控制</button>
                 <button class="nav-btn" data-target="view-preset" onclick="showView('preset')">✨ 预设配置</button>
                 <button class="nav-btn" data-target="view-config" onclick="showView('config')">⚙️ 自定义硬件配置</button>
-                <button class="nav-btn" data-target="view-canvas" onclick="showView('canvas')">🖼️ 图像测试</button>
-                <button class="nav-btn" data-target="view-debug" onclick="showView('debug')">📊 状态监控</button>
                 <button class="nav-btn" data-target="view-lut" onclick="showView('lut')">🧪 LUT 试验场</button>
+                <button class="nav-btn" data-target="view-debug" onclick="showView('debug')">📊 状态监控</button>
+                <button class="nav-btn" data-target="view-uart" onclick="showView('uart')">⚡ UART 刷写器</button>
             </nav>
             <div class="sidebar-footer">
                 <span>原版作者: ATC1441</span>
-                <a href="https://atc1441.github.io/ATC_BLE_OEPL_Image_Upload.html" target="_blank" style="color:var(--primary);text-decoration:none; font-weight: 500;">原版</a>
+                <a href="https://atc1441.github.io/ATC_BLE_OEPL_Image_Upload.html" target="_blank" style="color:var(--primary);text-decoration:none;">原版</a>
             </div>
         </aside>
 
@@ -479,39 +350,38 @@
                 
                 <div id="view-canvas" class="view-section active">
                     <h2>图像测试</h2>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">使用此功能前，请确保在 <strong>[BLE 连接控制]</strong> 面板中已连接设备。</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">使用此功能前，请确保在 <strong>[BLE 连接控制]</strong> 面板中已连接设备。</p>
                     <div class="card">
                         <div class="control-group">
                             <label for="widthInput">画布尺寸:</label>
-                            <input type="number" id="widthInput" placeholder="宽" value="184" style="width: 100px;" /> 
-                            <span style="color: var(--text-muted);">x</span>
-                            <input type="number" id="heightInput" placeholder="高" value="384" style="width: 100px;" />
+                            <input type="number" id="widthInput" placeholder="宽" value="184" style="width: 80px;" /> x 
+                            <input type="number" id="heightInput" placeholder="高" value="384" style="width: 80px;" />
                             <button onclick="createCanvas()">重置画布</button>
                         </div>
                         <div class="control-group">
                             <label for="textInput">文本渲染:</label>
-                            <input type="text" id="textInput" placeholder="输入文本" value="示例" style="flex-grow: 1; max-width: 400px;" />
+                            <input type="text" id="textInput" placeholder="输入文本" value="示例" style="flex-grow: 1; max-width: 300px;" />
                             <button onclick="addText()">添加文本</button>
                         </div>
                         <div class="control-group">
                             <label for="imageUpload">上传图像:</label>
                             <input type="file" id="imageUpload" accept="image/*" onclick="resetImageSelector()" onchange="uploadImage()" />
                         </div>
-                        <div class="checkbox-group-container">
+                        <div class="control-group" style="background: var(--bg-body); padding: 10px; border-radius: var(--radius-sm);">
                             <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" checked="true" id="ditherrin" /> 启用抖动</label>
                             <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" id="secondColorCheckbox" /> 第二颜色(红)</label>
                             <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" id="thirdColorCheckbox" /> 第三颜色(黄)</label>
                             <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" id="flipVerticalCheckbox" /> 垂直翻转</label>
                             <button onclick="getPixelData()" style="margin-left: auto;">重新提取像素数据</button>
                         </div>
-                        <div class="control-group" style="margin-top: 16px;">
+                        <div class="control-group">
                             <button id="mainUploadButton" type="button" onclick="sendimg(document.getElementById('pixelData').value);">上传原始图像</button>
                             <button id="uploadCompressedImageButton" class="btn-success" type="button" onclick="sendimgCompressed(document.getElementById('pixelData').value);">上传压缩图像</button>
                             <button type="button" onclick="sendcmd('0005');" title="读取基本信息，若可能更新画布">读取屏幕信息同步至画布</button>
                         </div>
                     </div>
                     <canvas id="myCanvas" width="184" height="384"></canvas>
-                    <textarea id="pixelData" rows="3" placeholder="提取的十六进制像素数据将显示在这里..." style="margin-top: 15px;"></textarea>
+                    <textarea id="pixelData" rows="3" placeholder="提取的十六进制像素数据将显示在这里..."></textarea>
                 </div>
 
                 <div id="view-ble" class="view-section">
@@ -520,8 +390,8 @@
                         <h3>连接设备</h3>
                         <div class="control-group">
                             <label for="namePrefix">设备前缀:</label>
-                            <input type="text" id="namePrefix" value="ATC_" placeholder="ATC_（逗号分隔）" style="width: 200px;" />
-                            <label class="checkbox-label" style="margin-left: 10px;"><input type="checkbox" id="rememberDeviceCheckbox" onchange="saveRememberDeviceSetting()" /> 记住最后连接的设备</label>
+                            <input type="text" id="namePrefix" value="ATC_" placeholder="ATC_（逗号分隔）" style="width: 150px;" />
+                            <label class="checkbox-label"><input type="checkbox" id="rememberDeviceCheckbox" onchange="saveRememberDeviceSetting()" /> 记住最后连接的设备</label>
                         </div>
                         <div class="control-group">
                             <button id="connectbutton" class="btn-success" type="button" onclick="preConnect();">扫描并连接</button>
@@ -534,24 +404,24 @@
                         <div class="control-group">
                             <label>固件 OTA:</label>
                             <input type="file" id="selectFirmware" accept=".bin" onclick="resetFileSelector()" onchange="selectFirmwareVoid()" />
-                            <button type="button" id="flashFromServerBleButton" onclick="flashFirmwareFromServerViaBLE()">从服务器刷写最新版</button>
+                            <button type="button" id="flashFromServerBleButton" onclick="flashFirmwareFromServerViaBLE()">从服务器刷写最新 ATC_BLE_OEPL.bin</button>
                         </div>
                         <div class="control-group">
-                            <label for="cmdTYPE">预设显示类型:</label>
+                            <label for="cmdTYPE">设置预设显示类型:</label>
                             <select id="cmdTYPE" style="flex-grow: 1; max-width: 300px;"></select>
                             <button type="button" onclick="setDisplayType(document.getElementById('cmdTYPE').value);">应用类型</button>
                         </div>
                         <div class="control-group">
-                            <label>时钟与状态:</label>
-                            <button type="button" onclick="sendcmd('0006');" class="btn-success">启用 OEPL</button>
+                            <label>时钟与 OEPL 状态:</label>
+                            <button type="button" onclick="sendcmd('0006');">启用 OEPL</button>
                             <button type="button" onclick="sendcmd('0007');" class="btn-danger">禁用 OEPL</button>
-                            <button type="button" onclick="sendClockMode(1)">标准时钟</button>
-                            <button type="button" onclick="sendClockMode(2)">分段时钟</button>
-                            <button type="button" onclick="sendcmd('000C');">禁用时钟</button>
+                            <button type="button" onclick="sendClockMode(1)">标准时钟模式</button>
+                            <button type="button" onclick="sendClockMode(2)">分段时钟模式</button>
+                            <button type="button" onclick="sendcmd('000C');">禁用时钟模式</button>
                         </div>
                         <div class="control-group">
                             <label for="cmdBLESpeed">ADV 广播间隔:</label>
-                            <select id="cmdBLESpeed" style="width: 150px;">
+                            <select id="cmdBLESpeed">
                                 <option value="1000">625ms</option>
                                 <option value="3200">2000ms</option>
                                 <option value="4000">2500ms</option>
@@ -564,41 +434,41 @@
                             <button type="button" onclick="setBleAdvInterval(document.getElementById('cmdBLESpeed').value);">设置间隔</button>
                         </div>
                         <div class="control-group">
-                            <label for="cmdCustomMac">自定义 MAC:</label>
-                            <input type="text" id="cmdCustomMac" value="1122334455667788" maxlength="16" style="width: 150px;" placeholder="HEX, 8Byte" />
+                            <label for="cmdCustomMac">自定义 MAC (HEX, 8Byte):</label>
+                            <input type="text" id="cmdCustomMac" value="1122334455667788" maxlength="16" />
                             <button type="button" onclick="setCustomMac()">写入 MAC</button>
                         </div>
                         <div class="control-group">
-                            <label>危险/系统:</label>
+                            <label>危险/系统操作:</label>
                             <button type="button" onclick="sendcmd('000A1234');" class="btn-danger">重置显示配置</button>
                             <button type="button" onclick="sendcmd('0012');" class="btn-danger">禁用 BLE 直到重启</button>
                             <button type="button" onclick="sendcmd('0014');">进入深度睡眠</button>
                             <button type="button" onclick="sendcmd('0017');">重启设备</button>
                         </div>
-                        <hr style="border-color: var(--border-color); margin: 20px 0;">
+                        <hr style="border-color: var(--border-color); margin: 15px 0;">
                         <div class="control-group">
                             <label for="cmdTXT">发送自定义 CMD:</label>
-                            <input type="text" id="cmdTXT" value="0001" style="width: 200px;" />
-                            <button type="button" onclick="sendcmd(document.getElementById('cmdTXT').value);">发送 (HEX)</button>
+                            <input type="text" id="cmdTXT" value="0001" />
+                            <button type="button" onclick="sendcmd(document.getElementById('cmdTXT').value);">发送(HEX)</button>
                         </div>
                     </div>
                 </div>
 
                 <div id="view-preset" class="view-section">
                     <h2>预设配置</h2>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">使用此功能前，请确保已连接设备。点击下方预设库按钮会自动填入预设到自定义预设区域，可以进行修改。如果修改了预设，请先点击"校验并应用自定义预设"。然后点击"💾 写入配置"。</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">使用此功能前，请确保在 <strong>[BLE 连接控制]</strong> 面板中已连接设备。点击预设按钮会自动填入 Payload。</p>
                     <div class="card">
                         <h3>预设库</h3>
                         <div class="preset-grid" id="presetContainer"></div>
                         
-                        <h3 style="margin-top: 25px;">自定义预设 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;"> (92 字节 / 184 位 HEX)</span></h3>
-                        <div style="display:flex; gap:12px; align-items: flex-start;">
-                            <textarea id="customPayload" rows="3" placeholder="140063000200..." style="flex:1;"></textarea>
+                        <h3 style="margin-top: 20px;">自定义 Payload (92 字节 / 184 位十六进制)</h3>
+                        <div style="display:flex; gap:10px;">
+                            <textarea id="customPayload" rows="3" placeholder="140063000200..."></textarea>
+                            <button onclick="useCustomPayload()" style="white-space: nowrap; height: fit-content;">校验并应用</button>
                         </div>
                         
                         <div class="control-group" style="margin-top: 20px;">
-                            <button onclick="useCustomPayload()" style="white-space: nowrap;">校验并应用自定义预设</button>
-                            <button class="btn-success" onclick="sendcmd('0010' + document.getElementById('customPayload').value)">💾 写入配置</button>
+                            <button class="btn-success" onclick="sendcmd('0010' + document.getElementById('customPayload').value)">💾 将上方配置写入设备</button>
                             <button onclick="sendcmd('0011')">📖 读取设备当前配置</button>
                         </div>
                     </div>
@@ -612,27 +482,27 @@
                         <button class="btn-success" type="button" onclick="sendDynamicConfigSave()">保存配置并重启设备</button>
                     </div>
                     
-                    <div class="card" style="padding: 24px;">
+                    <div class="card">
                         <fieldset>
                             <legend>显示屏幕设置</legend>
-                            <div class="config-row">
-                                <div class="pinout-item"><label>特殊类型:</label> <select id="conf_screen_type"></select></div>
-                                <div class="pinout-item"><label>OEPL (HEX):</label> <input type="text" id="conf_hw_type" value="0001" maxlength="4" /></div>
-                                <div class="pinout-item"><label>控制器:</label> 
+                            <div class="control-group">
+                                <div><label>特殊屏幕类型:</label> <select id="conf_screen_type"></select></div>
+                                <div><label>OEPL 类型 (HEX):</label> <input type="text" id="conf_hw_type" value="0001" maxlength="4" style="width: 80px;" /></div>
+                                <div><label>控制器:</label> 
                                     <select id="conf_screen_functions">
                                         <option value="0">NONE</option><option value="1">UC</option><option value="2">SSD</option>
                                         <option value="3">ST</option><option value="4">TI</option><option value="5">UC_PRO</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="config-row">
-                                <div class="pinout-item"><label>物理宽度:</label> <input type="number" id="conf_screen_w" value="184" /></div>
-                                <div class="pinout-item"><label>物理高度:</label> <input type="number" id="conf_screen_h" value="384" /></div>
-                                <div class="pinout-item"><label>宽度偏移:</label> <input type="number" id="conf_screen_w_offset" value="0" /></div>
-                                <div class="pinout-item"><label>高度偏移:</label> <input type="number" id="conf_screen_h_offset" value="0" /></div>
-                                <div class="pinout-item"><label>支持颜色数:</label> <input type="number" id="conf_screen_colors" value="2" /></div>
+                            <div class="control-group">
+                                <div><label>物理宽度:</label> <input type="number" id="conf_screen_w" value="184" style="width: 80px;" /></div>
+                                <div><label>物理高度:</label> <input type="number" id="conf_screen_h" value="384" style="width: 80px;" /></div>
+                                <div><label>宽度偏移:</label> <input type="number" id="conf_screen_w_offset" value="0" style="width: 80px;" /></div>
+                                <div><label>高度偏移:</label> <input type="number" id="conf_screen_h_offset" value="0" style="width: 80px;" /></div>
+                                <div><label>支持颜色数:</label> <input type="number" id="conf_screen_colors" value="2" style="width: 80px;" /></div>
                             </div>
-                            <div class="checkbox-group-container" style="margin-top: 16px;">
+                            <div class="control-group" style="gap: 20px;">
                                 <label class="checkbox-label"><input type="checkbox" id="conf_screen_w_h_inversed_ble" /> BLE 通信反转 W/H</label>
                                 <label class="checkbox-label"><input type="checkbox" id="conf_screen_w_h_inversed" /> 显示渲染反转 W/H</label>
                                 <label class="checkbox-label"><input type="checkbox" id="conf_screen_black_invert" /> 反转黑色(Black)</label>
@@ -640,79 +510,72 @@
                             </div>
                         </fieldset>
 
-                        <fieldset>
-                            <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_epd_pinout_enabled" checked onchange="togglePinoutSection('epd_pinout_details', this.checked)" /> EPD 墨水屏引脚</label></legend>
-                            <div id="epd_pinout_details" class="pinout-grid" >
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;">
-                                    <div class="pinout-item"><label>RESET:</label><select class="gpio-select" id="conf_epd_RESET"></select></div>
-                                    <div class="pinout-item"><label>DC:</label><select class="gpio-select" id="conf_epd_DC"></select></div>
-                                    <div class="pinout-item"><label>BUSY:</label><select class="gpio-select" id="conf_epd_BUSY"></select></div>
-                                    <div class="pinout-item"><label>BUSYs:</label><select class="gpio-select" id="conf_epd_BUSYs"></select></div>
-                                    <div class="pinout-item"><label>CS:</label><select class="gpio-select" id="conf_epd_CS"></select></div>
-                                    <div class="pinout-item"><label>CSs:</label><select class="gpio-select" id="conf_epd_CSs"></select></div>
-                                    <div class="pinout-item"><label>CLK:</label><select class="gpio-select" id="conf_epd_CLK"></select></div>
-                                    <div class="pinout-item"><label>MOSI:</label><select class="gpio-select" id="conf_epd_MOSI"></select></div>
-                                    <div class="pinout-item"><label>ENABLE:</label><select class="gpio-select" id="conf_epd_ENABLE"></select></div>
-                                    <div class="pinout-item"><label>ENABLE1:</label><select class="gpio-select" id="conf_epd_ENABLE1"></select></div>
-                                    <div class="pinout-item"><label>FLASH_CS:</label><select class="gpio-select" id="conf_epd_FLASH_CS"></select></div>
-                                </div>
-                                
-                                
-                                <div class="pinout-divider">
-                                    <div class="checkbox-group-container"><label class="checkbox-label""><input type="checkbox" id="conf_epd_ENABLE_INVERT" /> 信号反转 ENABLE 引脚</label></div>
-                                    <div class="pinout-item"><label>上拉 CFG Sleep:</label><select class="pull-type-select" id="conf_epd_PIN_CONFIG_SLEEP"></select></div>
-                                    <div class="pinout-item"><label>上拉 ENABLE:</label><select class="pull-type-select" id="conf_epd_PIN_ENABLE"></select></div>
-                                    <div class="pinout-item"><label>上拉 ENABLE Sleep:</label><select class="pull-type-select" id="conf_epd_PIN_ENABLE_SLEEP"></select></div>
-                                </div>
-                            </div>
-                        </fieldset>
-
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
                             <fieldset>
-                                <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_led_pinout_enabled" onchange="togglePinoutSection('led_pinout_details', this.checked)" /> LED 引脚</label></legend>
-                                <div id="led_pinout_details" class="pinout-grid" style="display: none; margin-top:0;">
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>R:</label><select class="gpio-select" id="conf_led_R"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>G:</label><select class="gpio-select" id="conf_led_G"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>B:</label><select class="gpio-select" id="conf_led_B"></select></div>
-                                    <div class="checkbox-group-container" style="margin-top: 8px;">
-                                        <label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_led_inverted" /> 反转 LED 驱动电平</label>
+                                <legend><label class="checkbox-label"><input type="checkbox" id="conf_epd_pinout_enabled" checked onchange="togglePinoutSection('epd_pinout_details', this.checked)" /> EPD 墨水屏引脚</label></legend>
+                                <div id="epd_pinout_details" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div><label>RESET:</label><select class="gpio-select" id="conf_epd_RESET"></select></div>
+                                    <div><label>DC:</label><select class="gpio-select" id="conf_epd_DC"></select></div>
+                                    <div><label>BUSY:</label><select class="gpio-select" id="conf_epd_BUSY"></select></div>
+                                    <div><label>BUSYs:</label><select class="gpio-select" id="conf_epd_BUSYs"></select></div>
+                                    <div><label>CS:</label><select class="gpio-select" id="conf_epd_CS"></select></div>
+                                    <div><label>CSs:</label><select class="gpio-select" id="conf_epd_CSs"></select></div>
+                                    <div><label>CLK:</label><select class="gpio-select" id="conf_epd_CLK"></select></div>
+                                    <div><label>MOSI:</label><select class="gpio-select" id="conf_epd_MOSI"></select></div>
+                                    <div><label>ENABLE:</label><select class="gpio-select" id="conf_epd_ENABLE"></select></div>
+                                    <div><label>ENABLE1:</label><select class="gpio-select" id="conf_epd_ENABLE1"></select></div>
+                                    <div><label>FLASH_CS:</label><select class="gpio-select" id="conf_epd_FLASH_CS"></select></div>
+                                    <div style="grid-column: span 2;"><label class="checkbox-label"><input type="checkbox" id="conf_epd_ENABLE_INVERT" /> 信号反转 ENABLE 引脚</label></div>
+                                    
+                                    <div style="grid-column: span 2; border-top: 1px dashed var(--border-color); margin-top: 5px; padding-top: 8px;">
+                                        <div><label>上拉 CFG Sleep:</label><select class="pull-type-select" id="conf_epd_PIN_CONFIG_SLEEP"></select></div>
+                                        <div><label>上拉 ENABLE:</label><select class="pull-type-select" id="conf_epd_PIN_ENABLE"></select></div>
+                                        <div><label>上拉 ENABLE Sleep:</label><select class="pull-type-select" id="conf_epd_PIN_ENABLE_SLEEP"></select></div>
                                     </div>
                                 </div>
                             </fieldset>
 
                             <fieldset>
-                                <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_nfc_pinout_enabled" onchange="togglePinoutSection('nfc_pinout_details', this.checked)" /> NFC 引脚</label></legend>
-                                <div id="nfc_pinout_details" class="pinout-grid" style="display: none; margin-top:0;">
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>SDA:</label><select class="gpio-select" id="conf_nfc_SDA"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>SCL:</label><select class="gpio-select" id="conf_nfc_SCL"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>CS:</label><select class="gpio-select" id="conf_nfc_CS"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>IRQ:</label><select class="gpio-select" id="conf_nfc_IRQ"></select></div>
+                                <legend><label class="checkbox-label"><input type="checkbox" id="conf_led_pinout_enabled" onchange="togglePinoutSection('led_pinout_details', this.checked)" /> LED 引脚</label></legend>
+                                <div id="led_pinout_details" style="display: none; gap: 8px; flex-direction: column;">
+                                    <div><label>R:</label><select class="gpio-select" id="conf_led_R"></select></div>
+                                    <div><label>G:</label><select class="gpio-select" id="conf_led_G"></select></div>
+                                    <div><label>B:</label><select class="gpio-select" id="conf_led_B"></select></div>
+                                    <div><label class="checkbox-label"><input type="checkbox" id="conf_led_inverted" /> 反转 LED 驱动电平</label></div>
                                 </div>
                             </fieldset>
 
                             <fieldset>
-                                <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_flash_pinout_enabled" onchange="togglePinoutSection('flash_pinout_details', this.checked)" /> 外部 Flash</label></legend>
-                                <div id="flash_pinout_details" class="pinout-grid" style="display: none; margin-top:0;">
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>CS:</label><select class="gpio-select" id="conf_flash_CS"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>CLK:</label><select class="gpio-select" id="conf_flash_CLK"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>MISO:</label><select class="gpio-select" id="conf_flash_MISO"></select></div>
-                                    <div class="pinout-item" style="margin-top: 8px;"><label>MOSI:</label><select class="gpio-select" id="conf_flash_MOSI"></select></div>
+                                <legend><label class="checkbox-label"><input type="checkbox" id="conf_nfc_pinout_enabled" onchange="togglePinoutSection('nfc_pinout_details', this.checked)" /> NFC 引脚</label></legend>
+                                <div id="nfc_pinout_details" style="display: none; gap: 8px; flex-direction: column;">
+                                    <div><label>SDA:</label><select class="gpio-select" id="conf_nfc_SDA"></select></div>
+                                    <div><label>SCL:</label><select class="gpio-select" id="conf_nfc_SCL"></select></div>
+                                    <div><label>CS:</label><select class="gpio-select" id="conf_nfc_CS"></select></div>
+                                    <div><label>IRQ:</label><select class="gpio-select" id="conf_nfc_IRQ"></select></div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend><label class="checkbox-label"><input type="checkbox" id="conf_flash_pinout_enabled" onchange="togglePinoutSection('flash_pinout_details', this.checked)" /> 外部 Flash 引脚</label></legend>
+                                <div id="flash_pinout_details" style="display: none; gap: 8px; flex-direction: column;">
+                                    <div><label>CS:</label><select class="gpio-select" id="conf_flash_CS"></select></div>
+                                    <div><label>CLK:</label><select class="gpio-select" id="conf_flash_CLK"></select></div>
+                                    <div><label>MISO:</label><select class="gpio-select" id="conf_flash_MISO"></select></div>
+                                    <div><label>MOSI:</label><select class="gpio-select" id="conf_flash_MOSI"></select></div>
                                 </div>
                             </fieldset>
                             
                             <fieldset>
                                 <legend>其他系统引脚</legend>
-                                <div class="pinout-grid" style="margin-top:0;">
-                                    <div class="pinout-item"><label>ADC 引脚:</label><select class="gpio-select" id="conf_ADC_pinout"></select></div>
-                                    <div class="pinout-item"><label>UART TX:</label><select class="gpio-select" id="conf_UART_pinout"></select></div>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div><label>ADC 引脚:</label><select class="gpio-select" id="conf_ADC_pinout"></select></div>
+                                    <div><label>UART TX 引脚:</label><select class="gpio-select" id="conf_UART_pinout"></select></div>
                                 </div>
                             </fieldset>
                         </div>
                         
-                        <div style="margin-top:20px;">
-                            <label style="display:block; margin-bottom: 8px; font-weight: 600;">生成的 Payload (HEX):</label>
-                            <textarea id="dynamicConfigPayload" rows="3" readonly placeholder="此区域会自动生成基于以上选项构建的 Payload..." style="background: var(--bg-body);"></textarea>
-                        </div>
+                        <label style="display:block; margin-top:15px;">生成的 Payload (HEX):</label>
+                        <textarea id="dynamicConfigPayload" rows="3" readonly placeholder="此区域会自动生成基于以上选项构建的 Payload..."></textarea>
                     </div>
                 </div>
 
@@ -720,34 +583,34 @@
                     <h2>LUT 试验场</h2>
                     <div class="card">
                         <h3>UC 控制器 LUT</h3>
-                        <div class="lut-group">
+                        <div class="control-group" style="flex-direction: column; align-items: stretch;">
                             <label>UC VCOM LUT Reg 0x20</label><textarea id="uc_reg_20" rows="2">26 0A 39 39 A0 00 00 00 19 19 19 19 19 19 19 19</textarea>
                             <label>UC W2W LUT Reg 0x21</label><textarea id="uc_reg_21" rows="2">14 02 01 02 01 01 01 01 14 27 24 09 01 02 01 02 14 02 14 01 01 05 88 48 88 48 01 01 1C 03 01 03 01 01 01 04 03 03 03 03 02 01 03 03 02 28 06 01 01 02 03 02 06 25 01 01</textarea>
                             <label>UC B2W LUT Reg 0x22</label><textarea id="uc_reg_22" rows="2">14 42 01 82 81 01 01 01 94 27 24 49 01 02 01 02 94 02 94 01 01 05 48 88 48 88 01 01 1C 43 01 83 01 01 01 04 03 03 43 83 02 01 03 83 02 E8 06 01 01 02 83 02 C6 E5 01 01</textarea>
                             <label>UC W2B LUT Reg 0x23</label><textarea id="uc_reg_23" rows="2">14 42 01 82 81 01 01 01 94 67 64 49 01 02 01 02 94 02 94 01 01 05 48 88 48 88 01 01 1C 03 01 03 01 01 01 04 03 83 03 03 02 01 03 83 82 28 06 01 01 02 83 82 06 25 01 01</textarea>
                             <label>UC B2B LUT Reg 0x24</label><textarea id="uc_reg_24" rows="2">14 42 01 82 81 01 01 01 94 27 64 49 01 02 01 02 94 02 94 01 01 05 48 88 48 88 01 01 1C 43 01 83 81 01 01 04 43 83 03 83 02 01 03 03 02 28 46 01 01 02 03 02 46 25 01 01</textarea>
                             <label>UC Border LUT Reg 0x25</label><textarea id="uc_reg_25" rows="2"></textarea>
-                            <div style="margin-top: 16px;">
-                                <button type="button" class="btn-primary" onclick="sendCustomUCLUT(document.getElementById('uc_reg_20').value, document.getElementById('uc_reg_21').value, document.getElementById('uc_reg_22').value, document.getElementById('uc_reg_23').value, document.getElementById('uc_reg_24').value, document.getElementById('uc_reg_25').value);">生成并上传 UC LUT</button>
+                            <div>
+                                <button type="button" onclick="sendCustomUCLUT(document.getElementById('uc_reg_20').value, document.getElementById('uc_reg_21').value, document.getElementById('uc_reg_22').value, document.getElementById('uc_reg_23').value, document.getElementById('uc_reg_24').value, document.getElementById('uc_reg_25').value);">生成并上传 UC LUT</button>
                             </div>
                         </div>
                     </div>
                     
                     <div class="card">
                         <h3>SSD 控制器 LUT</h3>
-                        <div class="lut-group">
-                            <label>SSD LUT Reg 0x32</label><textarea id="ssd_reg_32" rows="4"></textarea>
-                            <div style="margin-top: 16px;"><button type="button" class="btn-primary" onclick="sendCustomSSDLUT(document.getElementById('ssd_reg_32').value);">生成并上传 SSD LUT</button></div>
+                        <div class="control-group" style="flex-direction: column; align-items: stretch;">
+                            <label>SSD LUT Reg 0x32</label><textarea id="ssd_reg_32" rows="6"></textarea>
+                            <div><button type="button" onclick="sendCustomSSDLUT(document.getElementById('ssd_reg_32').value);">生成并上传 SSD LUT</button></div>
                         </div>
                     </div>
 
                     <div class="card">
                         <h3>原始 LUT 数据读写</h3>
-                        <div class="lut-group">
+                        <div class="control-group" style="flex-direction: column; align-items: stretch;">
                             <label>原始 LUT 数据 (HEX):</label>
-                            <textarea id="lutData" rows="4"></textarea>
-                            <div style="margin-top: 16px; display: flex; gap: 12px;">
-                                <button type="button" class="btn-primary" onclick="sendCustomLUT(document.getElementById('lutData').value);">写入原始 LUT 数据</button>
+                            <textarea id="lutData" rows="6"></textarea>
+                            <div style="margin-top: 10px;">
+                                <button type="button" onclick="sendCustomLUT(document.getElementById('lutData').value);">写入原始 LUT 数据</button>
                                 <button type="button" onclick="sendcmd('000D');">从设备读取原始 LUT</button>
                             </div>
                         </div>
@@ -756,14 +619,14 @@
 
                 <div id="view-debug" class="view-section">
                     <h2>状态监控</h2>
-                    <div class="card" style="display: flex; flex-wrap: wrap; gap: 16px;">
-                        <div class="status-box"><label>电池电压</label><div style="color: var(--success);" id="status-battery">N/A</div></div>
-                        <div class="status-box"><label>ADC 原值</label><div style="color: var(--primary);" id="status-adc-raw">N/A</div></div>
-                        <div class="status-box"><label>ADC 温度</label><div style="color: var(--danger);" id="status-adc-temp">N/A</div></div>
-                        <div class="status-box"><label>EPD 温度</label><div style="color: #17a2b8;" id="status-epd-temp">N/A</div></div>
-                        <div class="status-box"><label>最近更新</label><div style="font-size: 1.1rem; color: var(--text-muted); margin-top: 6px;" id="status-timestamp">N/A</div></div>
+                    <div class="card" style="display: flex; justify-content: space-around; text-align: center;">
+                        <div><label>电池电压</label><div style="font-size: 1.5rem; font-weight: bold; color: var(--success);" id="status-battery">N/A</div></div>
+                        <div><label>ADC 原值</label><div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);" id="status-adc-raw">N/A</div></div>
+                        <div><label>ADC 温度</label><div style="font-size: 1.5rem; font-weight: bold; color: var(--danger);" id="status-adc-temp">N/A</div></div>
+                        <div><label>EPD 温度</label><div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;" id="status-epd-temp">N/A</div></div>
+                        <div><label>最近更新</label><div style="font-size: 1.1rem; color: var(--text-muted); margin-top: 5px;" id="status-timestamp">N/A</div></div>
                     </div>
-                    <div class="card" style="padding: 20px;">
+                    <div class="card">
                         <div id="debug-chart-container">
                             <canvas id="debugChart"></canvas>
                         </div>
@@ -772,46 +635,50 @@
 
                 <div id="view-uart" class="view-section">
                     <h2>UART 刷写器</h2>
-                    <div class="checkbox-group-container" style="border-color: var(--danger); background: rgba(217, 48, 37, 0.05); margin-bottom: 20px;">
-                        <span style="color: var(--danger); font-size: 0.85rem; font-weight: 500;">⚠️ 注意: 请使用 HTTPS 访问以调用 Web Serial API。设备需正确连接 USB-TTL 模块。</span>
-                    </div>
+                    <p style="color: var(--danger); font-size: 0.9rem;">⚠️ 注意: 请使用 HTTPS 访问以调用 Web Serial API。设备需正确连接 USB-TTL 模块。</p>
                     <div class="card">
                         <h3>1. COM 端口设置</h3>
                         <div class="control-group">
-                            <input type="button" class="btn-primary" id="uart_butOpen" value="打开 USB-COM 端口">
-                            <label for="uart_ubaud" style="margin-left: 10px;">波特率:</label>
+                            <input type="button" id="uart_butOpen" value="打开 USB-COM 端口">
+                            <label for="uart_ubaud">波特率:</label>
                             <select id="uart_ubaud" title="推荐: 921600 波特率">
-                                <option value="115200">115200</option><option value="230400">230400</option>
-                                <option value="460800">460800</option><option value="921600" selected>921600</option>
-                                <option value="1500000">1500000</option><option value="2000000">2000000</option>
+                                <option value="115200">115200</option>
+                                <option value="230400">230400</option>
+                                <option value="460800">460800</option>
+                                <option value="921600" selected>921600</option>
+                                <option value="1500000">1500000</option>
+                                <option value="2000000">2000000</option>
                             </select>
-                            <label for="uart_uatime" style="margin-left: 10px;">握手激活时间:</label>
+                            <label for="uart_uatime">握手激活时间:</label>
                             <select id="uart_uatime" title="激活时间: 设置为高于广播间隔">
-                                <option value="0">0 ms</option><option value="100">100 ms</option>
-                                <option value="1000">1 sec</option><option value="2000" selected>2 sec</option><option value="3000">3 sec</option>
+                                <option value="0">0 ms</option>
+                                <option value="100">100 ms</option>
+                                <option value="1000">1 sec</option>
+                                <option value="2000" selected>2 sec</option>
+                                <option value="3000">3 sec</option>
                             </select>
                         </div>
                         
                         <h3>2. 选择目标固件</h3>
                         <div class="control-group">
-                            <input type="file" accept=".bin" id="uart_file" style="flex-grow: 1; max-width: 400px;" />
-                            <input type="button" id="uart_butLoadFromServer" value="加载在线最新版" disabled>
+                            <input type="file" accept=".bin" id="uart_file" style="flex-grow: 1;" />
+                            <input type="button" id="uart_butLoadFromServer" value="加载在线 ATC_BLE_OEPL.bin" disabled>
                         </div>
                         
                         <h3>3. 硬件设备标识</h3>
                         <div class="control-group">
-                            <select id="uart_deviceTypeSelect" style="flex-grow: 1; max-width: 400px;"></select>
+                            <select id="uart_deviceTypeSelect" style="flex-grow: 1; max-width: 350px;"></select>
                             <input type="button" id="uart_butWriteDeviceType" value="写入设备类型 (0x79000)" disabled>
                         </div>
 
                         <h3>4. 执行动作</h3>
-                        <div class="control-group" style="background: var(--bg-body); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <div class="control-group">
                             <input type="button" class="btn-success" id="uart_butWrite" value="仅刷入固件" disabled>
                             <input type="button" class="btn-success" id="uart_butWriteAndType" value="刷入固件 + 设备类型" disabled>
-                            <span id="uart_swrite" style="font-weight: 600; color: var(--danger); margin-left: auto; font-size: 0.85rem;">请先打开 COM 并选择文件</span>
+                            <span id="uart_swrite" style="font-weight: bold; color: var(--danger); margin-left: auto;">请先打开 COM 并选择文件</span>
                         </div>
                         
-                        <hr style="border-color: var(--border-color); margin: 20px 0;">
+                        <hr style="border-color: var(--border-color); margin: 15px 0;">
                         <div class="control-group">
                             <label>底层命令:</label>
                             <input type="button" id="uart_butUnlock" value="解锁 Flash" disabled>
@@ -825,8 +692,8 @@
 
             <div class="logs-panel">
                 <div class="log-header">
-                    <span id="log-title-text">📶 运行日志 TERMINAL</span>
-                    <button type="button" onclick="clearActiveLog()">清除</button>
+                    <span id="log-title-text">📶 BLE 运行日志</span>
+                    <button type="button" onclick="clearActiveLog()">清除日志</button>
                 </div>
                 <div id="log-ble-wrapper" class="log-container active">
                     <pre id="log"></pre>
@@ -838,6 +705,7 @@
 
         </main>
     </div>
+
     <script src="./pako.js"></script>
     
     <script>
@@ -2855,10 +2723,10 @@
             }
 
             showView('ble');
-            addLog("页面加载完成，准备就绪。");
+            addLog("页面已加载。就绪。");
             setStatus("就绪");
 
-            // 切换到BLE页面自动加载服务器固件
+
             loadServerFirmware(addLog);
         });
 
@@ -3546,15 +3414,15 @@
 
         function useCustomPayload() {
             const raw = document.getElementById('customPayload').value.trim();
-            if (raw.length !== 184 || !/^[0-9A-Fa-f]+$/.test(raw)) { alert('预设必须为 92 字节(184 个十六进制字符)'); return; }
+            if (raw.length !== 184 || !/^[0-9A-Fa-f]+$/.test(raw)) { alert('payload 必须为 92 字节(184 个十六进制字符)'); return; }
             currentBlePayload = raw.toUpperCase();
             document.getElementById('customPayload').value = currentBlePayload;
-            addLog('已使用自定义预设');
+            addLog('已使用自定义 payload');
         }
 
         async function bleReadConfig() { if (!bleChar) return; addLog('发送读取命令 (0011)'); await bleChar.writeValueWithoutResponse(new Uint8Array([0x00,0x11])); }
         async function bleWriteConfig() {
-            if (!bleChar || currentBlePayload.length !== 184) { alert('预设无效'); return; }
+            if (!bleChar || currentBlePayload.length !== 184) { alert('payload 无效'); return; }
             const bytes = new Uint8Array(currentBlePayload.match(/../g).map(b=>parseInt(b,16)));
             await bleChar.writeValueWithoutResponse(new Uint8Array([0x00,0x10,...bytes]));
             addLog('发送写入命令 (0010 + 92字节)');
