@@ -1746,8 +1746,9 @@
             );
             addLog(fw_header_img_len);
             const isStandardOk = (imgArray.substring(16, 24).toUpperCase() === "4B4E4C54") && ((imgArrayLen / 2) === fw_header_img_len);
-            const isSpecialOk = (imgArray.substring(8, 12).toUpperCase() === "9327");                    
-            if (!isStandardOk && !isSpecialOk) {
+            const isSpecialOk = (imgArray.substring(8, 12).toUpperCase() === "9327");
+            const isSpecial1Ok = (imgArray.substring(876, 880).toUpperCase() === "9327");
+            if (!isStandardOk && !isSpecialOk && !isSpecial1Ok) {
                 addLog("错误: 固件完整性检查失败。");
                 return;
             }
@@ -1819,7 +1820,7 @@
             addLog("尝试通过 BLE 从服务器刷写 ATC_BLE_OEPL.bin...");
             setStatus("BLE: 正在加载 ATC_BLE_OEPL.bin...");
             try {
-                const response = await fetch("./ATC_BLE_OEPL.bin", { mode: 'cors' });
+                const response = await fetch("https://atc1441.github.io/ATC_BLE_OEPL.bin");
                 if (!response.ok) {
                     throw new Error(`HTTP 错误! 状态: ${response.status} - ${response.statusText}。确保 ATC_BLE_OEPL.bin 与 HTML 文件在同一文件夹中。`);
                 }
@@ -2890,7 +2891,6 @@
             const uart_write_device_type_btn = uart$('uart_butWriteDeviceType');
             const uart_bwrite_and_type_btn = uart$('uart_butWriteAndType');
 
-
             function uartLog(data) {
                 console.log("UART 日志: " + data);
                 const logArea = uart$("uart-log");
@@ -2902,12 +2902,11 @@
                     if (lines.length > maxLogLines + 1) {
                         logArea.innerHTML = lines.slice(0, maxLogLines).join('<br>') + (lines.length > maxLogLines ? '<br>' : '');
                     }
-
                 }
             }
 
             function uartDelay(ms) {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve) => {
                     setTimeout(resolve, ms);
                 });
             }
@@ -2924,7 +2923,7 @@
                     uartLog(`来自 ${sourceName} 的固件数据为空。`);
                     uart_fwriter_btn.disabled = true;
                     uart_bwrite_and_type_btn.disabled = true;
-                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                    uart_swrite_span.innerHTML = '请先打开 COM 并选择文件';
                     return false;
                 }
 
@@ -2935,7 +2934,7 @@
                     uartFirmwareArray = null;
                     uart_fwriter_btn.disabled = true;
                     uart_bwrite_and_type_btn.disabled = true;
-                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                    uart_swrite_span.innerHTML = '请先打开 COM 并选择文件';
                     return false;
                 }
                 if (uart_connect_btn.opened) {
@@ -2948,15 +2947,15 @@
                 return true;
             }
 
+            // ================== SWS 写数据（原有，未改动） ==================
             function uart_sws_wr_addr(addr, data) {
-                // log(addr + ':['+data+']');
-                let d = new Uint8Array(10); // word swire 10 bits = 10 bytes UART
+                let d = new Uint8Array(10);
                 let h = new Uint8Array([0x5a, (addr >> 16) & 0xff, (addr >> 8) & 0xff, addr & 0xff, 0x00]);
                 let pkt = new Uint8Array((data.byteLength + 6) * 10);
-                d[0] = 0x80; // start bit byte cmd swire = 1
-                d[9] = 0xfe; // stop bit swire = 0
+                d[0] = 0x80;
+                d[9] = 0xfe;
                 h.forEach((el, n) => {
-                    let m = 0x80; // mask bit
+                    let m = 0x80;
                     let idx = 1;
                     do {
                         if ((el & m) != 0) d[idx] = 0x80;
@@ -2965,10 +2964,10 @@
                         m >>= 1;
                     } while (m != 0);
                     pkt.set(d, n * 10);
-                    d[0] = 0xfe; // start bit next byte swire = 0
+                    d[0] = 0xfe;
                 });
                 data.forEach((el, n) => {
-                    let m = 0x80; // mask bit
+                    let m = 0x80;
                     let idx = 1;
                     do {
                         if ((el & m) != 0) d[idx] = 0x80;
@@ -2978,12 +2977,67 @@
                     } while (m != 0);
                     pkt.set(d, (n + 5) * 10);
                 });
-                // swire stop cmd = 0xff 
                 d.fill(0x80, 0, 9);
                 pkt.set(d, (data.byteLength + 5) * 10);
                 return pkt;
             }
 
+            // ================== 新增：SWS 读数据支持 ==================
+            async function uartSpiRead(cmd, addr = 0, length = 1) {
+                // 进入 FIFO 读模式
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0b3, new Uint8Array([0x80])));
+                // 片选拉低
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
+
+                // 构建命令包
+                let cmdBytes;
+                if (cmd === 0x05) {
+                    // 读状态寄存器
+                    cmdBytes = new Uint8Array([0x05]);
+                } else if (cmd === 0x03) {
+                    // 读 Flash 数据
+                    cmdBytes = new Uint8Array([0x03, (addr >> 16) & 0xff, (addr >> 8) & 0xff, addr & 0xff, 0x00]);
+                } else {
+                    throw new Error(`不支持 SPI 读命令: 0x${cmd.toString(16)}`);
+                }
+                // 发送命令
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, cmdBytes));
+                // 设置为自动读模式
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x0a])));
+                // 读取指定长度的数据
+                const data = await uartSerialController.readBytes(length);
+                // 恢复片选
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x01])));
+                // 退出 FIFO 模式
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0b3, new Uint8Array([0x00])));
+                return data;
+            }
+
+            // ================== 新增：读取 Flash 状态寄存器 ==================
+            async function uartFlashReadStatus() {
+                const data = await uartSpiRead(0x05);
+                return data[0];
+            }
+
+            // ================== 新增：等待 Flash 就绪（核心修改） ==================
+            async function uartFlashReady(maxRetries = 33) {
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        const status = await uartFlashReadStatus();
+                        if ((status & 0x01) === 0) {
+                            return true;   // 忙位为 0，操作完成
+                        }
+                    } catch (e) {
+                        uartLog(`读 Flash 状态错误: ${e}`);
+                        return false;
+                    }
+                    await uartDelay(1); // 等待 1ms 再查
+                }
+                uartLog("Flash 忙超时！");
+                return false;
+            }
+
+            // ================== 原有 Flash 命令（保留） ==================
             async function uartFlashByteCmd(cmd) {
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
                 return await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([cmd & 0xff, 0x01])));
@@ -2997,6 +3051,7 @@
                 return uartFlashByteCmd(0xab);
             }
 
+            // ================== 修改：解锁后等待完成 ==================
             async function uartFlashUnlock() {
                 await uartFlashWriteEnable();
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
@@ -3006,19 +3061,19 @@
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x01])));
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x00])));
-                return await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x00, 0x01])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x00, 0x01])));
+                // ★ 等待解锁操作真正完成
+                return await uartFlashReady();
             }
 
+            // ================== 修改：全片擦除后等待 ==================
             async function uartFlashEraseAll() {
-                return uartFlashByteCmd(0x60);
+                await uartFlashByteCmd(0x60);
+                // ★ 全片擦除耗时较长，设定较大超时（1000 次 × 1ms）
+                return await uartFlashReady(1000);
             }
 
-            async function uartWriteFifo(addr, data) {
-                await uartSerialController.write_raw(uart_sws_wr_addr(0x00b3, new Uint8Array([0x80])));
-                await uartSerialController.write_raw(uart_sws_wr_addr(addr, data));
-                return await uartSerialController.write_raw(uart_sws_wr_addr(0x00b3, new Uint8Array([0x00])));
-            }
-
+            // ================== 修改：扇区擦除后等待 ==================
             async function uartSectorErase(addr) {
                 uartLog(`正在擦除扇区地址 0x${uartHex(addr, 6)}...`);
                 await uartFlashWriteEnable();
@@ -3027,21 +3082,31 @@
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([(addr >> 16) & 0xff])));
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([(addr >> 8) & 0xff])));
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([addr & 0xff, 0x01])));
-                return await uartDelay(300);
+                // ★ 等待扇区擦除完成
+                return await uartFlashReady();
             }
 
+            // ================== 修改：写入 Flash 块后等待 ==================
             async function uartWriteFlashBlk(addr, data) {
                 await uartFlashWriteEnable();
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
                 let blk = new Uint8Array(4 + data.byteLength);
                 blk[0] = 0x02;
                 blk[1] = (addr >> 16) & 0xff;
-                blk[2] = (addr >> 8) & 0xff
+                blk[2] = (addr >> 8) & 0xff;
                 blk[3] = addr & 0xff;
                 blk.set(data, 4);
                 await uartWriteFifo(0x0c, blk);
                 await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x01])));
-                return await uartDelay(10);
+                // ★ 等待页写入完成
+                return await uartFlashReady();
+            }
+
+            // 保持原有写 FIFO 函数不变
+            async function uartWriteFifo(addr, data) {
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x00b3, new Uint8Array([0x80])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(addr, data));
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x00b3, new Uint8Array([0x00])));
             }
 
             async function uartSoftResetMSU() {
@@ -3079,7 +3144,8 @@
                     await uartActivate(uart_uatime_select.value);
                     await uartFlashWriteEnable();
                     await uartFlashUnlock();
-                    await uartDelay(1500);
+                    // 解锁已有内置等待，但再稍等一下确保稳定
+                    await uartDelay(100);
                     uartLog('写入 ' + uartFirmwareArray.byteLength + ' 字节到 Flash...');
                     let len = uartFirmwareArray.byteLength;
                     let addr = 0;
@@ -3089,19 +3155,23 @@
                             let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash 扇区擦除 0x' + uartHex(addr, 6);
                             uartLog(s);
                             uart_swrite_span.innerHTML = s;
-                            await uartSectorErase(addr);
+                            if (!(await uartSectorErase(addr))) {
+                                uartLog("扇区擦除失败！");
+                                throw new Error("扇区擦除失败");
+                            }
                         }
                         if (len < sblk) sblk = len;
                         let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash 写入 ' + sblk + ' 字节到 0x' + uartHex(addr, 6);
-
                         uart_swrite_span.innerHTML = s;
-                        await uartWriteFlashBlk(addr, new Uint8Array(uartFirmwareArray.slice(addr, addr + sblk)));
+                        if (!(await uartWriteFlashBlk(addr, new Uint8Array(uartFirmwareArray.slice(addr, addr + sblk))))) {
+                            uartLog("Flash 写入失败！");
+                            throw new Error("Flash 写入失败");
+                        }
                         addr += sblk;
                         len -= sblk;
                     }
                     uart_swrite_span.innerHTML = '固件写入完成';
                     uartLog('固件刷写完成 (' + ((new Date().getTime() - t) / 1000.0) + ' 秒).');
-
                     return true;
                 } catch (error) {
                     uartLog(`固件刷写过程中出错: ${error}`);
@@ -3111,6 +3181,7 @@
                 }
             }
 
+            // ================== 设备类型写入函数（内部也用了 Flash 操作，需等待） ==================
             async function writeDeviceTypeSettings(doActivate) {
                 if (uart_connect_btn.opened == false) {
                     uartLog("写入设备类型：端口未打开。");
@@ -3151,14 +3222,17 @@
                     await uartFlashUnlock();
                     await uartDelay(100);
 
-                    await uartSectorErase(UART_SETTINGS_ADDR);
+                    if (!(await uartSectorErase(UART_SETTINGS_ADDR))) {
+                        throw new Error("扇区擦除失败");
+                    }
 
                     uartLog(`写入 ${uint8ArrayView.length} 字节到 0x${UART_SETTINGS_ADDR.toString(16)}...`);
-                    await uartWriteFlashBlk(UART_SETTINGS_ADDR, uint8ArrayView);
+                    if (!(await uartWriteFlashBlk(UART_SETTINGS_ADDR, uint8ArrayView))) {
+                        throw new Error("写入设备类型失败");
+                    }
 
                     uart_swrite_span.innerHTML = '设备类型写入成功！';
                     uartLog(`设备类型设置成功写入到 0x${UART_SETTINGS_ADDR.toString(16)} (${((new Date().getTime() - t_start) / 1000.0).toFixed(2)} 秒)。`);
-
                     return true;
                 } catch (error) {
                     uartLog(`写入设备类型设置时出错: ${error}`);
@@ -3168,11 +3242,11 @@
                 }
             }
 
-
             async function uartDeviceStop() {
                 return uartSerialController.close();
             }
 
+            // ================== 事件绑定（保持不变） ==================
             uart_connect_btn.addEventListener('pointerdown', () => {
                 if (uart_connect_btn.value == '关闭') {
                     uartDeviceStop();
@@ -3183,7 +3257,6 @@
 
             uart_load_server_fw_btn.onclick = async function () {
                 uart_load_server_fw_btn.disabled = true;
-
                 await window.loadServerFirmware(uartLog);
                 if (serverFirmwareBuffer) {
                     setUartFirmware(serverFirmwareBuffer, "服务器");
@@ -3300,7 +3373,6 @@
                 }
             };
 
-
             uart_bunlock_btn.onclick = async function () {
                 uart_fwriter_btn.disabled = true;
                 uart_bwrite_and_type_btn.disabled = true;
@@ -3315,8 +3387,7 @@
                 uart_swrite_span.innerHTML = '正在解锁...';
                 uartLog('Flash 正在解锁...');
                 await uartFlashWriteEnable();
-                await uartFlashUnlock();
-                await uartDelay(100);
+                await uartFlashUnlock(); // 内部已含等待
                 uart_swrite_span.innerHTML = '已解锁！';
                 uartLog('解锁完成。');
 
@@ -3344,12 +3415,15 @@
 
                 await uartActivate(uart_uatime_select.value);
                 uart_swrite_span.innerHTML = '正在擦除...';
-                uartLog('Flash 正在全部擦除（约 3.5 秒）...');
+                uartLog('Flash 正在全部擦除...');
                 await uartFlashWriteEnable();
-                await uartFlashEraseAll();
-                await uartDelay(3500);
-                uart_swrite_span.innerHTML = '已擦除！';
-                uartLog('擦除完成。');
+                if (!(await uartFlashEraseAll())) {
+                    uartLog('全片擦除失败！');
+                    uart_swrite_span.innerHTML = '擦除出错！';
+                } else {
+                    uart_swrite_span.innerHTML = '已擦除！';
+                    uartLog('擦除完成。');
+                }
 
                 uart_connect_btn.disabled = false;
                 uart_bunlock_btn.disabled = false;
@@ -3409,7 +3483,15 @@
                 }
             }, false);
 
+            // ================== 修改：UARTSerialController 增加读取功能 ==================
             class UARTSerialController {
+                constructor() {
+                    this.port = null;
+                    this.writer = null;
+                    this.reader = null;       // ★ 新增
+                    this.readBuffer = [];     // ★ 用于处理粘包的缓冲
+                }
+
                 async init(init_cb) {
                     if ('serial' in navigator) {
                         try {
@@ -3420,6 +3502,8 @@
                                 bufferSize: 240,
                             });
                             this.writer = this.port.writable.getWriter();
+                            // ★ 获取 reader（只读流）
+                            this.reader = this.port.readable.getReader();
                             uartLog('DTR, RTS 已开启。');
                             await this.port.setSignals({
                                 dataTerminalReady: false,
@@ -3434,7 +3518,6 @@
                             uart_load_server_fw_btn.disabled = false;
                             uart_write_device_type_btn.disabled = false;
 
-
                             if (serverFirmwareBuffer && !uartFirmwareArray) {
                                 setUartFirmware(serverFirmwareBuffer, "服务器（自动）");
                             } else if (uartFirmwareArray) {
@@ -3444,7 +3527,6 @@
                             } else {
                                 uart_swrite_span.innerHTML = '选择固件文件';
                             }
-
 
                             if (typeof init_cb == 'function') await init_cb(this.port);
                         } catch (err) {
@@ -3456,7 +3538,7 @@
                             uart_bwrite_and_type_btn.disabled = true;
                             uart_load_server_fw_btn.disabled = true;
                             uart_write_device_type_btn.disabled = true;
-                            uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                            uart_swrite_span.innerHTML = '请先打开 COM 并选择文件';
                         }
                         uart_connect_btn.disabled = false;
                     } else {
@@ -3475,9 +3557,43 @@
                         uart_swrite_span.innerHTML = 'Web Serial API 错误';
                     }
                 }
+
                 async write_raw(data) {
                     return await this.writer.write(data);
                 }
+
+                // ★ 新增：从串口读取指定字节数
+                async readBytes(count, timeoutMs = 2000) {
+                    let result = new Uint8Array(count);
+                    let offset = 0;
+                    const startTime = Date.now();
+
+                    // 先消耗缓存
+                    while (this.readBuffer.length > 0 && offset < count) {
+                        result[offset++] = this.readBuffer.shift();
+                    }
+
+                    while (offset < count) {
+                        const { value, done } = await this.reader.read();
+                        if (done) {
+                            throw new Error("串口读流已关闭");
+                        }
+                        for (let i = 0; i < value.length && offset < count; i++) {
+                            result[offset++] = value[i];
+                        }
+                        // 多余字节存入缓存，防止丢失
+                        if (offset >= count && value.length > count - (offset - value.length)) {
+                            for (let i = count - (offset - value.length); i < value.length; i++) {
+                                this.readBuffer.push(value[i]);
+                            }
+                        }
+                        if (Date.now() - startTime > timeoutMs) {
+                            throw new Error("读取超时");
+                        }
+                    }
+                    return result;
+                }
+
                 async reset(t_ms) {
                     uartLog('DTR, RTS 已关闭。');
                     await this.port.setSignals({
@@ -3491,16 +3607,26 @@
                         requestToSend: false
                     });
                 }
+
                 async close() {
                     uart_fwriter_btn.disabled = true;
                     uart_bwrite_and_type_btn.disabled = true;
-                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                    uart_swrite_span.innerHTML = '请先打开 COM 并选择文件';
+                    if (this.reader) {
+                        try {
+                            await this.reader.releaseLock();
+                        } catch (e) {
+                            uartLog("释放读取锁时出错: " + e);
+                        }
+                        this.reader = null;
+                    }
                     if (this.writer) {
                         try {
                             await this.writer.close();
                         } catch (e) {
                             uartLog("关闭写入器时出错: " + e);
                         }
+                        this.writer = null;
                     }
                     if (this.port) {
                         try {
@@ -3508,6 +3634,7 @@
                         } catch (e) {
                             uartLog("关闭端口时出错: " + e);
                         }
+                        this.port = null;
                     }
                     uart_connect_btn.value = '打开';
                     uart_connect_btn.opened = false;
@@ -3520,6 +3647,7 @@
                     uart_connect_btn.disabled = false;
                 }
             }
+
             var uartSerialController = new UARTSerialController();
         })();
 

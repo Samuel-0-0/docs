@@ -57,12 +57,12 @@ nav:
     - CNC:
       - cnc/index.md
       - 机械速查表: cnc/holes_thread_shaft.md
-    - 墨水屏:
-      - inkplate/index.md
-      - ATC_BLE_OEPL固件维护: inkplate/ATC_BLE_OEPL/ATC_BLE_OEPL.html
-      - ATC模板设计器: inkplate/oepl_json_designer/index.html
-      - MDI图标字库预览: inkplate/oepl_json_designer/MaterialDesignIcons_cheatsheet.html
-      - 硬件MODS: inkplate/mods.md
+    - 墨水屏电子价签:
+      - epl/index.md
+      - ATC_BLE_OEPL固件维护: epl/ATC_BLE_OEPL/ATC_BLE_OEPL.html
+      #- ATC模板设计器: epl/oepl_json_designer/index.html
+      - MDI图标字库预览: epl/MaterialDesignIcons_cheatsheet.html
+      - 硬件MODS: epl/mods.md
 
 plugins:
   - search
