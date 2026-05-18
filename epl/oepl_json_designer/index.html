@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenEPaperLink Template Designer</title>
+    <link rel="icon" href="/oepl_json_designer/favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable class-based dark mode
+        theme: {
+          extend: {
+            colors: {
+              epaperBlack: '#000000',
+              epaperWhite: '#FFFFFF',
+              epaperRed: '#FF0000',
+              epaperYellow: '#FFFF00',
+              epaperLightGray: '#D3D3D3',
+              epaperDarkGray: '#A9A9A9',
+              epaperPink: '#FFC0CB',
+              epaperBrown: '#A52A2A',
+              epaperGreen: '#008000',
+              epaperBlue: '#0000FF',
+              epaperOrange: '#FFA500',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+
+      /* MaterialDesignIcons TTF */
+      @font-face {
+        font-family: 'Material Design Icons Desktop';
+        src: url('fonts/MaterialDesignIconsDesktop.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      /* 中文字体 */
+      @font-face {
+        font-family: 'OPPO Sans 4.0';
+        src: url('fonts/OPPO Sans 4.0.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正粗圆_GBK';
+        src: url('fonts/方正粗圆_GBK.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正黑体_GBK';
+        src: url('fonts/方正黑体_GBK.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正兰亭圆_GBK_准';
+        src: url('fonts/方正兰亭圆_GBK_准.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正锐正黑_GBK DemiBold';
+        src: url('fonts/方正锐正黑_GBK DemiBold.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正新楷体_GBK';
+        src: url('fonts/方正新楷体_GBK.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正正粗黑_GBK';
+        src: url('fonts/方正正粗黑_GBK.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正中雅宋_GBK';
+        src: url('fonts/方正中雅宋_GBK.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '方正准圆_GBK';
+        src: url('fonts/方正准圆_GBK.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '凤凰点阵体 12px';
+        src: url('fonts/凤凰点阵体 12px.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '凤凰点阵体 16px';
+        src: url('fonts/凤凰点阵体 16px.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '汉仪正圆-65S';
+        src: url('fonts/汉仪正圆-65S.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文彩云';
+        src: url('fonts/华文彩云.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文仿宋';
+        src: url('fonts/华文仿宋.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文琥珀';
+        src: url('fonts/华文琥珀.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文楷体';
+        src: url('fonts/华文楷体.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文隶书';
+        src: url('fonts/华文隶书.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文细黑';
+        src: url('fonts/华文细黑.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文新魏';
+        src: url('fonts/华文新魏.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文行楷';
+        src: url('fonts/华文行楷.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '华文中宋';
+        src: url('fonts/华文中宋.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '宋体';
+        src: url('fonts/宋体.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '微软雅黑';
+        src: url('fonts/微软雅黑.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: '微软雅黑 Bold';
+        src: url('fonts/微软雅黑 Bold.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      .fallback-font {
+        font-family: monospace, sans-serif; /* Generic fallback for SVG text if font not loaded */
+      }
+      
+      /* Prevent text selection during drag operations */
+      body.dragging-active, body.dragging-active * {
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        /* cursor: grabbing !important; /* Optional: if you want the grabbing cursor globally */
+      }
+    </style>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "vite": "https://esm.sh/vite@^6.3.5",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^4.5.0"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/inkplate/oepl_json_designer/assets/index-CebQsBY-.js"></script>
+  <link rel="stylesheet" crossorigin href="/inkplate/oepl_json_designer/assets/index-tn0RQdqM.css">
+</head>
+  <body class="bg-slate-100 dark:bg-slate-900">
+    <script>
+      // Apply dark mode immediately based on localStorage
+      if (localStorage.getItem('oelDesigner_darkMode') === 'true' ||
+          (!('oelDesigner_darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+    <div id="root"></div>
+  </body>
+</html>

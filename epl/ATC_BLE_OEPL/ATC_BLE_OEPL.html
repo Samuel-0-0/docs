@@ -1,0 +1,3567 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ATC_BLE_OEPL 固件维护工作站</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ---------------- CSS 变量定义 (暗/亮色主题) ---------------- */
+        :root {
+            /* 亮色模式 (默认) */
+            --bg-body: #f0f2f5;
+            --bg-surface: #ffffff;
+            --bg-sidebar: #ffffff;
+            --bg-log: #1e1e1e;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+            --text-log: #4af626;
+            --border-color: #dadce0;
+            --primary: #1a73e8;
+            --primary-hover: #1557b0;
+            --success: #0f9d58;
+            --success-hover: #0b8043;
+            --danger: #d93025;
+            --danger-hover: #b31412;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+        }
+
+        [data-theme="dark"] {
+            /* 暗色模式 */
+            --bg-body: #121212;
+            --bg-surface: #1e1e1e;
+            --bg-sidebar: #252526;
+            --bg-log: #0d0d0d;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --text-log: #4af626;
+            --border-color: #3c4043;
+            --primary: #8ab4f8;
+            --primary-hover: #aecbfa;
+            --success: #81c995;
+            --success-hover: #5bb974;
+            --danger: #f28b82;
+            --danger-hover: #ee675c;
+            --input-bg: #2d2e30;
+            --input-border: #5f6368;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ---------------- 滚动条美化 ---------------- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.6); }
+
+        /* ---------------- 基础样式 ---------------- */
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Roboto", system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ---------------- 主布局结构 ---------------- */
+        .app-wrapper {
+            width: 100%;
+            max-width: 1600px;
+            height: 96vh;
+            background-color: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            display: flex;
+            overflow: hidden;
+            margin: 0 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .sidebar-nav {
+            flex-grow: 1;
+            padding: 15px 10px;
+            overflow-y: auto;
+        }
+
+        .nav-btn {
+            width: 100%;
+            text-align: left;
+            padding: 22px 16px;
+            margin-bottom: 6px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .nav-btn:hover { background-color: rgba(26, 115, 232, 0.08); color: var(--primary); }
+        .nav-btn.active { background-color: var(--primary); color: white; }
+
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--bg-body); /* 区分主区和面板 */
+        }
+
+        .top-header {
+            height: 60px;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-surface);
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .status-badge {
+            background-color: rgba(26, 115, 232, 0.1);
+            color: var(--primary);
+            padding: 0 16px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1px solid rgba(26, 115, 232, 0.2);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0 12px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .theme-toggle:hover { background-color: var(--bg-body); }
+
+        .content-scroll-area {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ---------------- 排版与控件规范统一 ---------------- */
+        h2 { margin-top: 0; color: var(--text-main); font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; }
+        h3 { margin-top: 0; color: var(--text-main); font-size: 1.05rem; font-weight: 600; padding-bottom: 10px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .control-group { margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        
+        label { font-weight: 500; color: var(--text-muted); font-size: 0.85rem; white-space: nowrap; }
+        
+        /* 统一输入框与下拉菜单 */
+        input[type="text"], input[type="number"], select, input[type="file"] {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-sm);
+            padding: 0 10px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            height: 32px; /* 统一高度 */
+            transition: all 0.2s;
+            outline: none;
+        }
+        textarea {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            outline: none;
+            width: 100%;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1); }
+        
+        /* 定制美化 Checkbox */
+        input[type="checkbox"] {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid var(--input-border);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        input[type="checkbox"]:checked { background-color: var(--primary); border-color: var(--primary); }
+        input[type="checkbox"]:checked::after { content: ''; width: 4px; height: 8px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px;}
+        .checkbox-label { cursor: pointer; color: var(--text-main); display: inline-flex; align-items: center; margin-right: 8px; }
+
+        /* 定制美化文件上传按钮 */
+        input[type="file"] { padding: 3px; cursor: pointer; }
+        input[type="file"]::file-selector-button {
+            height: 100%;
+            border: none;
+            background: var(--bg-body);
+            color: var(--text-main);
+            padding: 0 12px;
+            margin-right: 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover { background: var(--border-color); }
+
+        /* 统一按钮 */
+        button, input[type="button"] {
+            background-color: var(--bg-surface);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0 16px;
+            height: 32px; /* 统一高度 */
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        button:hover, input[type="button"]:hover { background-color: var(--bg-body); border-color: var(--text-muted); }
+        button:active, input[type="button"]:active { transform: scale(0.98); }
+        button:disabled, input[type="button"]:disabled { background-color: var(--bg-body); color: var(--text-muted); cursor: not-allowed; opacity: 0.6; border-color: var(--border-color); }
+        
+        /* 强动作按钮 */
+        #mainUploadButton, #connectbutton, .btn-primary { background-color: var(--primary); color: #fff; border-color: var(--primary); }
+        #mainUploadButton:hover, #connectbutton:hover, .btn-primary:hover { background-color: var(--primary-hover); }
+        
+        .btn-success { background-color: var(--success); color: white; border-color: var(--success); }
+        .btn-success:hover { background-color: var(--success-hover); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; border-color: var(--danger); }
+        .btn-danger:hover { background-color: var(--danger-hover); color: white; }
+
+        /* ---------------- 特定模块排版 ---------------- */
+        
+        #myCanvas { border: 1px solid var(--border-color); background-color: #fff; display: block; margin: 15px auto; max-width: 100%; height: auto; border-radius: var(--radius-sm); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        .preset-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .preset-chip { 
+            font-size: 0.85rem; padding: 0 14px; height: 28px; display: inline-flex; align-items: center; border-radius: 6px; 
+            background: var(--bg-body); border: 1px solid var(--border-color); 
+            cursor: pointer; transition: all 0.2s; color: var(--text-main); font-weight: 500;
+        }
+        .preset-chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(26, 115, 232, 0.05); }
+        .preset-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .checkbox-group-container { display: flex; flex-wrap: wrap; gap: 16px; background: var(--bg-body); padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+
+        /* --- 自定义硬件配置页网格排版 (核心优化区) --- */
+        fieldset { border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; background-color: var(--bg-surface); }
+        legend { font-weight: 600; color: var(--primary); background: rgba(26, 115, 232, 0.08); padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; border: 1px solid rgba(26, 115, 232, 0.15); }
+
+        .config-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+        
+        .pinout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+            align-items: center;
+        }
+        .pinout-item {
+            display: flex;
+            align-items: center;
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 4px 8px;
+            transition: border-color 0.2s;
+        }
+        .pinout-item:hover { border-color: var(--primary); }
+        .pinout-item label {
+            flex: 0 0 80px;
+            text-align: right;
+            padding-right: 10px;
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .pinout-item select, .pinout-item input {
+            flex: 1;
+            width: 100%;
+            min-width: 0;
+            height: 28px; /* 网格内稍微紧凑点 */
+            padding: 0 8px;
+            border-color: transparent; /* 去除内部边框显的更干净 */
+            background: var(--bg-surface);
+        }
+        .pinout-item select:focus, .pinout-item input:focus { border-color: var(--primary); }
+        
+        .pinout-full-width { grid-column: 1 / -1; }
+        
+        .pinout-divider {
+            grid-column: 1 / -1;
+            border-top: 1px dashed var(--border-color);
+            margin-top: 8px;
+            padding-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .lut-group label { display: block; margin: 12px 0 6px 0; font-weight: 600; color: var(--primary); font-size: 0.85rem; }
+
+        /* ---------------- 日志区域样式 ---------------- */
+        .logs-panel {
+            height: 240px;
+            background-color: var(--bg-log);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .log-header span { color: #8ab4f8; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; }
+        .log-header button { height: 26px; padding: 0 12px; font-size: 0.75rem; background-color: #333; color: #ddd; border: 1px solid #444; }
+        .log-header button:hover { background-color: #444; color: #fff; }
+
+        #log, #uart-log {
+            flex-grow: 1;
+            padding: 12px 16px;
+            overflow-y: auto;
+            color: var(--text-log);
+            font-family: 'JetBrains Mono', 'Consolas', monospace; /* 优化为更专业的代码字体 */
+            font-size: 0.75rem; /* 字体调小 */
+            line-height: 1.5;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-container { display: none; height: 100%; flex-direction: column; }
+        .log-container.active { display: flex; }
+
+        /* ---------------- 调试图表 ---------------- */
+        #debug-chart-container { width: 100%; min-height: 400px; margin-top: 10px; }
+        .status-box { flex: 1; min-width: 120px; text-align: center; padding: 15px; background: var(--bg-body); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+        .status-box label { display: block; margin-bottom: 8px; font-size: 0.8rem; }
+        .status-box div { font-size: 1.5rem; font-weight: 700; }
+
+        /* 响应式调整 */
+        @media (max-width: 900px) {
+            .app-wrapper { flex-direction: column; height: 100vh; margin: 0; border-radius: 0; border: none;}
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .sidebar-nav { display: flex; overflow-x: auto; padding: 10px; white-space: nowrap; }
+            .nav-btn { width: auto; display: inline-block; margin: 0 5px 0 0; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>ATC_BLE_OEPL<br>固件维护工作站</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn" data-target="view-uart" onclick="showView('uart')">⚡ UART 刷写器</button>
+                <button class="nav-btn" data-target="view-ble" onclick="showView('ble')">🔗 BLE 连接控制</button>
+                <button class="nav-btn" data-target="view-preset" onclick="showView('preset')">✨ 预设配置</button>
+                <button class="nav-btn" data-target="view-config" onclick="showView('config')">⚙️ 自定义硬件配置</button>
+                <button class="nav-btn" data-target="view-canvas" onclick="showView('canvas')">🖼️ 图像测试</button>
+                <button class="nav-btn" data-target="view-debug" onclick="showView('debug')">📊 状态监控</button>
+                <button class="nav-btn" data-target="view-lut" onclick="showView('lut')">🧪 LUT 试验场</button>
+            </nav>
+            <div class="sidebar-footer">
+                <span>原版作者: ATC1441</span>
+                <a href="https://atc1441.github.io/ATC_BLE_OEPL_Image_Upload.html" target="_blank" style="color:var(--primary);text-decoration:none; font-weight: 500;">原版</a>
+            </div>
+        </aside>
+
+        <main class="main-container">
+            <header class="top-header">
+                <div id="status" class="status-badge">就绪 / 未连接</div>
+                <div>
+                    <button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+                </div>
+            </header>
+
+            <div class="content-scroll-area">
+                
+                <div id="view-canvas" class="view-section active">
+                    <h2>图像测试</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">使用此功能前，请确保在 <strong>[BLE 连接控制]</strong> 面板中已连接设备。</p>
+                    <div class="card">
+                        <div class="control-group">
+                            <label for="widthInput">画布尺寸:</label>
+                            <input type="number" id="widthInput" placeholder="宽" value="184" style="width: 100px;" /> 
+                            <span style="color: var(--text-muted);">x</span>
+                            <input type="number" id="heightInput" placeholder="高" value="384" style="width: 100px;" />
+                            <button onclick="createCanvas()">重置画布</button>
+                        </div>
+                        <div class="control-group">
+                            <label for="textInput">文本渲染:</label>
+                            <input type="text" id="textInput" placeholder="输入文本" value="示例" style="flex-grow: 1; max-width: 400px;" />
+                            <button onclick="addText()">添加文本</button>
+                        </div>
+                        <div class="control-group">
+                            <label for="imageUpload">上传图像:</label>
+                            <input type="file" id="imageUpload" accept="image/*" onclick="resetImageSelector()" onchange="uploadImage()" />
+                        </div>
+                        <div class="checkbox-group-container">
+                            <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" checked="true" id="ditherrin" /> 启用抖动</label>
+                            <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" id="secondColorCheckbox" /> 第二颜色(红)</label>
+                            <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" id="thirdColorCheckbox" /> 第三颜色(黄)</label>
+                            <label class="checkbox-label"><input onchange="getPixelData()" type="checkbox" id="flipVerticalCheckbox" /> 垂直翻转</label>
+                            <button onclick="getPixelData()" style="margin-left: auto;">重新提取像素数据</button>
+                        </div>
+                        <div class="control-group" style="margin-top: 16px;">
+                            <button id="mainUploadButton" type="button" onclick="sendimg(document.getElementById('pixelData').value);">上传原始图像</button>
+                            <button id="uploadCompressedImageButton" class="btn-success" type="button" onclick="sendimgCompressed(document.getElementById('pixelData').value);">上传压缩图像</button>
+                            <button type="button" onclick="sendcmd('0005');" title="读取基本信息，若可能更新画布">读取屏幕信息同步至画布</button>
+                        </div>
+                    </div>
+                    <canvas id="myCanvas" width="184" height="384"></canvas>
+                    <textarea id="pixelData" rows="3" placeholder="提取的十六进制像素数据将显示在这里..." style="margin-top: 15px;"></textarea>
+                </div>
+
+                <div id="view-ble" class="view-section">
+                    <h2>BLE 连接控制</h2>
+                    <div class="card">
+                        <h3>连接设备</h3>
+                        <div class="control-group">
+                            <label for="namePrefix">设备前缀:</label>
+                            <input type="text" id="namePrefix" value="ATC_" placeholder="ATC_（逗号分隔）" style="width: 200px;" />
+                            <label class="checkbox-label" style="margin-left: 10px;"><input type="checkbox" id="rememberDeviceCheckbox" onchange="saveRememberDeviceSetting()" /> 记住最后连接的设备</label>
+                        </div>
+                        <div class="control-group">
+                            <button id="connectbutton" class="btn-success" type="button" onclick="preConnect();">扫描并连接</button>
+                            <button type="button" onclick="reConnect();">尝试重新连接</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>高级操作指令</h3>
+                        <div class="control-group">
+                            <label>固件 OTA:</label>
+                            <input type="file" id="selectFirmware" accept=".bin" onclick="resetFileSelector()" onchange="selectFirmwareVoid()" />
+                            <button type="button" id="flashFromServerBleButton" onclick="flashFirmwareFromServerViaBLE()">从服务器刷写最新版</button>
+                        </div>
+                        <div class="control-group">
+                            <label for="cmdTYPE">预设显示类型:</label>
+                            <select id="cmdTYPE" style="flex-grow: 1; max-width: 300px;"></select>
+                            <button type="button" onclick="setDisplayType(document.getElementById('cmdTYPE').value);">应用类型</button>
+                        </div>
+                        <div class="control-group">
+                            <label>时钟与状态:</label>
+                            <button type="button" onclick="sendcmd('0006');" class="btn-success">启用 OEPL</button>
+                            <button type="button" onclick="sendcmd('0007');" class="btn-danger">禁用 OEPL</button>
+                            <button type="button" onclick="sendClockMode(1)">标准时钟</button>
+                            <button type="button" onclick="sendClockMode(2)">分段时钟</button>
+                            <button type="button" onclick="sendcmd('000C');">禁用时钟</button>
+                        </div>
+                        <div class="control-group">
+                            <label for="cmdBLESpeed">ADV 广播间隔:</label>
+                            <select id="cmdBLESpeed" style="width: 150px;">
+                                <option value="1000">625ms</option>
+                                <option value="3200">2000ms</option>
+                                <option value="4000">2500ms</option>
+                                <option value="5000">3125ms</option>
+                                <option value="6000">3750ms</option>
+                                <option value="7000">4375ms</option>
+                                <option value="8000">5000ms</option>
+                                <option value="10000">6250ms</option>
+                            </select>
+                            <button type="button" onclick="setBleAdvInterval(document.getElementById('cmdBLESpeed').value);">设置间隔</button>
+                        </div>
+                        <div class="control-group">
+                            <label for="cmdCustomMac">自定义 MAC:</label>
+                            <input type="text" id="cmdCustomMac" value="1122334455667788" maxlength="16" style="width: 150px;" placeholder="HEX, 8Byte" />
+                            <button type="button" onclick="setCustomMac()">写入 MAC</button>
+                        </div>
+                        <div class="control-group">
+                            <label>危险/系统:</label>
+                            <button type="button" onclick="sendcmd('000A1234');" class="btn-danger">重置显示配置</button>
+                            <button type="button" onclick="sendcmd('0012');" class="btn-danger">禁用 BLE 直到重启</button>
+                            <button type="button" onclick="sendcmd('0014');">进入深度睡眠</button>
+                            <button type="button" onclick="sendcmd('0017');">重启设备</button>
+                        </div>
+                        <hr style="border-color: var(--border-color); margin: 20px 0;">
+                        <div class="control-group">
+                            <label for="cmdTXT">发送自定义 CMD:</label>
+                            <input type="text" id="cmdTXT" value="0001" style="width: 200px;" />
+                            <button type="button" onclick="sendcmd(document.getElementById('cmdTXT').value);">发送 (HEX)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-preset" class="view-section">
+                    <h2>预设配置</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">使用此功能前，请确保已连接设备。点击下方预设库按钮会自动填入预设到自定义预设区域，可以进行修改。如果修改了预设，请先点击"校验并应用自定义预设"。然后点击"💾 写入配置"。</p>
+                    <div class="card">
+                        <h3>预设库</h3>
+                        <div class="preset-grid" id="presetContainer"></div>
+                        
+                        <h3 style="margin-top: 25px;">自定义预设 <span style="font-size:0.8rem;color:var(--text-muted);font-weight:normal;"> (92 字节 / 184 位 HEX)</span></h3>
+                        <div style="display:flex; gap:12px; align-items: flex-start;">
+                            <textarea id="customPayload" rows="3" placeholder="140063000200..." style="flex:1;"></textarea>
+                        </div>
+                        
+                        <div class="control-group" style="margin-top: 20px;">
+                            <button onclick="useCustomPayload()" style="white-space: nowrap;">校验并应用自定义预设</button>
+                            <button class="btn-success" onclick="sendcmd('0010' + document.getElementById('customPayload').value)">💾 写入配置</button>
+                            <button onclick="sendcmd('0011')">📖 读取设备当前配置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-config" class="view-section">
+                    <h2>自定义硬件配置</h2>
+                    <div class="control-group">
+                        <button type="button" onclick="readDynamicConfig()">读取设备当前配置</button>
+                        <button type="button" onclick="sendDynamicConfigTest()">下发测试当前配置</button>
+                        <button class="btn-success" type="button" onclick="sendDynamicConfigSave()">保存配置并重启设备</button>
+                    </div>
+                    
+                    <div class="card" style="padding: 24px;">
+                        <fieldset>
+                            <legend>显示屏幕设置</legend>
+                            <div class="config-row">
+                                <div class="pinout-item"><label>特殊类型:</label> <select id="conf_screen_type"></select></div>
+                                <div class="pinout-item"><label>OEPL (HEX):</label> <input type="text" id="conf_hw_type" value="0001" maxlength="4" /></div>
+                                <div class="pinout-item"><label>控制器:</label> 
+                                    <select id="conf_screen_functions">
+                                        <option value="0">NONE</option><option value="1">UC</option><option value="2">SSD</option>
+                                        <option value="3">ST</option><option value="4">TI</option><option value="5">UC_PRO</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-row">
+                                <div class="pinout-item"><label>物理宽度:</label> <input type="number" id="conf_screen_w" value="184" /></div>
+                                <div class="pinout-item"><label>物理高度:</label> <input type="number" id="conf_screen_h" value="384" /></div>
+                                <div class="pinout-item"><label>宽度偏移:</label> <input type="number" id="conf_screen_w_offset" value="0" /></div>
+                                <div class="pinout-item"><label>高度偏移:</label> <input type="number" id="conf_screen_h_offset" value="0" /></div>
+                                <div class="pinout-item"><label>支持颜色数:</label> <input type="number" id="conf_screen_colors" value="2" /></div>
+                            </div>
+                            <div class="checkbox-group-container" style="margin-top: 16px;">
+                                <label class="checkbox-label"><input type="checkbox" id="conf_screen_w_h_inversed_ble" /> BLE 通信反转 W/H</label>
+                                <label class="checkbox-label"><input type="checkbox" id="conf_screen_w_h_inversed" /> 显示渲染反转 W/H</label>
+                                <label class="checkbox-label"><input type="checkbox" id="conf_screen_black_invert" /> 反转黑色(Black)</label>
+                                <label class="checkbox-label"><input type="checkbox" id="conf_screen_second_color_invert" /> 反转第二颜色</label>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_epd_pinout_enabled" checked onchange="togglePinoutSection('epd_pinout_details', this.checked)" /> EPD 墨水屏引脚</label></legend>
+                            <div id="epd_pinout_details" class="pinout-grid" >
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;">
+                                    <div class="pinout-item"><label>RESET:</label><select class="gpio-select" id="conf_epd_RESET"></select></div>
+                                    <div class="pinout-item"><label>DC:</label><select class="gpio-select" id="conf_epd_DC"></select></div>
+                                    <div class="pinout-item"><label>BUSY:</label><select class="gpio-select" id="conf_epd_BUSY"></select></div>
+                                    <div class="pinout-item"><label>BUSYs:</label><select class="gpio-select" id="conf_epd_BUSYs"></select></div>
+                                    <div class="pinout-item"><label>CS:</label><select class="gpio-select" id="conf_epd_CS"></select></div>
+                                    <div class="pinout-item"><label>CSs:</label><select class="gpio-select" id="conf_epd_CSs"></select></div>
+                                    <div class="pinout-item"><label>CLK:</label><select class="gpio-select" id="conf_epd_CLK"></select></div>
+                                    <div class="pinout-item"><label>MOSI:</label><select class="gpio-select" id="conf_epd_MOSI"></select></div>
+                                    <div class="pinout-item"><label>ENABLE:</label><select class="gpio-select" id="conf_epd_ENABLE"></select></div>
+                                    <div class="pinout-item"><label>ENABLE1:</label><select class="gpio-select" id="conf_epd_ENABLE1"></select></div>
+                                    <div class="pinout-item"><label>FLASH_CS:</label><select class="gpio-select" id="conf_epd_FLASH_CS"></select></div>
+                                </div>
+                                
+                                
+                                <div class="pinout-divider">
+                                    <div class="checkbox-group-container"><label class="checkbox-label""><input type="checkbox" id="conf_epd_ENABLE_INVERT" /> 信号反转 ENABLE 引脚</label></div>
+                                    <div class="pinout-item"><label>上拉 CFG Sleep:</label><select class="pull-type-select" id="conf_epd_PIN_CONFIG_SLEEP"></select></div>
+                                    <div class="pinout-item"><label>上拉 ENABLE:</label><select class="pull-type-select" id="conf_epd_PIN_ENABLE"></select></div>
+                                    <div class="pinout-item"><label>上拉 ENABLE Sleep:</label><select class="pull-type-select" id="conf_epd_PIN_ENABLE_SLEEP"></select></div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                            <fieldset>
+                                <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_led_pinout_enabled" onchange="togglePinoutSection('led_pinout_details', this.checked)" /> LED 引脚</label></legend>
+                                <div id="led_pinout_details" class="pinout-grid" style="display: none; margin-top:0;">
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>R:</label><select class="gpio-select" id="conf_led_R"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>G:</label><select class="gpio-select" id="conf_led_G"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>B:</label><select class="gpio-select" id="conf_led_B"></select></div>
+                                    <div class="checkbox-group-container" style="margin-top: 8px;">
+                                        <label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_led_inverted" /> 反转 LED 驱动电平</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_nfc_pinout_enabled" onchange="togglePinoutSection('nfc_pinout_details', this.checked)" /> NFC 引脚</label></legend>
+                                <div id="nfc_pinout_details" class="pinout-grid" style="display: none; margin-top:0;">
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>SDA:</label><select class="gpio-select" id="conf_nfc_SDA"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>SCL:</label><select class="gpio-select" id="conf_nfc_SCL"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>CS:</label><select class="gpio-select" id="conf_nfc_CS"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>IRQ:</label><select class="gpio-select" id="conf_nfc_IRQ"></select></div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend><label class="checkbox-label" style="margin:0;"><input type="checkbox" id="conf_flash_pinout_enabled" onchange="togglePinoutSection('flash_pinout_details', this.checked)" /> 外部 Flash</label></legend>
+                                <div id="flash_pinout_details" class="pinout-grid" style="display: none; margin-top:0;">
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>CS:</label><select class="gpio-select" id="conf_flash_CS"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>CLK:</label><select class="gpio-select" id="conf_flash_CLK"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>MISO:</label><select class="gpio-select" id="conf_flash_MISO"></select></div>
+                                    <div class="pinout-item" style="margin-top: 8px;"><label>MOSI:</label><select class="gpio-select" id="conf_flash_MOSI"></select></div>
+                                </div>
+                            </fieldset>
+                            
+                            <fieldset>
+                                <legend>其他系统引脚</legend>
+                                <div class="pinout-grid" style="margin-top:0;">
+                                    <div class="pinout-item"><label>ADC 引脚:</label><select class="gpio-select" id="conf_ADC_pinout"></select></div>
+                                    <div class="pinout-item"><label>UART TX:</label><select class="gpio-select" id="conf_UART_pinout"></select></div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        
+                        <div style="margin-top:20px;">
+                            <label style="display:block; margin-bottom: 8px; font-weight: 600;">生成的 Payload (HEX):</label>
+                            <textarea id="dynamicConfigPayload" rows="3" readonly placeholder="此区域会自动生成基于以上选项构建的 Payload..." style="background: var(--bg-body);"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-lut" class="view-section">
+                    <h2>LUT 试验场</h2>
+                    <div class="card">
+                        <h3>UC 控制器 LUT</h3>
+                        <div class="lut-group">
+                            <label>UC VCOM LUT Reg 0x20</label><textarea id="uc_reg_20" rows="2">26 0A 39 39 A0 00 00 00 19 19 19 19 19 19 19 19</textarea>
+                            <label>UC W2W LUT Reg 0x21</label><textarea id="uc_reg_21" rows="2">14 02 01 02 01 01 01 01 14 27 24 09 01 02 01 02 14 02 14 01 01 05 88 48 88 48 01 01 1C 03 01 03 01 01 01 04 03 03 03 03 02 01 03 03 02 28 06 01 01 02 03 02 06 25 01 01</textarea>
+                            <label>UC B2W LUT Reg 0x22</label><textarea id="uc_reg_22" rows="2">14 42 01 82 81 01 01 01 94 27 24 49 01 02 01 02 94 02 94 01 01 05 48 88 48 88 01 01 1C 43 01 83 01 01 01 04 03 03 43 83 02 01 03 83 02 E8 06 01 01 02 83 02 C6 E5 01 01</textarea>
+                            <label>UC W2B LUT Reg 0x23</label><textarea id="uc_reg_23" rows="2">14 42 01 82 81 01 01 01 94 67 64 49 01 02 01 02 94 02 94 01 01 05 48 88 48 88 01 01 1C 03 01 03 01 01 01 04 03 83 03 03 02 01 03 83 82 28 06 01 01 02 83 82 06 25 01 01</textarea>
+                            <label>UC B2B LUT Reg 0x24</label><textarea id="uc_reg_24" rows="2">14 42 01 82 81 01 01 01 94 27 64 49 01 02 01 02 94 02 94 01 01 05 48 88 48 88 01 01 1C 43 01 83 81 01 01 04 43 83 03 83 02 01 03 03 02 28 46 01 01 02 03 02 46 25 01 01</textarea>
+                            <label>UC Border LUT Reg 0x25</label><textarea id="uc_reg_25" rows="2"></textarea>
+                            <div style="margin-top: 16px;">
+                                <button type="button" class="btn-primary" onclick="sendCustomUCLUT(document.getElementById('uc_reg_20').value, document.getElementById('uc_reg_21').value, document.getElementById('uc_reg_22').value, document.getElementById('uc_reg_23').value, document.getElementById('uc_reg_24').value, document.getElementById('uc_reg_25').value);">生成并上传 UC LUT</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>SSD 控制器 LUT</h3>
+                        <div class="lut-group">
+                            <label>SSD LUT Reg 0x32</label><textarea id="ssd_reg_32" rows="4"></textarea>
+                            <div style="margin-top: 16px;"><button type="button" class="btn-primary" onclick="sendCustomSSDLUT(document.getElementById('ssd_reg_32').value);">生成并上传 SSD LUT</button></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>原始 LUT 数据读写</h3>
+                        <div class="lut-group">
+                            <label>原始 LUT 数据 (HEX):</label>
+                            <textarea id="lutData" rows="4"></textarea>
+                            <div style="margin-top: 16px; display: flex; gap: 12px;">
+                                <button type="button" class="btn-primary" onclick="sendCustomLUT(document.getElementById('lutData').value);">写入原始 LUT 数据</button>
+                                <button type="button" onclick="sendcmd('000D');">从设备读取原始 LUT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-debug" class="view-section">
+                    <h2>状态监控</h2>
+                    <div class="card" style="display: flex; flex-wrap: wrap; gap: 16px;">
+                        <div class="status-box"><label>电池电压</label><div style="color: var(--success);" id="status-battery">N/A</div></div>
+                        <div class="status-box"><label>ADC 原值</label><div style="color: var(--primary);" id="status-adc-raw">N/A</div></div>
+                        <div class="status-box"><label>ADC 温度</label><div style="color: var(--danger);" id="status-adc-temp">N/A</div></div>
+                        <div class="status-box"><label>EPD 温度</label><div style="color: #17a2b8;" id="status-epd-temp">N/A</div></div>
+                        <div class="status-box"><label>最近更新</label><div style="font-size: 1.1rem; color: var(--text-muted); margin-top: 6px;" id="status-timestamp">N/A</div></div>
+                    </div>
+                    <div class="card" style="padding: 20px;">
+                        <div id="debug-chart-container">
+                            <canvas id="debugChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-uart" class="view-section">
+                    <h2>UART 刷写器</h2>
+                    <div class="checkbox-group-container" style="border-color: var(--danger); background: rgba(217, 48, 37, 0.05); margin-bottom: 20px;">
+                        <span style="color: var(--danger); font-size: 0.85rem; font-weight: 500;">⚠️ 注意: 请使用 HTTPS 访问以调用 Web Serial API。设备需正确连接 USB-TTL 模块。</span>
+                    </div>
+                    <div class="card">
+                        <h3>1. COM 端口设置</h3>
+                        <div class="control-group">
+                            <input type="button" class="btn-primary" id="uart_butOpen" value="打开 USB-COM 端口">
+                            <label for="uart_ubaud" style="margin-left: 10px;">波特率:</label>
+                            <select id="uart_ubaud" title="推荐: 921600 波特率">
+                                <option value="115200">115200</option><option value="230400">230400</option>
+                                <option value="460800">460800</option><option value="921600" selected>921600</option>
+                                <option value="1500000">1500000</option><option value="2000000">2000000</option>
+                            </select>
+                            <label for="uart_uatime" style="margin-left: 10px;">握手激活时间:</label>
+                            <select id="uart_uatime" title="激活时间: 设置为高于广播间隔">
+                                <option value="0">0 ms</option><option value="100">100 ms</option>
+                                <option value="1000">1 sec</option><option value="2000" selected>2 sec</option><option value="3000">3 sec</option>
+                            </select>
+                        </div>
+                        
+                        <h3>2. 选择目标固件</h3>
+                        <div class="control-group">
+                            <input type="file" accept=".bin" id="uart_file" style="flex-grow: 1; max-width: 400px;" />
+                            <input type="button" id="uart_butLoadFromServer" value="加载在线最新版" disabled>
+                        </div>
+                        
+                        <h3>3. 硬件设备标识</h3>
+                        <div class="control-group">
+                            <select id="uart_deviceTypeSelect" style="flex-grow: 1; max-width: 400px;"></select>
+                            <input type="button" id="uart_butWriteDeviceType" value="写入设备类型 (0x79000)" disabled>
+                        </div>
+
+                        <h3>4. 执行动作</h3>
+                        <div class="control-group" style="background: var(--bg-body); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            <input type="button" class="btn-success" id="uart_butWrite" value="仅刷入固件" disabled>
+                            <input type="button" class="btn-success" id="uart_butWriteAndType" value="刷入固件 + 设备类型" disabled>
+                            <span id="uart_swrite" style="font-weight: 600; color: var(--danger); margin-left: auto; font-size: 0.85rem;">请先打开 COM 并选择文件</span>
+                        </div>
+                        
+                        <hr style="border-color: var(--border-color); margin: 20px 0;">
+                        <div class="control-group">
+                            <label>底层命令:</label>
+                            <input type="button" id="uart_butUnlock" value="解锁 Flash" disabled>
+                            <input type="button" id="uart_butErase" value="全片擦除 (Erase All)" class="btn-danger" disabled>
+                            <input type="button" id="uart_butReset" value="软重置 (Reset MCU)" disabled>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="logs-panel">
+                <div class="log-header">
+                    <span id="log-title-text">📶 运行日志 TERMINAL</span>
+                    <button type="button" onclick="clearActiveLog()">清除</button>
+                </div>
+                <div id="log-ble-wrapper" class="log-container active">
+                    <pre id="log"></pre>
+                </div>
+                <div id="log-uart-wrapper" class="log-container">
+                    <pre id="uart-log"></pre>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <script src="./pako.js"></script>
+    
+    <script>
+        // ============================================================================
+        // 核心与主题逻辑
+        // ============================================================================
+
+        // 主题切换
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+        }
+
+        // 初始化加载主题
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+
+        // 导航切换
+        function showView(viewId) {
+            // 切页
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            
+            // 切按钮状态
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.querySelector(`.nav-btn[data-target="view-${viewId}"]`);
+            if(activeBtn) activeBtn.classList.add('active');
+
+            // 处理控制台切换 (UART 独立使用一个日志窗口)
+            if (viewId === 'uart') {
+                document.getElementById('log-ble-wrapper').classList.remove('active');
+                document.getElementById('log-uart-wrapper').classList.add('active');
+                document.getElementById('log-title-text').innerHTML = "⚡ UART 刷写日志";
+            } else {
+                document.getElementById('log-uart-wrapper').classList.remove('active');
+                document.getElementById('log-ble-wrapper').classList.add('active');
+                document.getElementById('log-title-text').innerHTML = "📶 BLE 运行日志";
+            }
+
+            // 处理特殊视图行为
+            if (viewId === 'debug') {
+                initDebugChart();
+                startDebugPolling();
+            } else if (viewId === 'preset') {
+                buildPresetChips();
+            } else {
+                stopDebugPolling();
+                if (myDebugChart) {
+                    myDebugChart.destroy();
+                    myDebugChart = null;
+                }
+            }
+        }
+
+        function clearActiveLog() {
+            const activeWrap = document.querySelector('.log-container.active');
+            if (activeWrap) {
+                const pre = activeWrap.querySelector('pre');
+                if (pre) pre.innerHTML = "";
+            }
+        }
+
+        // ============================================================================
+        // 数据字典与预设常量
+        // ============================================================================
+        const deviceTypes = [
+            { id: 65535, name: "动态（HW 配置标签）" },
+            { id: 1, name: "1: 350 HS BWY UC" },
+            { id: 2, name: "2: 350 HS BWY UC 反转" },
+            { id: 3, name: "3: 350 HS BWY SSD" },
+            { id: 4, name: "4: 350 HS BW UC" },
+            { id: 5, name: "5: 200 HS BWY SSD" },
+            { id: 6, name: "6: 750 HS BWY UC" },
+            { id: 7, name: "7: 350 HS BWR UC" },
+            { id: 8, name: "8: 350 HS BWR SSD" },
+            { id: 9, name: "9: 266 HS BWR SSD" },
+            { id: 10, name: "10: 213 HS BW UC" },
+            { id: 11, name: "11: 213 Gici BWR SSD" },
+            { id: 12, name: "12: 290 Gici BWR SSD" },
+            { id: 13, name: "13: 213 Gici BW ST" },
+            { id: 14, name: "14: 970 TI BWR" },
+            { id: 15, name: "15: 1200 TI BWR" },
+            { id: 16, name: "16: 213 HS BWR SSD" },
+            { id: 17, name: "17: 350 HS BWRY JD" },
+            { id: 18, name: "18: 154 HS BWR H SSD" },
+            { id: 19, name: "19: 213 HS BWR UC" },
+            { id: 20, name: "20: 420 HS BWR SSD" },
+            { id: 21, name: "21: 420 HS BWR UC" },
+            { id: 22, name: "22: 420 Gici BWR SSD" },
+            { id: 23, name: "23: 1200 TI BWR V2" },
+            { id: 24, name: "24: 290 HS BWR SSD" },
+            { id: 25, name: "25: 213 HS BW SSD" },
+            { id: 26, name: "26: 581 TI BW" },
+            { id: 27, name: "27: 581 TI BWR" },
+            { id: 28, name: "28: 213 Gici BWR UC" },
+            { id: 29, name: "29: 213 Gici BW SSD" },
+            { id: 30, name: "30: 213 Gici BW UC" },
+            { id: 31, name: "31: 583 HS BWY UC" },
+            { id: 32, name: "32: 350 HS BW SSD" },
+            { id: 33, name: "33: 266 HS BWR SSD Offset" },
+            { id: 34, name: "34: 581 TI BWR UC" },
+            { id: 35, name: "35: 346 HS BWY UC" },
+            { id: 36, name: "36: 290 WO BWRY JD" },
+            { id: 37, name: "37: 750 HS BWRY JD" },
+            { id: 38, name: "38: 200 HS BWRY JD" },
+            { id: 39, name: "39: 290 WO BWRY JD V2" },
+            { id: 40, name: "40: 260 HS BWRY JD" },
+            { id: 41, name: "41: 260 WO BWRY JD V2" },
+            { id: 42, name: "42: 420 HS BWY SSD" },
+            { id: 43, name: "43: 290 HS BWR SSD V2" },
+            { id: 44, name: "44: 583 HS BWR UC" },
+            { id: 45, name: "45: 213 HS BWR SSD V2" },
+            { id: 46, name: "46: 290 HS BWR SSD V3" },
+            { id: 47, name: "47: 213 HS BWR UC V2" },
+            { id: 48, name: "48: 350 HS BWR SSD V2" },
+        ];
+        
+        const gpioPins = {
+            "None": 0x0000, "PA0": 0x0001, "PA1": 0x0002, "PA2": 0x0004, "PA3": 0x0008, "PA4": 0x0010, "PA5 (DM)": 0x0020, "PA6 (DP)": 0x0040, "PA7 (SWS)": 0x0080,
+            "PB0": 0x0101, "PB1": 0x0102, "PB2": 0x0104, "PB3": 0x0108, "PB4": 0x0110, "PB5": 0x0120, "PB6": 0x0140, "PB7": 0x0180,
+            "PC0": 0x0201, "PC1": 0x0202, "PC2": 0x0204, "PC3": 0x0208, "PC4": 0x0210, "PC5": 0x0220, "PC6": 0x0240, "PC7": 0x0280,
+            "PD0": 0x0301, "PD1": 0x0302, "PD2": 0x0304, "PD3": 0x0308, "PD4": 0x0310, "PD5": 0x0320, "PD6": 0x0340, "PD7": 0x0380,
+            "PE0": 0x0401, "PE1": 0x0402, "PE2": 0x0404, "PE3": 0x0408,
+        };
+        const gpioPullTypes = { "Float": 0, "Pullup 1M": 1, "Pulldown 100K": 2, "Pullup 10K": 3 };
+        
+        // BLE 预设 Payload 库
+        const PRESETS = [
+            {
+                id: "01",
+                name: "Ali8250_4in2BWR_SSD(400x300, SSD)",
+                payload: "1400630002000001002C019001000000000200010000004D3784006737840000000000000000000801000002000803010000000403000080038001000000000000000000001001200140020000000000000000000000000000000000"
+            },
+            {
+                id: "02",
+                name: "Ali8250_4in2BWR_UC(400x300, UC)",
+                payload: "1400630002000001002C01900100000000020001000000010000000100000000000000000000000801000002000803010000000403000080038001000000000000000000001001200140020000000000000000000000000000000000"
+            },
+            {
+                id: "03",
+                name: "HS8359_2in13BWR_SSD(256x128, SSD, Stellar-M3N@ E31HA)",
+                payload: "1000550002000001000001800000000000020001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "04",
+                name: "HS8359_2in13BW_SSD(256x128, SSD, Stellar-M E31H)",
+                payload: "1900540002000001000001800000000000010001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "05",
+                name: "HS9118_2in13BWR_UC(250x122, UC, Nebular-213R-N M3LW FCC-213)",
+                payload: "130055000100000100FA00800000000000020001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "06",
+                name: "HS9118_2in13BWR_UC(250x122, UC, Nebular-213R-N D3LW FCC-213K)",
+                payload: "130055000100000000FA00800000000000020001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "07",
+                name: "HS9118_2in13BWRY_UC-Pro(250x128, UC-Pro, Nebular-213R-N M3LW FCC-213)",
+                payload: "260055000500000000FA00800000000000030001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "08",
+                name: "HS8359_2in13BWR_SSD(256x128, SSD, Nowa-213R-N)",
+                payload: "1000550002000001000001800000000000020001000000010000000100000001000000000000000801020110038003020000001001000020014001200280010100000101010403080380000001020202400210020000000000000000"
+            },
+            {
+                id: "09",
+                name: "HS9118_4in2BWR_SSD(400x300, SSD, Nebular-420R-N M5LW M5LWG)",
+                payload: "1400630002000001002C01900100000000020001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "10",
+                name: "HS9118_4in2BWRY_UC-Pro(400x300, UC-Pro, Nebular-420R-N M3LW)",
+                payload: "1500630005000000002C01900100000000030001000000010000000100000001000000000000000801020110038001020000000403000080034001200100000100000102011001080380000001020202400210020000000000000000"
+            },
+            {
+                id: "11",
+                name: "Endor_4in2BWR_SSD(400x300, SSD, BLOZI-Endor)",
+                payload: "1400630002000001002c019001000000000200010000004d3784006737840000000000000000002001000020021002400200001001000002010200100300000100000002000403080310030000000000000000000000000000000000"
+            },
+            {
+                id: "12",
+                name: "Endor_5in83BWR_UC(648x480, UC, BLOZI-Endor)",
+                payload: "2c0050000100000100e0018802000000000200010000004d3784006737840000000000763784002001000020021002400200001001000002010200100300000100000002000403080310030000000000000000002001800340018001"
+            }
+        ];
+
+        const SIZEOF_DEFAULT_SETTINGS = 41;
+        const SIZEOF_SCREEN_PINOUT = 26;
+        const SIZEOF_LED_PINOUT = 7;
+        const SIZEOF_NFC_PINOUT = 8;
+        const SIZEOF_FLASH_PINOUT = 8;
+        const BLOCK_DATA_SIZE = 4096;
+        const BLOCK_PART_DATA_SIZE = 230;
+        const BLOCK_REQ_PARTS_BYTES = 6;
+
+        let bleDevice;
+        let gattServer;
+        let Theservice;
+        let writeCharacteristic;
+        let reconnectTrys = 0;
+        let packets = [];
+        let totalPackets = 0;
+        let packetIndex = 0;
+        let currentBlockId = 0;
+        let imgArray = "";
+        let imgArrayLen = 0;
+        let serverFirmwareBuffer = null;
+        
+        let debugPollingInterval = null;
+        let myDebugChart = null;
+        const MAX_CHART_POINTS = 1000;
+
+        function createCanvas() {
+            var width = parseInt(document.getElementById('widthInput').value);
+            var height = parseInt(document.getElementById('heightInput').value);
+            var canvas = document.getElementById('myCanvas');
+            if (isNaN(width) || width <= 0 || isNaN(height) || height <= 0) {
+                addLog("无效的画布尺寸。");
+                return;
+            }
+            if (width > 4000 || height > 4000) {
+                addLog("画布尺寸过大。");
+                return;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            var ctx = canvas.getContext('2d', {
+                willReadFrequently: true
+            });
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+            addLog(`画布已创建/清除: ${width}x${height}`);
+        }
+
+        function addText() {
+            var canvas = document.getElementById('myCanvas');
+            if (!canvas || canvas.width === 0 || canvas.height === 0) {
+                addLog("无法添加文本: 画布未准备好。");
+                return;
+            }
+            var ctx = canvas.getContext('2d', {
+                willReadFrequently: true
+            });
+            var text = document.getElementById('textInput').value;
+            var fontSize = 72;
+            var maxWidth = canvas.width - 20;
+            var x = canvas.width / 2;
+            var y = canvas.height / 2;
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'black';
+
+            do {
+                fontSize--;
+                ctx.font = fontSize + 'px Arial';
+            } while (ctx.measureText(text).width > maxWidth && fontSize > 1);
+
+            if (fontSize <= 1) {
+                addLog("警告: 文本过长，无法显著适应。");
+            }
+
+            ctx.fillStyle = 'black';
+            ctx.fillText(text, x, y);
+
+            var secondColorEnabled = document.getElementById('secondColorCheckbox').checked;
+            if (secondColorEnabled) {
+                let y2 = y + fontSize * 0.7;
+                ctx.fillStyle = 'red';
+                ctx.fillText(text, x, y2);
+            }
+
+            var thirdColorEnabled = document.getElementById('thirdColorCheckbox').checked;
+            if (thirdColorEnabled) {
+                let y2 = y - fontSize * 0.7;
+                ctx.fillStyle = 'yellow';
+                ctx.fillText(text, x, y2);
+            }
+            getPixelData();
+        }
+
+        function rotateImageData(imageData, rotations) {
+            if (!imageData || !imageData.data || !imageData.width || !imageData.height) {
+                console.error("无效的 ImageData 对象传入。");
+                return null;
+            }
+
+            const originalWidth = imageData.width;
+            const originalHeight = imageData.height;
+            const originalData = imageData.data;
+            const numRotations = (parseInt(rotations, 10) % 4 + 4) % 4;
+            let newWidth, newHeight;
+            let rotatedData = new Uint8ClampedArray(originalData.length);
+
+            switch (numRotations) {
+                case 0:
+                    newWidth = originalWidth;
+                    newHeight = originalHeight;
+                    rotatedData.set(originalData);
+                    break;
+                case 1:
+                    newWidth = originalHeight;
+                    newHeight = originalWidth;
+                    for (let y = 0; y < originalHeight; y++) {
+                        for (let x = 0; x < originalWidth; x++) {
+                            const originalIndex = (y * originalWidth + x) * 4;
+                            const targetX = originalHeight - 1 - y;
+                            const targetY = x;
+                            const targetIndex = (targetY * newWidth + targetX) * 4;
+                            rotatedData[targetIndex] = originalData[originalIndex];
+                            rotatedData[targetIndex + 1] = originalData[originalIndex + 1];
+                            rotatedData[targetIndex + 2] = originalData[originalIndex + 2];
+                            rotatedData[targetIndex + 3] = originalData[originalIndex + 3];
+                        }
+                    }
+                    break;
+                case 2:
+                    newWidth = originalWidth;
+                    newHeight = originalHeight;
+                    for (let y = 0; y < originalHeight; y++) {
+                        for (let x = 0; x < originalWidth; x++) {
+                            const originalIndex = (y * originalWidth + x) * 4;
+                            const targetX = originalWidth - 1 - x;
+                            const targetY = originalHeight - 1 - y;
+                            const targetIndex = (targetY * newWidth + targetX) * 4;
+                            rotatedData[targetIndex] = originalData[originalIndex];
+                            rotatedData[targetIndex + 1] = originalData[originalIndex + 1];
+                            rotatedData[targetIndex + 2] = originalData[originalIndex + 2];
+                            rotatedData[targetIndex + 3] = originalData[originalIndex + 3];
+                        }
+                    }
+                    break;
+                case 3:
+                    newWidth = originalHeight;
+                    newHeight = originalWidth;
+                    for (let y = 0; y < originalHeight; y++) {
+                        for (let x = 0; x < originalWidth; x++) {
+                            const originalIndex = (y * originalWidth + x) * 4;
+                            const targetX = y;
+                            const targetY = originalWidth - 1 - x;
+                            const targetIndex = (targetY * newWidth + targetX) * 4;
+                            rotatedData[targetIndex] = originalData[originalIndex];
+                            rotatedData[targetIndex + 1] = originalData[originalIndex + 1];
+                            rotatedData[targetIndex + 2] = originalData[originalIndex + 2];
+                            rotatedData[targetIndex + 3] = originalData[originalIndex + 3];
+                        }
+                    }
+                    break;
+                default:
+                    console.error("意外的旋转值:", numRotations);
+                    return null;
+            }
+            return new ImageData(rotatedData, newWidth, newHeight);
+        }
+
+        function getPixelData() {
+            const canvas = document.getElementById('myCanvas');
+            if (!canvas || canvas.width === 0 || canvas.height === 0) {
+                addLog("无法获取像素数据: 画布未准备好。");
+                document.getElementById('pixelData').value = "";
+                return;
+            }
+            const ctx = canvas.getContext('2d', {
+                willReadFrequently: true
+            });
+            const isYellowEnabled = document.getElementById('thirdColorCheckbox').checked;
+            const isRedEnabled = document.getElementById('secondColorCheckbox').checked;
+            const flipVertical = document.getElementById('flipVerticalCheckbox').checked;
+            const useDithering = document.getElementById('ditherrin').checked;
+
+            if (useDithering) {
+                applyDithering(ctx, canvas.width, canvas.height, isRedEnabled, isYellowEnabled);
+            }
+            const rotatedImageData = rotateImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), flipVertical ? 2 : 0);
+
+            if (rotatedImageData) {
+                const pixels = rotatedImageData.data;
+                const imageWidth = rotatedImageData.width;
+                const imageHeight = rotatedImageData.height;
+                const byteData = [];
+                const byteDataRed = [];
+                let currentByte = 0;
+                let currentByteRed = 0;
+                let bitPosition = 7;
+                const colorPlaneActive = isYellowEnabled || isRedEnabled;
+
+                for (let y = 0; y < imageHeight; y++) {
+                    for (let x = 0; x < imageWidth; x++) {
+                        const i = (y * imageWidth + x) * 4;
+                        const r = pixels[i];
+                        const g = pixels[i + 1];
+                        const b = pixels[i + 2];
+                        let isBlack = false;
+                        let isRedFlag = false;
+                        let isYellowFlag = false;
+
+                        if (r < 128 && g < 128 && b < 128) {
+                            isBlack = true;
+                        } else if (isYellowEnabled && r > 128 && g > 128 && b < 128) {
+                            isYellowFlag = true;
+                        } else if (isRedEnabled && r > 128 && g < 128 && b < 128) {
+                            isRedFlag = true;
+                        }
+
+                        if (!isBlack && !isRedFlag && !isYellowFlag) {
+                            currentByte |= (1 << bitPosition);
+                        } else if (isBlack) { } else if (isRedFlag) {
+                            currentByte |= (1 << bitPosition);
+                            currentByteRed |= (1 << bitPosition);
+                        } else if (isYellowFlag) {
+                            currentByteRed |= (1 << bitPosition);
+                        }
+
+                        bitPosition--;
+                        if (bitPosition < 0) {
+                            byteData.push(currentByte);
+                            if (colorPlaneActive) byteDataRed.push(currentByteRed);
+                            currentByte = 0;
+                            currentByteRed = 0;
+                            bitPosition = 7;
+                        }
+                    }
+                }
+                if (bitPosition !== 7) {
+                    byteData.push(currentByte);
+                    if (colorPlaneActive) byteDataRed.push(currentByteRed);
+                }
+                let byteDataCombined = [];
+                for (let b = 0; b < byteData.length; b++) {
+                    byteDataCombined.push(~byteData[b] & 0xFF);
+                }
+                if (colorPlaneActive) {
+                    for (let b = 0; b < byteDataRed.length; b++) {
+                        byteDataCombined.push(byteDataRed[b]);
+                    }
+                }
+                document.getElementById('pixelData').value = bytesToHex(byteDataCombined);
+            } else {
+                console.error("rotateImageData 返回 null。");
+            }
+        }
+
+        function uploadImage() {
+            const fileInput = document.getElementById('imageUpload');
+            const canvas = document.getElementById('myCanvas');
+            if (!canvas || canvas.width === 0 || canvas.height === 0) {
+                addLog("无法上传图像: 画布未准备好。");
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const canvasWidth = canvas.width;
+                        const canvasHeight = canvas.height;
+                        const imgWidth = img.width;
+                        const imgHeight = img.height;
+                        const scale = Math.max(canvasWidth / imgWidth, canvasHeight / imgHeight);
+                        const newWidth = imgWidth * scale;
+                        const newHeight = imgHeight * scale;
+                        const offsetX = (canvasWidth - newWidth) / 2;
+                        const offsetY = (canvasHeight - newHeight) / 2;
+                        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                        ctx.drawImage(img, offsetX, offsetY, newWidth, newHeight);
+                        getPixelData();
+                    };
+                    img.onerror = function () {
+                        addLog("加载图像文件时出错。");
+                    }
+                    img.src = e.target.result;
+                };
+                reader.onerror = function (e) {
+                    addLog("读取文件时出错: " + e);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        function findNearestColor(r, g, b, isRedEnabled, isYellowEnabled) {
+            const colorWhite = [255, 255, 255];
+            const colorBlack = [0, 0, 0];
+            const colorRed = [255, 0, 0];
+            const colorYellow = [255, 255, 0];
+            const distWhite = Math.sqrt((r - colorWhite[0]) ** 2 + (g - colorWhite[1]) ** 2 + (b - colorWhite[2]) ** 2);
+            const distBlack = Math.sqrt((r - colorBlack[0]) ** 2 + (g - colorBlack[1]) ** 2 + (b - colorBlack[2]) ** 2);
+            let distRedVal = Math.sqrt((r - colorRed[0]) ** 2 + (g - colorRed[1]) ** 2 + (b - colorRed[2]) ** 2);
+            let distYellowVal = Math.sqrt((r - colorYellow[0]) ** 2 + (g - colorYellow[1]) ** 2 + (b - colorYellow[2]) ** 2);
+            let minDist = distWhite;
+            let nearestColor = colorWhite;
+            if (distBlack < minDist) {
+                minDist = distBlack;
+                nearestColor = colorBlack;
+            }
+            if (isRedEnabled && distRedVal < minDist) {
+                minDist = distRedVal;
+                nearestColor = colorRed;
+            }
+            if (isYellowEnabled && distYellowVal < minDist) {
+                minDist = distYellowVal;
+                nearestColor = colorYellow;
+            }
+            return nearestColor;
+        }
+
+        function applyDithering(ctx, width, height, secondColorEnabled, thirdColorEnabled) {
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            const errorsR = new Array(width * height).fill(0);
+            const errorsG = new Array(width * height).fill(0);
+            const errorsB = new Array(width * height).fill(0);
+
+            function clamp(value) {
+                return Math.max(0, Math.min(255, value));
+            }
+
+            function setPixelError(x, y, errR, errG, errB, factor) {
+                if (x < 0 || x >= width || y < 0 || y >= height) return;
+                const index = y * width + x;
+                errorsR[index] += errR * factor;
+                errorsG[index] += errG * factor;
+                errorsB[index] += errB * factor;
+            }
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const index = y * width + x;
+                    const dataIndex = index * 4;
+                    const oldR = clamp(data[dataIndex] + errorsR[index]);
+                    const oldG = clamp(data[dataIndex + 1] + errorsG[index]);
+                    const oldB = clamp(data[dataIndex + 2] + errorsB[index]);
+                    const [newR, newG, newB] = findNearestColor(oldR, oldG, oldB, secondColorEnabled, thirdColorEnabled);
+                    data[dataIndex] = newR;
+                    data[dataIndex + 1] = newG;
+                    data[dataIndex + 2] = newB;
+                    const errR = oldR - newR;
+                    const errG = oldG - newG;
+                    const errB = oldB - newB;
+                    setPixelError(x + 1, y, errR, errG, errB, 7 / 16);
+                    setPixelError(x - 1, y + 1, errR, errG, errB, 3 / 16);
+                    setPixelError(x, y + 1, errR, errG, errB, 5 / 16);
+                    setPixelError(x + 1, y + 1, errR, errG, errB, 1 / 16);
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function resetVariables() {
+            gattServer = null;
+            Theservice = null;
+            writeCharacteristic = null;
+            packets = [];
+            totalPackets = 0;
+            packetIndex = 0;
+            currentBlockId = 0;
+            imgArray = "";
+            imgArrayLen = 0;
+            setStatus("已断开连接");
+            document.getElementById("connectbutton").innerHTML = '扫描并连接';
+        }
+
+        function handleError(error) {
+            console.error("BLE 错误:", error);
+            addLog("BLE 错误: " + error.message);
+            if (error.name === 'NotFoundError' || error.name === 'AbortError') {
+                addLog("连接已取消或未找到设备。");
+                resetVariables();
+                bleDevice = null;
+                reconnectTrys = 0;
+                return;
+            }
+            const canRetry = !!bleDevice;
+            const deviceToRetry = bleDevice;
+            resetVariables();
+            if (canRetry && reconnectTrys < 5) {
+                reconnectTrys++;
+                const delay = 200;
+                addLog(`连接失败/丢失。正在重试连接尝试 ${reconnectTrys}/5，${delay}ms后...`);
+                setStatus(`连接失败。正在重试 ${reconnectTrys}/5...`);
+                document.getElementById("connectbutton").innerHTML = '重试中...';
+                bleDevice = deviceToRetry;
+                setTimeout(connect, delay);
+            } else if (canRetry) {
+                addLog("重试后连接失败。");
+                setStatus("连接失败。");
+                document.getElementById("connectbutton").innerHTML = '扫描并连接';
+                reconnectTrys = 0;
+                bleDevice = null;
+            } else {
+                addLog("连接失败 (无设备？)。");
+                setStatus("连接失败。");
+                document.getElementById("connectbutton").innerHTML = '扫描并连接';
+                reconnectTrys = 0;
+            }
+        }
+
+        function delayPromise(delay) {
+            return new Promise(resolve => {
+                setTimeout(resolve, delay);
+            });
+        }
+        async function sendCommand(cmd) {
+            if (writeCharacteristic) {
+                try {
+                    await writeCharacteristic.writeValueWithoutResponse(cmd);
+                } catch (error) {
+                    if (error.name === 'NetworkError' && error.message.includes('GATT operation')) {
+                        addLog("GATT 忙碌，正在重试发送...");
+                        await delayPromise(150);
+                        try {
+                            await writeCharacteristic.writeValueWithoutResponse(cmd);
+                        } catch (retryError) {
+                            addLog("GATT 重试错误: " + retryError);
+                            handleError(retryError);
+                        }
+                    } else {
+                        addLog("发送错误: " + error);
+                        handleError(error);
+                    }
+                }
+            } else {
+                addLog("无法发送命令: 未连接。");
+                setStatus("未连接");
+            }
+        }
+        async function sendcmd(cmdTXT) {
+            if (cmdTXT.length % 2 !== 0 || cmdTXT.length < 2) {
+                addLog(`无效的调试命令格式 (必须为十六进制): ${cmdTXT}`);
+                return;
+            }
+            if (cmdTXT.length == 2) {
+                cmdTXT = "00" + cmdTXT;
+            } else if (cmdTXT.length >= 4 && cmdTXT.substring(0, 2) !== "00") { }
+            if (cmdTXT.length < 4 || cmdTXT.length % 2 !== 0) {
+                addLog(`无效的命令格式: ${cmdTXT}`);
+                return;
+            }
+            const commandIdHex = cmdTXT.substring(0, 4);
+            const payloadHex = cmdTXT.substring(4);
+            const logPayload = payloadHex.length > 40 ? payloadHex.substring(0, 40) + '...' : payloadHex;
+            addLog(`CMD> ${commandIdHex} 负载: ${logPayload} (${payloadHex.length / 2}B)`);
+            let cmd = hexToBytes(cmdTXT);
+            await sendCommand(cmd);
+        }
+
+        function sendClockMode(design) {
+            var timeHexString = (Math.floor((Date.now() / 1000) + (-(new Date().getTimezoneOffset() * 60)))).toString(16);
+            timeHexString = timeHexString.padStart(8, '0');
+            sendcmd('000B' + timeHexString.substring(6, 8) + timeHexString.substring(4, 6) + timeHexString.substring(2, 4) + timeHexString.substring(0, 2) + design.toString(16).padStart(2, '0'));
+        }
+
+        function setDisplayType(newType) {
+            const typeInt = parseInt(newType);
+            if (typeInt === 65535) {
+                addLog("已选择动态类型。请使用配置选项卡。");
+                return;
+            }
+            if (isNaN(typeInt)) {
+                addLog("选择的显示类型无效。");
+                return;
+            }
+            sendcmd("0004" + Number(newType).toString(16).padStart(4, '0').toUpperCase());
+        }
+
+        function setBleAdvInterval(newAdvInt) {
+            const intervalInt = parseInt(newAdvInt);
+            if (isNaN(intervalInt)) {
+                addLog("无效的 ADV 间隔。");
+                return;
+            }
+            sendcmd("0008" + Number(newAdvInt).toString(16).padStart(4, '0').toUpperCase());
+        }
+
+        function setCustomMac() {
+            const macInput = document.getElementById('cmdCustomMac');
+            const macHex = macInput.value.trim().toUpperCase();
+            if (macHex.length !== 16) {
+                addLog("错误: 自定义 MAC 必须是 16 个十六进制字符 (8 字节)。");
+                macInput.focus();
+                return;
+            }
+            if (!/^[0-9A-F]{16}$/.test(macHex)) {
+                addLog("错误: MAC 中有无效的十六进制字符。");
+                macInput.focus();
+                return;
+            }
+            sendcmd('0009' + macHex);
+        }
+
+        function reverseEndian(hex) {
+            const bytes = hex.match(/.{2}/g);
+            return bytes.reverse().join('');
+        }
+        class AvailDataInfo {
+            constructor(checksum, dataVer, dataSize, dataType, dataTypeArgument, nextCheckIn) {
+                this.checksum = checksum;
+                this.dataVer = dataVer;
+                this.dataSize = dataSize;
+                this.dataType = dataType;
+                this.dataTypeArgument = dataTypeArgument;
+                this.nextCheckIn = nextCheckIn;
+            }
+            toHexString() {
+                const hexChecksum = this.toHex(this.checksum, 1);
+                const hexDataVer = reverseEndian(this.toHex(this.dataVer, 8));
+                const hexDataSize = reverseEndian(this.toHex(this.dataSize, 4));
+                const hexDataType = this.toHex(this.dataType, 1);
+                const hexDataTypeArgument = this.toHex(this.dataTypeArgument, 1);
+                const hexNextCheckIn = reverseEndian(this.toHex(this.nextCheckIn, 2));
+                return hexChecksum + hexDataVer + hexDataSize + hexDataType + hexDataTypeArgument + hexNextCheckIn;
+            }
+            toHex(value, bytes) {
+                return value.toString(16).padStart(bytes * 2, '0').toUpperCase();
+            }
+        }
+        class BlockRequest {
+            constructor(hexString) {
+                this.checksum = this.fromHex(hexString.substring(0, 2));
+                this.ver = BigInt("0x" + reverseEndian(hexString.substring(2, 18)));
+                this.blockId = this.fromHex(hexString.substring(18, 20));
+                this.type = this.fromHex(hexString.substring(20, 22));
+                const requestedPartsHex = hexString.substring(22, 22 + BLOCK_REQ_PARTS_BYTES * 2);
+                this.requestedParts = this.hexToBitField(requestedPartsHex);
+            }
+            fromHex(hexStr) {
+                return parseInt(hexStr, 16);
+            }
+            hexToBitField(hexStr) {
+                const bitField = [];
+                for (let i = 0; i < hexStr.length; i += 2) {
+                    const byte = parseInt(hexStr.substring(i, i + 2), 16);
+                    for (let bit = 7; bit >= 0; bit--) {
+                        bitField.push((byte >> bit) & 1);
+                    }
+                }
+                return bitField;
+            }
+            display() {
+                console.log(`校验和: ${this.checksum}, 版本: ${this.ver.toString(16).toUpperCase()}, 块 ID: ${this.blockId}, 类型: ${this.type}, 请求的部分: ${this.requestedParts.join('')}`);
+            }
+        }
+        const BLOCK_XFER_BUFFER_SIZE = BLOCK_DATA_SIZE + 3;
+        class BlockPart {
+            constructor(blockId, blockPart, dataSlice) {
+                this.blockId = blockId;
+                this.blockPart = blockPart;
+                this.data = dataSlice;
+                this.buffer = new Uint8Array(3 + BLOCK_PART_DATA_SIZE);
+                this.buffer[1] = blockId;
+                this.buffer[2] = blockPart;
+                for (let i = 0; i < BLOCK_PART_DATA_SIZE; i++) {
+                    this.buffer[3 + i] = dataSlice[i] || 0;
+                }
+                this.addCRC();
+            }
+            addCRC() {
+                let total = 0;
+                for (let i = 1; i < this.buffer.length; i++) {
+                    total += this.buffer[i];
+                }
+                this.buffer[0] = total & 0xFF;
+            }
+            toHexString() {
+                return Array.from(this.buffer).map(byte => byte.toString(16).padStart(2, '0').toUpperCase()).join('');
+            }
+        }
+
+        function nextBlkPart() {
+            addLog(`发送数据包: ${packets[packetIndex]}`);
+            sendCommand(hexToBytes("0065" + packets[packetIndex]));
+        }
+        async function sendBlockData(blockId, largeHexData) {
+            const blockSizeHex = (BLOCK_DATA_SIZE * 2);
+            const totalBlocks = Math.ceil(largeHexData.length / blockSizeHex);
+            if (blockId >= totalBlocks) {
+                addLog(`块 ID ${blockId} 超过总块数 (${totalBlocks})。`);
+                return;
+            }
+            const start = blockId * blockSizeHex;
+            const end = start + blockSizeHex;
+            const blockHexData = largeHexData.substring(start, end);
+            addLog(`正在处理块 ${blockId + 1}/${totalBlocks}...`);
+            const dataBytes = hexToByteArray(blockHexData);
+            packets = [];
+            totalPackets = Math.ceil(dataBytes.length / BLOCK_PART_DATA_SIZE);
+            for (let i = 0; i < totalPackets; i++) {
+                const startIdx = i * BLOCK_PART_DATA_SIZE;
+                const slice = dataBytes.slice(startIdx, startIdx + BLOCK_PART_DATA_SIZE);
+                const packet = new BlockPart(blockId, i, slice);
+                packets.push(packet.toHexString());
+            }
+            packetIndex = 0;
+            updateUploadProgress();
+            nextBlkPart();
+        }
+
+        function hexToByteArray(hexStr) {
+            const byteArray = [];
+            byteArray.push((hexStr.length / 2) & 0xff);
+            byteArray.push(((hexStr.length / 2) >> 8) & 0xff);
+            byteArray.push(0x00);
+            byteArray.push(0x00);
+            let theCrc = 0;
+            for (let i = 0; i < hexStr.length; i += 2) {
+                theCrc += parseInt(hexStr.substring(i, i + 2), 16);
+                byteArray.push(parseInt(hexStr.substring(i, i + 2), 16));
+            }
+            byteArray[2] = theCrc & 0xff;
+            byteArray[3] = (theCrc >> 8) & 0xff;
+            return byteArray;
+        }
+        const crc32Table = (() => {
+            const table = [];
+            const polynomial = 0xedb88320;
+            for (let i = 0; i < 256; i++) {
+                let crc = i;
+                for (let j = 8; j > 0; j--) {
+                    crc = (crc & 1) ? (crc >>> 1) ^ polynomial : crc >>>= 1;
+                }
+                table[i] = crc;
+            }
+            return table;
+        })();
+
+        function crc32(byteArray) {
+            byteArray = Uint8Array.from(byteArray);
+            let crc = 0xffffffff;
+            for (let i = 0; i < byteArray.length; i++) {
+                const byte = byteArray[i];
+                const tableIndex = (crc ^ byte) & 0xff;
+                crc = (crc >>> 8) ^ crc32Table[tableIndex];
+            }
+            return (crc ^ 0xffffffff) >>> 0;
+        }
+
+        function computeCRC32(hexData) {
+            return crc32(hexToByteArray(hexData));
+        }
+
+        function hexStringToUint8Array(hexString) {
+            if (hexString.length % 2 !== 0) {
+                throw new Error("无效的十六进制字符串：长度为奇数。");
+            }
+            const byteArray = new Uint8Array(hexString.length / 2);
+            for (let i = 0; i < byteArray.length; i++) {
+                byteArray[i] = parseInt(hexString.substr(i * 2, 2), 16);
+                if (isNaN(byteArray[i])) {
+                    throw new Error(`无效的十六进制字符串：'${hexString.substr(i * 2, 2)}' 无法解析。`);
+                }
+            }
+            return byteArray;
+        }
+
+        function sendimgCompressed(cmdIMG) {
+            var width = parseInt(document.getElementById('widthInput').value);
+            var height = parseInt(document.getElementById('heightInput').value);
+            var secondColorEnabled = document.getElementById('secondColorCheckbox').checked;
+            var thirdColorEnabled = document.getElementById('thirdColorCheckbox').checked;
+            imgArray = cmdIMG.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            var unCompressedSize = imgArray.length / 2;
+            imgArray = "06" + toHexUint16LE(width) + toHexUint16LE(height) + ((secondColorEnabled || thirdColorEnabled) ? "02" : "01") + imgArray;
+            const compressedBytes = pako.deflate(hexStringToUint8Array(imgArray), {
+                level: 9,
+                windowBits: 12
+            });
+            imgArray = bytesToHex(compressedBytes);
+            imgArray = toHexUint32LE(unCompressedSize) + imgArray;
+            imgArrayLen = imgArray.length;
+            uploadPart = 0;
+            addLog('发送压缩图像大小: ' + imgArrayLen / 2 + '，原始大小: ' + unCompressedSize);
+            const dataInfo = new AvailDataInfo(255, computeCRC32(imgArray), imgArrayLen / 2, 0x30, 0, 0);
+            sendcmd("0064" + dataInfo.toHexString());
+        }
+
+        function sendimg(cmdIMG) {
+            var secondColorEnabled = document.getElementById('secondColorCheckbox').checked;
+            var thirdColorEnabled = document.getElementById('thirdColorCheckbox').checked;
+            imgArray = cmdIMG.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            imgArrayLen = imgArray.length;
+            uploadPart = 0;
+            addLog('发送图像大小: ' + imgArrayLen / 2);
+            const dataInfo = new AvailDataInfo(255, computeCRC32(imgArray), imgArrayLen / 2, (secondColorEnabled || thirdColorEnabled) ? 0x21 : 0x20, 0, 0);
+            sendcmd("0064" + dataInfo.toHexString());
+        }
+
+        function sendFw(cmdFW) {
+            imgArray = cmdFW.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            imgArrayLen = imgArray.length;
+            fw_header_img_len = parseInt(
+                imgArray.substring(54, 56).toUpperCase() + 
+                imgArray.substring(52, 54).toUpperCase() + 
+                imgArray.substring(50, 52).toUpperCase() + 
+                imgArray.substring(48, 50).toUpperCase(), 
+                16
+            );
+            addLog(fw_header_img_len);
+            const isStandardOk = (imgArray.substring(16, 24).toUpperCase() === "4B4E4C54") && ((imgArrayLen / 2) === fw_header_img_len);
+            const isSpecialOk = (imgArray.substring(8, 12).toUpperCase() === "9327");
+            const isSpecial1Ok = (imgArray.substring(876, 880).toUpperCase() === "9327");
+            if (!isStandardOk && !isSpecialOk && !isSpecial1Ok) {
+                addLog("错误: 固件完整性检查失败。");
+                return;
+            }
+            uploadPart = 0;
+            addLog('发送固件大小: ' + imgArrayLen / 2);
+            const dataInfo = new AvailDataInfo(255, 123, imgArrayLen / 2, 0x03, 0, 0);
+            sendcmd("0064" + dataInfo.toHexString());
+        }
+
+        function sendCustomUCLUT(curLUT20, curLUT21, curLUT22, curLUT23, curLUT24, curLUT25) {
+            var ourUC_LUT = "";
+            curLUT20 = curLUT20.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            var curLUT20len = ((curLUT20.length / 2) + 4).toString(16).padStart(4, '0');
+            ourUC_LUT += curLUT20len + "0120" + curLUT20;
+            curLUT21 = curLUT21.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            var curLUT21len = ((curLUT21.length / 2) + 4).toString(16).padStart(4, '0');
+            ourUC_LUT += curLUT21len + "0121" + curLUT21;
+            curLUT22 = curLUT22.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            var curLUT22len = ((curLUT22.length / 2) + 4).toString(16).padStart(4, '0');
+            ourUC_LUT += curLUT22len + "0122" + curLUT22;
+            curLUT23 = curLUT23.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            var curLUT23len = ((curLUT23.length / 2) + 4).toString(16).padStart(4, '0');
+            ourUC_LUT += curLUT23len + "0123" + curLUT23;
+            curLUT24 = curLUT24.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            var curLUT24len = ((curLUT24.length / 2) + 4).toString(16).padStart(4, '0');
+            ourUC_LUT += curLUT24len + "0124" + curLUT24;
+            if (curLUT25.length != 0) {
+                curLUT25 = curLUT25.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+                var curLUT25len = ((curLUT25.length / 2) + 4).toString(16).padStart(4, '0');
+                ourUC_LUT += curLUT25len + "0125" + curLUT25;
+            }
+            var allLength = (ourUC_LUT.length / 2).toString(16).padStart(4, '0');
+            ourUC_LUT = allLength + ourUC_LUT;
+            addLog('发送 UC LUT 大小: ' + ourUC_LUT.length / 2);
+            document.getElementById("lutData").value = ourUC_LUT;
+            sendCustomLUT(ourUC_LUT);
+        }
+
+        function sendCustomSSDLUT(curLUT32) {
+            var ourSSD_LUT = "";
+            curLUT32 = curLUT32.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            var curLUT32len = ((curLUT32.length / 2) + 4).toString(16).padStart(4, '0');
+            ourSSD_LUT += curLUT32len + "0132" + curLUT32;
+            var allLength = (ourSSD_LUT.length / 2).toString(16).padStart(4, '0');
+            ourSSD_LUT = allLength + ourSSD_LUT;
+            addLog('发送 SSD LUT 大小: ' + ourSSD_LUT.length / 2);
+            document.getElementById("lutData").value = ourSSD_LUT;
+            sendCustomLUT(ourSSD_LUT);
+        }
+
+        function sendCustomLUT(curLUT) {
+            imgArray = curLUT.replace(/(?:\r\n|\r|\n|,|0x| )/g, '');
+            imgArrayLen = imgArray.length;
+            uploadPart = 0;
+            addLog('发送自定义 LUT 大小: ' + imgArrayLen / 2);
+            const dataInfo = new AvailDataInfo(255, computeCRC32(imgArray), imgArrayLen / 2, 0xB0, 0, 0);
+            sendcmd("0064" + dataInfo.toHexString());
+        }
+
+        function resetFileSelector() {
+            document.getElementById("selectFirmware").value = '';
+        };
+
+        function resetImageSelector() {
+            document.getElementById("imageUpload").value = '';
+        };
+
+        async function flashFirmwareFromServerViaBLE() {
+            addLog("尝试通过 BLE 从服务器刷写 ATC_BLE_OEPL.bin...");
+            setStatus("BLE: 正在加载 ATC_BLE_OEPL.bin...");
+            try {
+                const response = await fetch("https://atc1441.github.io/ATC_BLE_OEPL.bin");
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误! 状态: ${response.status} - ${response.statusText}。确保 ATC_BLE_OEPL.bin 与 HTML 文件在同一文件夹中。`);
+                }
+                const serverBleFirmwareBuffer = await response.arrayBuffer();
+                addLog(`BLE: 成功从服务器加载 ATC_BLE_OEPL.bin (${serverBleFirmwareBuffer.byteLength} 字节)。`);
+                setStatus("BLE: 固件已加载，开始刷写...");
+                const firmwareByteArray = new Uint8Array(serverBleFirmwareBuffer);
+                sendFw(bytesToHex(firmwareByteArray));
+            } catch (error) {
+                addLog(`BLE: 从服务器加载或刷写固件时出错: ${error.message}`);
+                setStatus(`BLE 错误: ${error.message}`);
+                console.error("BLE 服务器固件加载/刷写错误:", error);
+            }
+        }
+        function selectFirmwareVoid() {
+            const fileInput = document.getElementById('selectFirmware');
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const byteArray = new Uint8Array(e.target.result);
+                    sendFw(bytesToHex(byteArray));
+                };
+                reader.onerror = function (e) {
+                    addLog("读取固件文件时出错: " + e);
+                    setStatus("读取固件文件时出错");
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function updateUploadProgress() {
+            if (imgArrayLen > 0) {
+                let bytesSent = currentBlockId * BLOCK_DATA_SIZE + packetIndex * BLOCK_PART_DATA_SIZE;
+                bytesSent = Math.min(bytesSent, imgArrayLen / 2);
+                const percentage = Math.floor((bytesSent / (imgArrayLen / 2)) * 100);
+                setStatus(`上传中... ${percentage}% (${bytesSent}/${imgArrayLen / 2} 字节)`);
+            }
+        }
+
+        function img_state_handle(data) {
+            const cmdHex = data.substring(0, 4).toUpperCase();
+            const payloadHex = data.substring(4);
+            switch (cmdHex) {
+                case "00C6":
+                    try {
+                        const blockRequest = new BlockRequest(payloadHex);
+                        blockRequest.display();
+                        setStatus(`设备请求块 ${blockRequest.blockId}`);
+                        currentBlockId = blockRequest.blockId;
+                        sendcmd("0002");
+                        setTimeout(() => {
+                            sendBlockData(blockRequest.blockId, imgArray);
+                        }, 50);
+                    } catch (e) {
+                        addLog("解析块请求 (00C6) 时出错: " + e.message);
+                        setStatus("错误: 错误的块请求");
+                    }
+                    break;
+                case "00C4":
+                    addLog(`第 ${currentBlockId} 块第 ${packetIndex} 部分出错。正在重试...`);
+                    setStatus(`部分错误重试 ${packetIndex}...`);
+                    setTimeout(nextBlkPart, 100);
+                    break;
+                case "00C5":
+                    packetIndex++;
+                    updateUploadProgress();
+                    if (packetIndex < totalPackets) {
+                        nextBlkPart();
+                    } else {
+                        addLog(`块 ${currentBlockId} 已确认。等待下一个请求...`);
+                        setStatus(`块 ${currentBlockId} 已发送。`);
+                    }
+                    break;
+                case "00C7":
+                    addLog("上传成功。");
+                    setStatus("上传完成。");
+                    imgArray = "";
+                    imgArrayLen = 0;
+                    packets = [];
+                    sendcmd("0003");
+                    break;
+                case "00C8":
+                    addLog("设备: 数据已存在。");
+                    setStatus("数据已存在。");
+                    imgArray = "";
+                    imgArrayLen = 0;
+                    packets = [];
+                    sendcmd("0003");
+                    break;
+                case "00C9":
+                    addLog("固件更新成功确认。");
+                    setStatus("固件更新成功。");
+                    imgArray = "";
+                    imgArrayLen = 0;
+                    packets = [];
+                    break;
+                case "0005":
+                    addLog("已收到显示信息 (0005)。正在解析...");
+                    try {
+                        const payloadBytes = hexToBytes(payloadHex);
+                        const minLen = 31;
+                        const configVersion = getUint32FromBytes(payloadBytes, 4);
+                        addLog(`设备配置版本: ${configVersion}`);
+                        if (payloadBytes.length >= minLen) {
+                            const colors = getUint8FromBytes(payloadBytes, 30);
+                            const isInvertedWH = getUint8FromBytes(payloadBytes, 19) === 1;
+                            let w, h;
+                            if (isInvertedWH) {
+                                h = getUint16FromBytes(payloadBytes, 24);
+                                w = getUint16FromBytes(payloadBytes, 22);
+                            } else {
+                                h = getUint16FromBytes(payloadBytes, 22);
+                                w = getUint16FromBytes(payloadBytes, 24);
+                            }
+                            addLog(`已解析显示 - 宽:${w}, 高:${h}, 颜色数:${colors}, 反转标志:${isInvertedWH}`);
+                            if (w > 0 && h > 0 && w < 4000 && h < 4000) {
+                                document.getElementById('widthInput').value = w;
+                                document.getElementById('heightInput').value = h;
+                                document.getElementById('secondColorCheckbox').checked = (colors >= 2);
+                                document.getElementById('thirdColorCheckbox').checked = (colors >= 3);
+                                doAll();
+                                addLog("画布已使用显示信息更新。");
+                            } else {
+                                addLog("解析的宽高无效或为零。");
+                            }
+                        } else {
+                            addLog(`显示信息有效负载过短 (${payloadBytes.length} 字节)。最小预期 ${minLen} 字节。`);
+                        }
+                    } catch (e) {
+                        addLog("解析显示信息 (0005) 时出错: " + e);
+                        setStatus("错误: 错误的显示信息");
+                    }
+                    break;
+                case "00CA":
+                    document.getElementById("lutData").value = "";
+                    addLog("LUT 读取开始确认。请求部分。");
+                    setStatus("正在读取 LUT...");
+                    sendcmd("000E");
+                    break;
+                case "00CB":
+                    document.getElementById("lutData").value += payloadHex;
+                    setStatus("正在读取 LUT...");
+                    addLog(`LUT 部分 (${payloadHex.length / 2}B 已接收)。请求下一个。`);
+                    sendcmd("000E");
+                    break;
+                case "00CC":
+                    addLog("设备 LUT 读取完成。");
+                    setStatus("LUT 读取完成。");
+                    break;
+                case "00CD":
+                    addLog("动态配置已接收。");
+                    setStatus("动态配置已接收。");
+                    parseAndApplyDynamicConfig(payloadHex);
+                    break;
+                case "00CE":
+                    addLog("动态配置成功确认。");
+                    setStatus("动态配置成功。");
+                    break;
+                case "00CF":
+                    addLog("错误: 设备动态配置错误。");
+                    setStatus("动态配置错误。");
+                    break;
+                case "00D1":
+                    addLog("收到调试状态信息 (00D1)。");
+                    try {
+                        const payloadBytes = hexToBytes(payloadHex);
+                        if (payloadBytes.length >= 6) {
+                            const batteryVoltage = (payloadBytes[0] << 8) | payloadBytes[1];
+                            const adcTempRaw = (payloadBytes[2] << 8) | payloadBytes[3];
+                            const adcTemp = payloadBytes[4];
+                            const epdTemp = payloadBytes[5];
+
+                            const signedAdcTemp = (adcTemp > 127) ? adcTemp - 256 : adcTemp;
+                            const signedEpdTemp = (epdTemp > 127) ? epdTemp - 256 : epdTemp;
+                            
+                            const timestamp = new Date();
+                            const timeString = timestamp.toLocaleTimeString();
+                            const dateTimeString = timestamp.toLocaleString();
+
+                            const statusString = `状态 - 电池: ${batteryVoltage}mV, 原始ADC: ${adcTempRaw}, ADC温度: ${signedAdcTemp}°C, EPD温度: ${signedEpdTemp}°C`;
+                            addLog(statusString);
+                            document.getElementById('status-battery').textContent = `${batteryVoltage} mV`;
+                            document.getElementById('status-adc-raw').textContent = `${adcTempRaw}`;
+                            document.getElementById('status-adc-temp').textContent = `${signedAdcTemp} °C`;
+                            document.getElementById('status-epd-temp').textContent = `${signedEpdTemp} °C`;
+                            document.getElementById('status-timestamp').textContent = dateTimeString;
+
+                            addChartData(timeString, batteryVoltage, adcTempRaw, signedAdcTemp, signedEpdTemp);
+
+                        } else {
+                            addLog(`调试信息有效负载过短 (${payloadBytes.length} 字节)。预期 6 字节。`);
+                        }
+                    } catch (e) {
+                        addLog("解析调试状态信息 (00D1) 时出错: " + e);
+                    }
+                    break;
+                case "0063":
+                    setStatus("命令确认。");
+                    break;
+                case "FFFF":
+                    addLog("错误: 通用命令错误 (FFFF)。");
+                    setStatus("命令错误 (FFFF)。");
+                    break;
+                default:
+                    addLog("未处理的命令: " + cmdHex + " 负载: " + payloadHex.substring(0, 40) + "...");
+                    break;
+            }
+        }
+        
+        function readDebugStatus() {
+            addLog("正在请求电池和温度状态...");
+            sendcmd('00160000');
+        }
+
+        function bleNotificationHandler(event) {
+            const value = event.target.value;
+            if (!value || value.byteLength === 0) return;
+            const hexString = bytesToHex(value.buffer);
+            addLog("BLE< " + hexString);
+            img_state_handle(hexString);
+        }
+
+        function disconnect() {
+            addLog('设备已断开连接。');
+            if (bleDevice && bleDevice.removeEventListener) {
+                bleDevice.removeEventListener('gattserverdisconnected', disconnect);
+            }
+            stopDebugPolling();
+            resetVariables();
+        }
+
+        function preConnect() {
+            if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
+                addLog("正在断开连接...");
+                setStatus("正在断开连接...");
+                bleDevice.removeEventListener('gattserverdisconnected', disconnect);
+                document.getElementById("connectbutton").innerHTML = '扫描并连接';
+                bleDevice.gatt.disconnect();
+            } else {
+                reconnectTrys = 0;
+                const namePrefix = document.getElementById('namePrefix').value.trim();
+                if (!namePrefix) {
+                    addLog("错误: 需要前缀过滤器。");
+                    setStatus("错误: 无前缀");
+                    return;
+                }
+                const deviceoptions = {
+                    optionalServices: [0x1337],
+                    acceptAllDevices: false,
+                    filters: namePrefix.split(",").map(p => p.trim()).filter(p => p).map(p => ({
+                        namePrefix: p
+                    }))
+                };
+                if (deviceoptions.filters.length === 0) {
+                    addLog("错误: 无有效过滤器。");
+                    setStatus("错误: 无效过滤器");
+                    return;
+                }
+                addLog("使用筛选器请求设备: " + JSON.stringify(deviceoptions.filters));
+                setStatus("请求设备...");
+                document.getElementById("connectbutton").innerHTML = '扫描中...';
+                navigator.bluetooth.requestDevice(deviceoptions)
+                    .then(device => {
+                        addLog(`找到: ${device.name || '未知设备'} (${device.id})`);
+                        setStatus(`找到 ${device.name || '设备'}`);
+                        bleDevice = device;
+                        bleDevice.addEventListener('gattserverdisconnected', disconnect);
+                        connect();
+                    })
+                    .catch(error => {
+                        if (error.name === 'NotFoundError' || error.name === 'AbortError') {
+                            addLog("未选择/未找到设备。");
+                            setStatus("未选择设备");
+                            document.getElementById("connectbutton").innerHTML = '扫描并连接';
+                        } else {
+                            handleError(error);
+                        }
+                    });
+            }
+        }
+
+        function reConnect() {
+            if (!bleDevice) {
+                addLog("没有上次设备可重新连接。请使用连接。");
+                setStatus("未选择设备");
+                return;
+            }
+            addLog("正在重新连接: " + (bleDevice.name || bleDevice.id));
+            if (bleDevice.gatt && bleDevice.gatt.connected) {
+                addLog("已连接。先断开连接...");
+                bleDevice.removeEventListener('gattserverdisconnected', disconnect);
+                bleDevice.gatt.disconnect();
+                setTimeout(() => {
+                    if (bleDevice) {
+                        bleDevice.addEventListener('gattserverdisconnected', disconnect);
+                        connect();
+                    }
+                }, 500);
+            } else {
+                resetVariables();
+                reconnectTrys = 0;
+                connect();
+            }
+        }
+
+        function connect() {
+            if (!bleDevice) {
+                addLog("已调用连接，但未选择设备。");
+                return;
+            }
+            if (bleDevice.gatt && bleDevice.gatt.connected) {
+                addLog("已连接。");
+                document.getElementById("connectbutton").innerHTML = '断开连接';
+                return;
+            }
+            addLog("正在连接到 GATT 服务器: " + (bleDevice.name || bleDevice.id) + "...");
+            setStatus("连接中...");
+            document.getElementById("connectbutton").innerHTML = '连接中...';
+            bleDevice.gatt.connect()
+                .then(server => {
+                    addLog('> GATT 服务器已连接');
+                    gattServer = server;
+                    return gattServer.getPrimaryService(0x1337);
+                })
+                .then(service => {
+                    addLog('> 找到服务 0x1337');
+                    Theservice = service;
+                    return Theservice.getCharacteristic(0x1337);
+                })
+                .then(characteristic => {
+                    addLog('> 找到特征 0x1337');
+                    writeCharacteristic = characteristic;
+                    return writeCharacteristic.startNotifications();
+                })
+                .then(() => {
+                    addLog('> 已开始通知');
+                    writeCharacteristic.addEventListener('characteristicvaluechanged', bleNotificationHandler);
+                    addLog('连接成功！');
+                    setStatus('已连接');
+                    document.getElementById("connectbutton").innerHTML = '断开连接';
+                    reconnectTrys = 0;
+                    if (bleDevice && bleDevice.name) {
+                        localStorage.setItem('lastDeviceName', bleDevice.name);
+                        addLog(`已保存最后设备名称: ${bleDevice.name}`);
+                        if (document.getElementById('rememberDeviceCheckbox').checked) {
+                            document.getElementById('namePrefix').value = bleDevice.name;
+                        }
+                    }
+                    setTimeout(() => {
+                        readDynamicConfig();
+                    }, 450);
+                })
+                .catch(handleError);
+        }
+
+        function setStatus(statusText) {
+            document.getElementById("status").innerHTML = statusText;
+        }
+
+        function addLog(logTXT) {
+            const logArea = document.getElementById("log");
+            const today = new Date();
+            const time = ("0" + today.getHours()).slice(-2) + ":" + ("0" + today.getMinutes()).slice(-2) + ":" + ("0" + today.getSeconds()).slice(-2) + " : ";
+            logArea.innerHTML = time + logTXT + '<br>' + logArea.innerHTML;
+            console.log("BLE 日志: " + time + logTXT);
+            const maxLogLines = 150;
+            const lines = logArea.innerHTML.split('<br>');
+            if (lines.length > maxLogLines + 1) {
+                logArea.innerHTML = lines.slice(0, maxLogLines).join('<br>') + '<br>';
+            }
+        }
+
+        function getUint8FromBytes(bytes, offset) {
+            if (offset >= bytes.length) {
+                console.warn(`getUint8 越界: 偏移 ${offset}, 长度 ${bytes.length}`);
+                return 0;
+            }
+            return bytes[offset];
+        }
+
+        function getUint16FromBytes(bytes, offset) {
+            if (offset + 1 >= bytes.length) {
+                console.warn(`getUint16 越界: 偏移 ${offset}, 长度 ${bytes.length}`);
+                return 0;
+            }
+            return (bytes[offset] | (bytes[offset + 1] << 8));
+        }
+
+        function getUint32FromBytes(bytes, offset) {
+            if (offset + 3 >= bytes.length) {
+                console.warn(`getUint32 越界: 偏移 ${offset}, 长度 ${bytes.length}`);
+                return 0;
+            }
+            return (bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)) >>> 0;
+        }
+
+        function fromHexUint8(hex) {
+            return parseInt(hex.substring(0, 2), 16);
+        }
+
+        function fromHexUint16LE(hex) {
+            return parseInt(hex.substring(2, 4) + hex.substring(0, 2), 16);
+        }
+
+        function fromHexUint32LE(hex) {
+            return parseInt(hex.substring(6, 8) + hex.substring(4, 6) + hex.substring(2, 4) + hex.substring(0, 2), 16) >>> 0;
+        }
+
+        function hexToUint8Array(hex) {
+            if (typeof hex !== 'string') {
+                console.error("hexToUint8Array 需要一个字符串。");
+                return new Uint8Array(0);
+            }
+            const cleanHex = hex.replace(/[^0-9a-fA-F]/g, '');
+            if (cleanHex.length % 2 !== 0) {
+                console.warn("奇怪的十六进制字符串长度:", cleanHex.length, "字符串（前50个字符）:", cleanHex.substring(0, 50) + "...");
+            }
+            const byteLength = Math.floor(cleanHex.length / 2);
+            const bytes = new Uint8Array(byteLength);
+            for (let i = 0; i < byteLength; i++) {
+                const byteHex = cleanHex.substr(i * 2, 2);
+                bytes[i] = parseInt(byteHex, 16);
+                if (isNaN(bytes[i])) {
+                    console.error(`无效的十六进制字节 "${byteHex}"，位置 ${i * 2}`);
+                    bytes[i] = 0;
+                }
+            }
+            return bytes;
+        }
+
+        function hexToBytes(hex) {
+            if (typeof hex !== 'string') hex = '';
+            if (hex.length % 2 !== 0) {
+                console.warn("提供了奇数长度的十六进制字符串:", hex);
+                hex = '0' + hex;
+            }
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let i = 0; i < bytes.length; i++) {
+                try {
+                    bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+                } catch (e) {
+                    console.error("十六进制解析错误", e);
+                    bytes[i] = 0;
+                }
+            }
+            return bytes;
+        }
+
+        function bytesToHex(byteArray) {
+            if (!byteArray) return "";
+            if (byteArray instanceof ArrayBuffer) {
+                byteArray = new Uint8Array(byteArray);
+            }
+            return Array.from(byteArray).map(byte => byte.toString(16).padStart(2, '0').toUpperCase()).join('');
+        }
+
+        function toHexUint8(val) {
+            return (Number(val) & 0xFF).toString(16).padStart(2, '0').toUpperCase();
+        }
+
+        function toHexUint16LE(val) {
+            const hex = (Number(val) & 0xFFFF).toString(16).padStart(4, '0').toUpperCase();
+            return hex.substring(2, 4) + hex.substring(0, 2);
+        }
+
+        function toHexUint32LE(val) {
+            const hex = (Number(val) >>> 0).toString(16).padStart(8, '0').toUpperCase();
+            return hex.substring(6, 8) + hex.substring(4, 6) + hex.substring(2, 4) + hex.substring(0, 2);
+        }
+
+        function getGpioName(value) {
+            for (const name in gpioPins) {
+                if (gpioPins[name] === value) return name;
+            }
+            return `Unknown (0x${value.toString(16).padStart(4, '0')})`;
+        }
+
+        function populateGpioSelects() {
+            document.querySelectorAll('.gpio-select').forEach(select => {
+                select.innerHTML = '';
+                for (const name in gpioPins) {
+                    const option = document.createElement('option');
+                    option.value = gpioPins[name];
+                    option.textContent = `${name} (0x${gpioPins[name].toString(16).padStart(4, '0')})`;
+                    select.appendChild(option);
+                }
+                select.value = 0x0000;
+            });
+        }
+
+        function togglePinoutSection(sectionId, isEnabled) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = isEnabled ? 'block' : 'none';
+            }
+        }
+
+        function populateDeviceTypeSelects() {
+            const cmdTypeSelect = document.getElementById('cmdTYPE');
+            const confTypeSelect = document.getElementById('conf_screen_type');
+            const uartTypeSelect = document.getElementById('uart_deviceTypeSelect');
+
+            cmdTypeSelect.innerHTML = '';
+            confTypeSelect.innerHTML = '';
+            uartTypeSelect.innerHTML = '';
+
+            deviceTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.id;
+                option.textContent = type.name;
+                cmdTypeSelect.appendChild(option.cloneNode(true));
+                confTypeSelect.appendChild(option.cloneNode(true));
+                if (type.id !== 65535) {
+                    uartTypeSelect.appendChild(option.cloneNode(true));
+                }
+            });
+            cmdTypeSelect.value = 1;
+            confTypeSelect.value = 1;
+            if (uartTypeSelect.options.length > 0) uartTypeSelect.value = uartTypeSelect.options[0].value;
+        }
+
+        function populatePullTypeSelects() {
+            document.querySelectorAll('.pull-type-select').forEach(select => {
+                select.innerHTML = '';
+                for (const name in gpioPullTypes) {
+                    const option = document.createElement('option');
+                    option.value = gpioPullTypes[name];
+                    option.textContent = name;
+                    select.appendChild(option);
+                }
+                select.value = 0;
+            });
+        }
+
+        function buildDynamicConfigPayload() {
+            let payload = "";
+            const zeroPad = (bytes) => "00".repeat(bytes);
+            try {
+                payload += toHexUint16LE(parseInt(document.getElementById('conf_screen_type').value) || 0);
+                let defaultSettingsHex = "";
+                const hwTypeHex = document.getElementById('conf_hw_type').value.trim().toUpperCase() || "0";
+                if (!/^[0-9A-F]{1,4}$/.test(hwTypeHex)) {
+                    throw new Error("无效的硬件类型十六进制值");
+                }
+                defaultSettingsHex += toHexUint16LE(parseInt(hwTypeHex, 16));
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_screen_functions').value) || 0);
+                defaultSettingsHex += toHexUint8(document.getElementById('conf_screen_w_h_inversed_ble').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint16LE(document.getElementById('conf_screen_w_h_inversed').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_screen_h').value) || 0);
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_screen_w').value) || 0);
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_screen_h_offset').value) || 0);
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_screen_w_offset').value) || 0);
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_screen_colors').value) || 0);
+                defaultSettingsHex += toHexUint16LE(document.getElementById('conf_screen_black_invert').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint16LE(document.getElementById('conf_screen_second_color_invert').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint32LE(document.getElementById('conf_epd_pinout_enabled').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint32LE(document.getElementById('conf_led_pinout_enabled').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint32LE(document.getElementById('conf_nfc_pinout_enabled').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint32LE(document.getElementById('conf_flash_pinout_enabled').checked ? 1 : 0);
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_ADC_pinout').value) || 0x0000);
+                defaultSettingsHex += toHexUint16LE(parseInt(document.getElementById('conf_UART_pinout').value) || 0x0000);
+                if (defaultSettingsHex.length !== SIZEOF_DEFAULT_SETTINGS * 2) {
+                    throw new Error("默认设置构造长度不匹配");
+                }
+                payload += defaultSettingsHex;
+                if (document.getElementById('conf_epd_pinout_enabled').checked) {
+                    let pinoutHex = "";
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_RESET').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_DC').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_BUSY').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_BUSYs').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_CS').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_CSs').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_CLK').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_MOSI').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_ENABLE').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_ENABLE1').value));
+                    pinoutHex += toHexUint8(document.getElementById('conf_epd_ENABLE_INVERT').checked ? 1 : 0);
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_epd_FLASH_CS').value));
+                    pinoutHex += toHexUint8(parseInt(document.getElementById('conf_epd_PIN_CONFIG_SLEEP').value));
+                    pinoutHex += toHexUint8(parseInt(document.getElementById('conf_epd_PIN_ENABLE').value));
+                    pinoutHex += toHexUint8(parseInt(document.getElementById('conf_epd_PIN_ENABLE_SLEEP').value));
+                    if (pinoutHex.length !== SIZEOF_SCREEN_PINOUT * 2) {
+                        throw new Error("EPD 引脚构造长度不匹配");
+                    }
+                    payload += pinoutHex;
+                } else {
+                    payload += zeroPad(SIZEOF_SCREEN_PINOUT);
+                }
+                if (document.getElementById('conf_led_pinout_enabled').checked) {
+                    let pinoutHex = "";
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_led_R').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_led_G').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_led_B').value));
+                    pinoutHex += toHexUint8(document.getElementById('conf_led_inverted').checked ? 1 : 0);
+                    if (pinoutHex.length !== SIZEOF_LED_PINOUT * 2) {
+                        throw new Error("LED 引脚构造长度不匹配");
+                    }
+                    payload += pinoutHex;
+                } else {
+                    payload += zeroPad(SIZEOF_LED_PINOUT);
+                }
+                if (document.getElementById('conf_nfc_pinout_enabled').checked) {
+                    let pinoutHex = "";
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_nfc_SDA').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_nfc_SCL').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_nfc_CS').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_nfc_IRQ').value));
+                    if (pinoutHex.length !== SIZEOF_NFC_PINOUT * 2) {
+                        throw new Error("NFC 引脚构造长度不匹配");
+                    }
+                    payload += pinoutHex;
+                } else {
+                    payload += zeroPad(SIZEOF_NFC_PINOUT);
+                }
+                if (document.getElementById('conf_flash_pinout_enabled').checked) {
+                    let pinoutHex = "";
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_flash_CS').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_flash_CLK').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_flash_MISO').value));
+                    pinoutHex += toHexUint16LE(parseInt(document.getElementById('conf_flash_MOSI').value));
+                    if (pinoutHex.length !== SIZEOF_FLASH_PINOUT * 2) {
+                        throw new Error("Flash 引脚构造长度不匹配");
+                    }
+                    payload += pinoutHex;
+                } else {
+                    payload += zeroPad(SIZEOF_FLASH_PINOUT);
+                }
+                document.getElementById('dynamicConfigPayload').value = payload;
+                return payload;
+            } catch (e) {
+                addLog("构建动态配置时出错: " + e.message);
+                document.getElementById('dynamicConfigPayload').value = "错误: 构建失败";
+                return null;
+            }
+        }
+
+        function parseAndApplyDynamicConfig(hexData) {
+            addLog("解析动态配置数据: " + hexData.length / 2 + " 字节已接收。");
+            let offset = 0;
+
+            function readUint16LE_internal(len = 4) {
+                if (offset + len > hexData.length) throw new Error(`越界读取 (Uint16LE)`);
+                const val = fromHexUint16LE(hexData.substring(offset, offset + len));
+                offset += len;
+                return val;
+            }
+
+            function readUint8_internal(len = 2) {
+                if (offset + len > hexData.length) throw new Error(`越界读取 (Uint8)`);
+                const val = fromHexUint8(hexData.substring(offset, offset + len));
+                offset += len;
+                return val;
+            }
+
+            function readUint32LE_internal(len = 8) {
+                if (offset + len > hexData.length) throw new Error(`越界读取 (Uint32LE)`);
+                const val = fromHexUint32LE(hexData.substring(offset, offset + len));
+                offset += len;
+                return val;
+            }
+            try {
+                const minExpectedLength = (2 + SIZEOF_DEFAULT_SETTINGS) * 2;
+                if (hexData.length < minExpectedLength) {
+                    throw new Error(`有效负载过短 (${hexData.length / 2}B)，基础配置至少需要 ${minExpectedLength / 2}B。`);
+                }
+                document.getElementById('conf_screen_type').value = readUint16LE_internal();
+                document.getElementById('conf_hw_type').value = readUint16LE_internal().toString(16).padStart(4, '0').toUpperCase();
+                document.getElementById('conf_screen_functions').value = readUint16LE_internal();
+                document.getElementById('conf_screen_w_h_inversed_ble').checked = (readUint8_internal() !== 0);
+                document.getElementById('conf_screen_w_h_inversed').checked = (readUint16LE_internal() !== 0);
+                const h = readUint16LE_internal();
+                const w = readUint16LE_internal();
+                document.getElementById('conf_screen_h').value = h;
+                document.getElementById('conf_screen_w').value = w;
+                if (w > 0 && h > 0 && w < 4000 && h < 4000) {
+                    const isInvertedWH = document.getElementById('conf_screen_w_h_inversed_ble').checked;
+                    if (isInvertedWH) {
+                        document.getElementById('widthInput').value = h;
+                        document.getElementById('heightInput').value = w;
+                    } else {
+                        document.getElementById('widthInput').value = w;
+                        document.getElementById('heightInput').value = h;
+                    }
+                } else {
+                    addLog("警告: 从动态配置解析的宽度/高度似乎无效，暂不更新主画布值。");
+                }
+                document.getElementById('conf_screen_h_offset').value = readUint16LE_internal();
+                document.getElementById('conf_screen_w_offset').value = readUint16LE_internal();
+                const colors = readUint16LE_internal();
+                document.getElementById('conf_screen_colors').value = colors;
+                document.getElementById('secondColorCheckbox').checked = (colors >= 2);
+                document.getElementById('thirdColorCheckbox').checked = (colors >= 3);
+                document.getElementById('conf_screen_black_invert').checked = (readUint16LE_internal() !== 0);
+                document.getElementById('conf_screen_second_color_invert').checked = (readUint16LE_internal() !== 0);
+                const epdEnabled = (readUint32LE_internal() !== 0);
+                const ledEnabled = (readUint32LE_internal() !== 0);
+                const nfcEnabled = (readUint32LE_internal() !== 0);
+                const flashEnabled = (readUint32LE_internal() !== 0);
+                document.getElementById('conf_ADC_pinout').value = readUint16LE_internal();
+                document.getElementById('conf_UART_pinout').value = readUint16LE_internal();
+                document.getElementById('conf_epd_pinout_enabled').checked = epdEnabled;
+                togglePinoutSection('epd_pinout_details', epdEnabled);
+                document.getElementById('conf_led_pinout_enabled').checked = ledEnabled;
+                togglePinoutSection('led_pinout_details', ledEnabled);
+                document.getElementById('conf_nfc_pinout_enabled').checked = nfcEnabled;
+                togglePinoutSection('nfc_pinout_details', nfcEnabled);
+                document.getElementById('conf_flash_pinout_enabled').checked = flashEnabled;
+                togglePinoutSection('flash_pinout_details', flashEnabled);
+                let remainingExpectedBytes = 0;
+                if (epdEnabled) remainingExpectedBytes += SIZEOF_SCREEN_PINOUT;
+                if (ledEnabled) remainingExpectedBytes += SIZEOF_LED_PINOUT;
+                if (nfcEnabled) remainingExpectedBytes += SIZEOF_NFC_PINOUT;
+                if (flashEnabled) remainingExpectedBytes += SIZEOF_FLASH_PINOUT;
+                if (offset + remainingExpectedBytes * 2 > hexData.length) {
+                    addLog(`警告: 负载对于所有启用的引脚部分来说太短。解析可用的内容。`);
+                    return;
+                }
+                if (epdEnabled) {
+                    document.getElementById('conf_epd_RESET').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_DC').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_BUSY').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_BUSYs').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_CS').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_CSs').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_CLK').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_MOSI').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_ENABLE').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_ENABLE1').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_ENABLE_INVERT').checked = (readUint8_internal() !== 0);
+                    document.getElementById('conf_epd_FLASH_CS').value = readUint16LE_internal();
+                    document.getElementById('conf_epd_PIN_CONFIG_SLEEP').value = readUint8_internal();
+                    document.getElementById('conf_epd_PIN_ENABLE').value = readUint8_internal();
+                    document.getElementById('conf_epd_PIN_ENABLE_SLEEP').value = readUint8_internal();
+                }
+                if (ledEnabled) {
+                    document.getElementById('conf_led_R').value = readUint16LE_internal();
+                    document.getElementById('conf_led_G').value = readUint16LE_internal();
+                    document.getElementById('conf_led_B').value = readUint16LE_internal();
+                    document.getElementById('conf_led_inverted').checked = (readUint8_internal() !== 0);
+                }
+                if (nfcEnabled) {
+                    document.getElementById('conf_nfc_SDA').value = readUint16LE_internal();
+                    document.getElementById('conf_nfc_SCL').value = readUint16LE_internal();
+                    document.getElementById('conf_nfc_CS').value = readUint16LE_internal();
+                    document.getElementById('conf_nfc_IRQ').value = readUint16LE_internal();
+                }
+                if (flashEnabled) {
+                    document.getElementById('conf_flash_CS').value = readUint16LE_internal();
+                    document.getElementById('conf_flash_CLK').value = readUint16LE_internal();
+                    document.getElementById('conf_flash_MISO').value = readUint16LE_internal();
+                    document.getElementById('conf_flash_MOSI').value = readUint16LE_internal();
+                }
+                if (offset !== hexData.length) {
+                    addLog(`警告: 动态配置已解析，但 ${(hexData.length - offset) / 2} 字节未解析。`);
+                } else {
+                    addLog("动态配置解析并成功更新 UI。");
+                }
+            } catch (e) {
+                addLog("解析动态配置时出错: " + e.message);
+                console.error("解析错误:", e, "原始十六进制:", hexData, "当前偏移:", offset);
+            } finally {
+                doAll();
+            }
+        }
+
+        function readDynamicConfig() {
+            sendcmd("0011");
+        }
+
+        function sendDynamicConfigTest() {
+            const p = buildDynamicConfigPayload();
+            if (p) sendcmd("000F" + p);
+        }
+
+        function sendDynamicConfigSave() {
+            const p = buildDynamicConfigPayload();
+            if (p) sendcmd("0010" + p);
+        }
+
+        function doAll() {
+            createCanvas();
+            addText();
+            getPixelData();
+        }
+
+        function saveRememberDeviceSetting() {
+            const checkbox = document.getElementById('rememberDeviceCheckbox');
+            const namePrefixInput = document.getElementById('namePrefix');
+            const isEnabled = checkbox.checked;
+            localStorage.setItem('rememberDeviceEnabled', isEnabled);
+            addLog(`记住设备设置已${isEnabled ? '启用' : '禁用'}。`);
+            if (isEnabled) {
+                const lastDeviceName = localStorage.getItem('lastDeviceName');
+                if (lastDeviceName) {
+                    namePrefixInput.value = lastDeviceName;
+                    addLog(`前缀过滤器设置为记住的设备: ${lastDeviceName}`);
+                } else {
+                    addLog(`记住设备已启用，但尚未存储设备名称。`);
+                }
+            }
+        }
+
+        function toggleViewMode() {
+            const body = document.body;
+            const button = document.getElementById('viewModeToggleButton');
+            const uploadCompressedBtn = document.getElementById('uploadCompressedImageButton');
+
+            body.classList.toggle('simple-view');
+
+            if (body.classList.contains('simple-view')) {
+                button.textContent = '高级视图';
+                if (uploadCompressedBtn) {
+                    uploadCompressedBtn.textContent = '上传图像';
+                }
+				localStorage.setItem('viewMode', 'simple');
+                doAll();
+            } else {
+                button.textContent = '简单视图';
+                if (uploadCompressedBtn) {
+                    uploadCompressedBtn.textContent = '上传压缩图像';
+                }
+				localStorage.setItem('viewMode', 'advanced');
+                showView('ble');
+            }
+        }
+		
+		function startDebugPolling() {
+            if (debugPollingInterval) {
+                return;
+            }
+            if (!bleDevice || !bleDevice.gatt || !bleDevice.gatt.connected) {
+                addLog("无法开始自动读取：未连接。");
+                return;
+            }
+            debugPollingInterval = setInterval(readDebugStatus, 3000);
+            addLog("已开始每 3 秒自动读取状态。");
+            readDebugStatus();
+        }
+
+        function stopDebugPolling() {
+            if (debugPollingInterval) {
+                clearInterval(debugPollingInterval);
+                debugPollingInterval = null;
+                addLog("已停止自动状态读取。");
+            }
+        }
+		
+        function initDebugChart() {
+            if (myDebugChart) {
+                myDebugChart.destroy();
+            }
+            const ctx = document.getElementById('debugChart').getContext('2d');
+            const voltageColor = 'rgba(255, 99, 132, 1)';
+            const adcRawColor = 'rgba(255, 159, 64, 1)';
+            const tempColor = 'rgba(54, 162, 235, 1)';
+            const epdTempColor = 'rgba(75, 192, 192, 1)';
+
+            myDebugChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '电池电压 (mV)',
+                        data: [],
+                        borderColor: voltageColor,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        yAxisID: 'y_voltage',
+                        tension: 0.1,
+                        pointRadius: 4,
+                        borderWidth: 2,
+                    }, {
+                        label: 'ADC 原始值',
+                        data: [],
+                        borderColor: adcRawColor,
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        yAxisID: 'y_adc_raw',
+                        tension: 0.1,
+                        pointRadius: 4,
+                        borderWidth: 2,
+                    }, {
+                        label: 'ADC 温度 (°C)',
+                        data: [],
+                        borderColor: tempColor,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        yAxisID: 'y_temp',
+                        tension: 0.1,
+                        pointRadius: 4,
+                        borderWidth: 2,
+                    }, {
+                        label: 'EPD 温度 (°C)',
+                        data: [],
+                        borderColor: epdTempColor,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        yAxisID: 'y_temp',
+                        tension: 0.1,
+                        pointRadius: 4,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: '时间'
+                            }
+                        },
+                        y_voltage: {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '电压 (mV)',
+                                color: voltageColor
+                            },
+                            ticks: {
+                                color: voltageColor
+                            },
+                            suggestedMin: 2000,
+                            suggestedMax: 3600
+                        },
+                        y_temp: {
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '温度 (°C)',
+                                color: tempColor
+                            },
+                            ticks: {
+                                color: tempColor
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            suggestedMin: -20,
+                            suggestedMax: 50
+                        },
+                        y_adc_raw: {
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'ADC 原始值',
+                                color: adcRawColor
+                            },
+                            ticks: {
+                                color: adcRawColor,
+                                callback: function(value, index, values) {
+                                    return value.toString().padStart(8, ' ');
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            suggestedMin: 750,
+                            suggestedMax: 1400
+                        }
+                    }
+                }
+            });
+        }
+
+        function addChartData(timestamp, battery, adcRaw, adcTemp, epdTemp) {
+            if (!myDebugChart) return;
+
+            myDebugChart.data.labels.push(timestamp);
+            myDebugChart.data.datasets[0].data.push(battery);
+            myDebugChart.data.datasets[1].data.push(adcRaw);
+            myDebugChart.data.datasets[2].data.push(adcTemp);
+            myDebugChart.data.datasets[3].data.push(epdTemp);
+
+            if (myDebugChart.data.labels.length > MAX_CHART_POINTS) {
+                myDebugChart.data.labels.shift();
+                myDebugChart.data.datasets.forEach((dataset) => {
+                    dataset.data.shift();
+                });
+            }
+
+            myDebugChart.update();
+        }
+
+        async function loadServerFirmware(uartLogCallback) {
+            uartLogCallback("尝试从服务器加载 ATC_BLE_OEPL.bin...");
+            try {
+                const response = await fetch("https://atc1441.github.io/ATC_BLE_OEPL.bin");
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误！状态码: ${response.status} - ${response.statusText}。`);
+                }
+                serverFirmwareBuffer = await response.arrayBuffer();
+                uartLogCallback(`成功从服务器加载 ATC_BLE_OEPL.bin (${serverFirmwareBuffer.byteLength} 字节)。当 UART 端口打开时将自动选择。`);
+            } catch (error) {
+                uartLogCallback(`从服务器加载固件时出错: ${error.message}`);
+                console.error("服务器固件加载错误:", error);
+                serverFirmwareBuffer = null;
+            }
+        }
+
+
+        window.addEventListener('load', function () {
+            populateDeviceTypeSelects();
+            populateGpioSelects();
+            populatePullTypeSelects();
+
+            togglePinoutSection('epd_pinout_details', document.getElementById('conf_epd_pinout_enabled').checked);
+            togglePinoutSection('led_pinout_details', document.getElementById('conf_led_pinout_enabled').checked);
+            togglePinoutSection('nfc_pinout_details', document.getElementById('conf_nfc_pinout_enabled').checked);
+            togglePinoutSection('flash_pinout_details', document.getElementById('conf_flash_pinout_enabled').checked);
+
+            doAll();
+
+            const rememberEnabled = localStorage.getItem('rememberDeviceEnabled') === 'true';
+            const lastDeviceName = localStorage.getItem('lastDeviceName');
+            const rememberCheckbox = document.getElementById('rememberDeviceCheckbox');
+            const namePrefixInput = document.getElementById('namePrefix');
+            rememberCheckbox.checked = rememberEnabled;
+            if (rememberEnabled && lastDeviceName) {
+                namePrefixInput.value = lastDeviceName;
+                addLog(`已加载记住的设备名称: ${lastDeviceName}`);
+            } else if (rememberEnabled) {
+                addLog(`记住设备已启用，但尚未存储设备名称。`);
+            } else {
+                addLog(`记住设备已禁用。`);
+            }
+
+            showView('ble');
+            addLog("页面加载完成，准备就绪。");
+            setStatus("就绪");
+
+            // 切换到BLE页面自动加载服务器固件
+            loadServerFirmware(addLog);
+        });
+
+
+        (function () {
+            "use strict";
+
+            var uartFirmwareArray = null;
+            const UART_SETTINGS_ADDR = 0x79000;
+            const MAGIC_WORD_DEFAULT = 0xABDC1234;
+            const MAGIC_VERSION_DEFAULT = 1;
+            const SIZEOF_SETTINGS_DEFAULT_TYPE_STRUCT = 15;
+
+            function uart$(id) {
+                return document.getElementById(id);
+            }
+
+            const uart_connect_btn = uart$('uart_butOpen');
+            const uart_fwriter_btn = uart$('uart_butWrite');
+            const uart_swrite_span = uart$('uart_swrite');
+            const uart_bunlock_btn = uart$('uart_butUnlock');
+            const uart_berase_btn = uart$('uart_butErase');
+            const uart_breset_btn = uart$('uart_butReset');
+            const uart_ubaud_select = uart$('uart_ubaud');
+            const uart_uatime_select = uart$('uart_uatime');
+            const uart_ufile_input = uart$('uart_file');
+            const uart_load_server_fw_btn = uart$('uart_butLoadFromServer');
+            const uart_device_type_select = uart$('uart_deviceTypeSelect');
+            const uart_write_device_type_btn = uart$('uart_butWriteDeviceType');
+            const uart_bwrite_and_type_btn = uart$('uart_butWriteAndType');
+
+
+            function uartLog(data) {
+                console.log("UART 日志: " + data);
+                const logArea = uart$("uart-log");
+                if (logArea) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    logArea.innerHTML = `${timestamp}: ${data}<br>` + logArea.innerHTML;
+                    const maxLogLines = 150;
+                    const lines = logArea.innerHTML.split('<br>');
+                    if (lines.length > maxLogLines + 1) {
+                        logArea.innerHTML = lines.slice(0, maxLogLines).join('<br>') + (lines.length > maxLogLines ? '<br>' : '');
+                    }
+
+                }
+            }
+
+            function uartDelay(ms) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(resolve, ms);
+                });
+            }
+
+            function uartHex(number, length) {
+                var str = (number.toString(16)).toUpperCase();
+                while (str.length < length) str = '0' + str;
+                return str;
+            }
+
+            function setUartFirmware(firmwareBuffer, sourceName) {
+                uartFirmwareArray = firmwareBuffer;
+                if (!uartFirmwareArray) {
+                    uartLog(`来自 ${sourceName} 的固件数据为空。`);
+                    uart_fwriter_btn.disabled = true;
+                    uart_bwrite_and_type_btn.disabled = true;
+                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                    return false;
+                }
+
+                uartLog(`从 ${sourceName} 选择了固件，大小: ${uartFirmwareArray.byteLength} 字节`);
+                if (uartFirmwareArray.byteLength < 16 || (new Uint32Array(uartFirmwareArray.slice(8, 12)))[0] !== 0x544C4E4B) {
+                    uartLog(`从 ${sourceName} 选择的数据不是 Telink 固件 .bin`);
+                    alert(`从 ${sourceName} 选择的数据不是 Telink 固件 .bin`);
+                    uartFirmwareArray = null;
+                    uart_fwriter_btn.disabled = true;
+                    uart_bwrite_and_type_btn.disabled = true;
+                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                    return false;
+                }
+                if (uart_connect_btn.opened) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_bwrite_and_type_btn.disabled = false;
+                    uart_swrite_span.innerHTML = `准备写入 (${sourceName})`;
+                } else {
+                    uart_swrite_span.innerHTML = `请先打开 COM 端口 (${sourceName} 已加载)`;
+                }
+                return true;
+            }
+
+            function uart_sws_wr_addr(addr, data) {
+                // log(addr + ':['+data+']');
+                let d = new Uint8Array(10); // word swire 10 bits = 10 bytes UART
+                let h = new Uint8Array([0x5a, (addr >> 16) & 0xff, (addr >> 8) & 0xff, addr & 0xff, 0x00]);
+                let pkt = new Uint8Array((data.byteLength + 6) * 10);
+                d[0] = 0x80; // start bit byte cmd swire = 1
+                d[9] = 0xfe; // stop bit swire = 0
+                h.forEach((el, n) => {
+                    let m = 0x80; // mask bit
+                    let idx = 1;
+                    do {
+                        if ((el & m) != 0) d[idx] = 0x80;
+                        else d[idx] = 0xfe;
+                        idx += 1;
+                        m >>= 1;
+                    } while (m != 0);
+                    pkt.set(d, n * 10);
+                    d[0] = 0xfe; // start bit next byte swire = 0
+                });
+                data.forEach((el, n) => {
+                    let m = 0x80; // mask bit
+                    let idx = 1;
+                    do {
+                        if ((el & m) != 0) d[idx] = 0x80;
+                        else d[idx] = 0xfe;
+                        idx += 1;
+                        m >>= 1;
+                    } while (m != 0);
+                    pkt.set(d, (n + 5) * 10);
+                });
+                // swire stop cmd = 0xff 
+                d.fill(0x80, 0, 9);
+                pkt.set(d, (data.byteLength + 5) * 10);
+                return pkt;
+            }
+
+            async function uartFlashByteCmd(cmd) {
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([cmd & 0xff, 0x01])));
+            }
+
+            async function uartFlashWriteEnable() {
+                return uartFlashByteCmd(0x06);
+            }
+
+            async function uartFlashWakeUp() {
+                return uartFlashByteCmd(0xab);
+            }
+
+            async function uartFlashUnlock() {
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x01])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x00, 0x01])));
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x01])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x00])));
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x00, 0x01])));
+            }
+
+            async function uartFlashEraseAll() {
+                return uartFlashByteCmd(0x60);
+            }
+
+            async function uartWriteFifo(addr, data) {
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x00b3, new Uint8Array([0x80])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(addr, data));
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x00b3, new Uint8Array([0x00])));
+            }
+
+            async function uartSectorErase(addr) {
+                uartLog(`正在擦除扇区地址 0x${uartHex(addr, 6)}...`);
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([0x20])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([(addr >> 16) & 0xff])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([(addr >> 8) & 0xff])));
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0c, new Uint8Array([addr & 0xff, 0x01])));
+                return await uartDelay(300);
+            }
+
+            async function uartWriteFlashBlk(addr, data) {
+                await uartFlashWriteEnable();
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x00])));
+                let blk = new Uint8Array(4 + data.byteLength);
+                blk[0] = 0x02;
+                blk[1] = (addr >> 16) & 0xff;
+                blk[2] = (addr >> 8) & 0xff
+                blk[3] = addr & 0xff;
+                blk.set(data, 4);
+                await uartWriteFifo(0x0c, blk);
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x0d, new Uint8Array([0x01])));
+                return await uartDelay(10);
+            }
+
+            async function uartSoftResetMSU() {
+                return await uartSerialController.write_raw(uart_sws_wr_addr(0x06f, new Uint8Array([0x20])));
+            }
+
+            async function uartActivate(tim) {
+                let blk = uart_sws_wr_addr(0x0602, new Uint8Array([0x05]));
+                let s = '重置 DTR/RTS (100 毫秒)';
+                uart_swrite_span.innerHTML = s;
+                uartLog(s);
+                await uartSerialController.reset(100);
+                uartLog('软复位 MCU');
+                await uartSoftResetMSU();
+                s = '激活 (' + (tim / 1000.0) + ' 秒)...';
+                uart_swrite_span.innerHTML = s;
+                uartLog(s);
+                let t = new Date().getTime();
+                while (new Date().getTime() - t < tim) {
+                    await uartSerialController.write_raw(blk);
+                }
+                await uartSerialController.write_raw(uart_sws_wr_addr(0x00b2, new Uint8Array([55])));
+                await uartSerialController.write_raw(blk);
+                return await uartFlashWakeUp();
+            }
+
+            async function uartFlashWrite() {
+                if (uartFirmwareArray == null || uart_connect_btn.opened == false) {
+                    uartLog("刷写固件失败：没有固件或端口未打开。");
+                    return false;
+                }
+                let t = new Date().getTime();
+                uartLog("开始固件刷写过程...");
+                try {
+                    await uartActivate(uart_uatime_select.value);
+                    await uartFlashWriteEnable();
+                    await uartFlashUnlock();
+                    await uartDelay(1500);
+                    uartLog('写入 ' + uartFirmwareArray.byteLength + ' 字节到 Flash...');
+                    let len = uartFirmwareArray.byteLength;
+                    let addr = 0;
+                    let sblk = 256;
+                    while (len > 0) {
+                        if ((addr & 0x0fff) == 0) {
+                            let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash 扇区擦除 0x' + uartHex(addr, 6);
+                            uartLog(s);
+                            uart_swrite_span.innerHTML = s;
+                            await uartSectorErase(addr);
+                        }
+                        if (len < sblk) sblk = len;
+                        let s = Math.floor(addr / (uartFirmwareArray.byteLength * 1.0) * 100) + '% Flash 写入 ' + sblk + ' 字节到 0x' + uartHex(addr, 6);
+
+                        uart_swrite_span.innerHTML = s;
+                        await uartWriteFlashBlk(addr, new Uint8Array(uartFirmwareArray.slice(addr, addr + sblk)));
+                        addr += sblk;
+                        len -= sblk;
+                    }
+                    uart_swrite_span.innerHTML = '固件写入完成';
+                    uartLog('固件刷写完成 (' + ((new Date().getTime() - t) / 1000.0) + ' 秒).');
+
+                    return true;
+                } catch (error) {
+                    uartLog(`固件刷写过程中出错: ${error}`);
+                    uart_swrite_span.innerHTML = '固件刷写出错！';
+                    console.error("固件刷写过程中出错:", error);
+                    return false;
+                }
+            }
+
+            async function writeDeviceTypeSettings(doActivate) {
+                if (uart_connect_btn.opened == false) {
+                    uartLog("写入设备类型：端口未打开。");
+                    alert("UART 端口未打开。");
+                    return false;
+                }
+                const selectedHwTypeValue = parseInt(uart_device_type_select.value);
+                if (isNaN(selectedHwTypeValue)) {
+                    uartLog("选择的设备类型无效，无法写入 OTP。");
+                    alert("请选择有效的设备类型。");
+                    return false;
+                }
+
+                uartLog(`准备将设备类型设置写入到地址 0x${UART_SETTINGS_ADDR.toString(16)}...`);
+                uartLog(`已选择 OEPL 硬件类型: 0x${selectedHwTypeValue.toString(16).padStart(4, '0')} (${uart_device_type_select.options[uart_device_type_select.selectedIndex].text})`);
+
+                const buffer = new ArrayBuffer(SIZEOF_SETTINGS_DEFAULT_TYPE_STRUCT);
+                const dataView = new DataView(buffer);
+                const uint8ArrayView = new Uint8Array(buffer);
+
+                dataView.setUint32(0, MAGIC_WORD_DEFAULT, true);
+                dataView.setUint32(4, MAGIC_VERSION_DEFAULT, true);
+                dataView.setUint32(8, SIZEOF_SETTINGS_DEFAULT_TYPE_STRUCT, true);
+                dataView.setUint16(12, selectedHwTypeValue, true);
+                let crc = 0;
+                for (let i = 0; i < SIZEOF_SETTINGS_DEFAULT_TYPE_STRUCT - 1; i++) {
+                    crc ^= uint8ArrayView[i];
+                }
+                dataView.setUint8(SIZEOF_SETTINGS_DEFAULT_TYPE_STRUCT - 1, crc);
+                uartLog(`有效负载 (十六进制): ${Array.from(uint8ArrayView).map(b => b.toString(16).padStart(2, '0')).join('')}`);
+
+                const t_start = new Date().getTime();
+                try {
+                    uart_swrite_span.innerHTML = '正在写入设备类型...';
+                    if (doActivate == 1)
+                        await uartActivate(uart_uatime_select.value);
+                    await uartFlashWriteEnable();
+                    await uartFlashUnlock();
+                    await uartDelay(100);
+
+                    await uartSectorErase(UART_SETTINGS_ADDR);
+
+                    uartLog(`写入 ${uint8ArrayView.length} 字节到 0x${UART_SETTINGS_ADDR.toString(16)}...`);
+                    await uartWriteFlashBlk(UART_SETTINGS_ADDR, uint8ArrayView);
+
+                    uart_swrite_span.innerHTML = '设备类型写入成功！';
+                    uartLog(`设备类型设置成功写入到 0x${UART_SETTINGS_ADDR.toString(16)} (${((new Date().getTime() - t_start) / 1000.0).toFixed(2)} 秒)。`);
+
+                    return true;
+                } catch (error) {
+                    uartLog(`写入设备类型设置时出错: ${error}`);
+                    uart_swrite_span.innerHTML = '写入设备类型出错！';
+                    console.error("写入设备类型时出错:", error);
+                    return false;
+                }
+            }
+
+
+            async function uartDeviceStop() {
+                return uartSerialController.close();
+            }
+
+            uart_connect_btn.addEventListener('pointerdown', () => {
+                if (uart_connect_btn.value == '关闭') {
+                    uartDeviceStop();
+                } else {
+                    uartSerialController.init();
+                }
+            });
+
+            uart_load_server_fw_btn.onclick = async function () {
+                uart_load_server_fw_btn.disabled = true;
+
+                await window.loadServerFirmware(uartLog);
+                if (serverFirmwareBuffer) {
+                    setUartFirmware(serverFirmwareBuffer, "服务器");
+                }
+                uart_load_server_fw_btn.disabled = false;
+            };
+
+            uart_fwriter_btn.onclick = async function () {
+                uart_fwriter_btn.disabled = true;
+                uart_bwrite_and_type_btn.disabled = true;
+                uart_bunlock_btn.disabled = true;
+                uart_berase_btn.disabled = true;
+                uart_breset_btn.disabled = true;
+                uart_connect_btn.disabled = true;
+                uart_load_server_fw_btn.disabled = true;
+                uart_write_device_type_btn.disabled = true;
+
+                const success = await uartFlashWrite();
+                if (success) {
+                    uartLog('独立固件刷写成功。软重置 MCU。');
+                    uart_swrite_span.innerHTML = '固件写入成功！正在重置...';
+                    await uartSoftResetMSU();
+                    uart_swrite_span.innerHTML = '固件写入成功。';
+                }
+
+                uart_connect_btn.disabled = false;
+                uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false;
+                uart_breset_btn.disabled = false;
+                uart_load_server_fw_btn.disabled = false;
+                uart_write_device_type_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray != null) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_bwrite_and_type_btn.disabled = false;
+                }
+            };
+
+            uart_write_device_type_btn.onclick = async function () {
+                uart_fwriter_btn.disabled = true;
+                uart_bwrite_and_type_btn.disabled = true;
+                uart_bunlock_btn.disabled = true;
+                uart_berase_btn.disabled = true;
+                uart_breset_btn.disabled = true;
+                uart_connect_btn.disabled = true;
+                uart_load_server_fw_btn.disabled = true;
+                uart_write_device_type_btn.disabled = true;
+
+                const success = await writeDeviceTypeSettings(1);
+                if (success) {
+                    uartLog('独立类型写入成功。软重置 MCU。');
+                    uart_swrite_span.innerHTML = '类型写入成功！正在重置...';
+                    await uartSoftResetMSU();
+                    uart_swrite_span.innerHTML = '类型写入成功。';
+                }
+
+                uart_connect_btn.disabled = false;
+                uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false;
+                uart_breset_btn.disabled = false;
+                uart_load_server_fw_btn.disabled = false;
+                uart_write_device_type_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray != null) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_bwrite_and_type_btn.disabled = false;
+                }
+            };
+
+            uart_bwrite_and_type_btn.onclick = async function () {
+                uart_fwriter_btn.disabled = true;
+                uart_bwrite_and_type_btn.disabled = true;
+                uart_bunlock_btn.disabled = true;
+                uart_berase_btn.disabled = true;
+                uart_breset_btn.disabled = true;
+                uart_connect_btn.disabled = true;
+                uart_load_server_fw_btn.disabled = true;
+                uart_write_device_type_btn.disabled = true;
+
+                let fw_ok = false;
+                let type_ok = false;
+
+                uartLog("开始组合写入：先写入固件...");
+                fw_ok = await uartFlashWrite();
+
+                if (fw_ok) {
+                    uartLog("组合写入: 固件成功。继续到设备类型...");
+                    uart_swrite_span.innerHTML = '固件成功，正在写入类型...';
+                    type_ok = await writeDeviceTypeSettings(0);
+                } else {
+                    uartLog("组合写入: 固件失败。跳过设备类型。");
+                }
+
+                if (fw_ok && type_ok) {
+                    uartLog("组合写入: 固件和设备类型成功。软重置 MCU。");
+                    uart_swrite_span.innerHTML = '固件与类型写入成功！正在重置...';
+                    await uartSoftResetMSU();
+                    uart_swrite_span.innerHTML = '固件与类型写入成功。';
+                } else if (fw_ok && !type_ok) {
+                    uartLog("组合写入: 固件成功，但设备类型失败。软重置 MCU（固件可能已应用）。");
+                    await uartSoftResetMSU();
+                    uart_swrite_span.innerHTML = uart_swrite_span.innerHTML.replace('!', '！已完成（类型错误）。');
+                } else {
+                    uartLog("组合写入: 固件失败。");
+                }
+
+                uart_connect_btn.disabled = false;
+                uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false;
+                uart_breset_btn.disabled = false;
+                uart_load_server_fw_btn.disabled = false;
+                uart_write_device_type_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray != null) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_bwrite_and_type_btn.disabled = false;
+                }
+            };
+
+
+            uart_bunlock_btn.onclick = async function () {
+                uart_fwriter_btn.disabled = true;
+                uart_bwrite_and_type_btn.disabled = true;
+                uart_bunlock_btn.disabled = true;
+                uart_berase_btn.disabled = true;
+                uart_breset_btn.disabled = true;
+                uart_connect_btn.disabled = true;
+                uart_load_server_fw_btn.disabled = true;
+                uart_write_device_type_btn.disabled = true;
+
+                await uartActivate(uart_uatime_select.value);
+                uart_swrite_span.innerHTML = '正在解锁...';
+                uartLog('Flash 正在解锁...');
+                await uartFlashWriteEnable();
+                await uartFlashUnlock();
+                await uartDelay(100);
+                uart_swrite_span.innerHTML = '已解锁！';
+                uartLog('解锁完成。');
+
+                uart_connect_btn.disabled = false;
+                uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false;
+                uart_breset_btn.disabled = false;
+                uart_load_server_fw_btn.disabled = false;
+                uart_write_device_type_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray != null) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_bwrite_and_type_btn.disabled = false;
+                }
+            };
+
+            uart_berase_btn.onclick = async function () {
+                uart_fwriter_btn.disabled = true;
+                uart_bwrite_and_type_btn.disabled = true;
+                uart_bunlock_btn.disabled = true;
+                uart_berase_btn.disabled = true;
+                uart_breset_btn.disabled = true;
+                uart_connect_btn.disabled = true;
+                uart_load_server_fw_btn.disabled = true;
+                uart_write_device_type_btn.disabled = true;
+
+                await uartActivate(uart_uatime_select.value);
+                uart_swrite_span.innerHTML = '正在擦除...';
+                uartLog('Flash 正在全部擦除（约 3.5 秒）...');
+                await uartFlashWriteEnable();
+                await uartFlashEraseAll();
+                await uartDelay(3500);
+                uart_swrite_span.innerHTML = '已擦除！';
+                uartLog('擦除完成。');
+
+                uart_connect_btn.disabled = false;
+                uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false;
+                uart_breset_btn.disabled = false;
+                uart_load_server_fw_btn.disabled = false;
+                uart_write_device_type_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray != null) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_bwrite_and_type_btn.disabled = false;
+                }
+            };
+
+            uart_breset_btn.onclick = async function () {
+                uart_fwriter_btn.disabled = true;
+                uart_bwrite_and_type_btn.disabled = true;
+                uart_bunlock_btn.disabled = true;
+                uart_berase_btn.disabled = true;
+                uart_breset_btn.disabled = true;
+                uart_connect_btn.disabled = true;
+                uart_load_server_fw_btn.disabled = true;
+                uart_write_device_type_btn.disabled = true;
+
+                await uartActivate(uart_uatime_select.value);
+                uartLog('软复位 MCU');
+                uart_swrite_span.innerHTML = '正在重置...';
+                await uartSoftResetMSU();
+                uart_swrite_span.innerHTML = '重置完成。';
+                uartLog('重置完成。');
+
+                uart_connect_btn.disabled = false;
+                uart_bunlock_btn.disabled = false;
+                uart_berase_btn.disabled = false;
+                uart_breset_btn.disabled = false;
+                uart_load_server_fw_btn.disabled = false;
+                uart_write_device_type_btn.disabled = false;
+                if (uart_connect_btn.opened && uartFirmwareArray != null) {
+                    uart_fwriter_btn.disabled = false;
+                    uart_bwrite_and_type_btn.disabled = false;
+                }
+            };
+
+            uart_ufile_input.onclick = function () {
+                uart_ufile_input.value = "";
+            };
+
+            uart_ufile_input.addEventListener("change", function () {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    setUartFirmware(this.result, "本地文件");
+                }
+                if (this.files[0] != null)
+                    reader.readAsArrayBuffer(this.files[0]);
+                else {
+                    uartLog("未通过输入选择文件。");
+                    setUartFirmware(null, "本地文件");
+                }
+            }, false);
+
+            class UARTSerialController {
+                async init(init_cb) {
+                    if ('serial' in navigator) {
+                        try {
+                            uart_connect_btn.disabled = true;
+                            this.port = await navigator.serial.requestPort();
+                            await this.port.open({
+                                baudRate: parseInt(uart_ubaud_select.value),
+                                bufferSize: 240,
+                            });
+                            this.writer = this.port.writable.getWriter();
+                            uartLog('DTR, RTS 已开启。');
+                            await this.port.setSignals({
+                                dataTerminalReady: false,
+                                requestToSend: false
+                            });
+                            uart_connect_btn.value = '关闭';
+                            uartLog('USB-COM 已打开。');
+                            uart_connect_btn.opened = true;
+                            uart_berase_btn.disabled = false;
+                            uart_bunlock_btn.disabled = false;
+                            uart_breset_btn.disabled = false;
+                            uart_load_server_fw_btn.disabled = false;
+                            uart_write_device_type_btn.disabled = false;
+
+
+                            if (serverFirmwareBuffer && !uartFirmwareArray) {
+                                setUartFirmware(serverFirmwareBuffer, "服务器（自动）");
+                            } else if (uartFirmwareArray) {
+                                uart_fwriter_btn.disabled = false;
+                                uart_bwrite_and_type_btn.disabled = false;
+                                uart_swrite_span.innerHTML = `准备写入 (${document.getElementById('uart_file').files.length > 0 ? "本地文件" : (serverFirmwareBuffer && uartFirmwareArray === serverFirmwareBuffer ? "服务器" : "文件")})`;
+                            } else {
+                                uart_swrite_span.innerHTML = '选择固件文件';
+                            }
+
+
+                            if (typeof init_cb == 'function') await init_cb(this.port);
+                        } catch (err) {
+                            uartLog('打开串口时出错: ' + err);
+                            uart_berase_btn.disabled = true;
+                            uart_bunlock_btn.disabled = true;
+                            uart_breset_btn.disabled = true;
+                            uart_fwriter_btn.disabled = true;
+                            uart_bwrite_and_type_btn.disabled = true;
+                            uart_load_server_fw_btn.disabled = true;
+                            uart_write_device_type_btn.disabled = true;
+                            uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                        }
+                        uart_connect_btn.disabled = false;
+                    } else {
+                        const errorMsg = 'Web Serial API 未启用。请通过 chrome://flags/#enable-experimental-web-platform-features 启用，或使用浏览器中类似的设置。';
+                        uartLog(errorMsg);
+                        alert(errorMsg);
+                        uart_connect_btn.disabled = false;
+                        uart_connect_btn.opened = false;
+                        uart_bunlock_btn.disabled = true;
+                        uart_berase_btn.disabled = true;
+                        uart_breset_btn.disabled = true;
+                        uart_fwriter_btn.disabled = true;
+                        uart_bwrite_and_type_btn.disabled = true;
+                        uart_load_server_fw_btn.disabled = true;
+                        uart_write_device_type_btn.disabled = true;
+                        uart_swrite_span.innerHTML = 'Web Serial API 错误';
+                    }
+                }
+                async write_raw(data) {
+                    return await this.writer.write(data);
+                }
+                async reset(t_ms) {
+                    uartLog('DTR, RTS 已关闭。');
+                    await this.port.setSignals({
+                        dataTerminalReady: true,
+                        requestToSend: true
+                    });
+                    await uartDelay(t_ms);
+                    uartLog('DTR, RTS 已恢复。');
+                    return await this.port.setSignals({
+                        dataTerminalReady: false,
+                        requestToSend: false
+                    });
+                }
+                async close() {
+                    uart_fwriter_btn.disabled = true;
+                    uart_bwrite_and_type_btn.disabled = true;
+                    uart_swrite_span.innerHTML = '打开 COM 并选择文件';
+                    if (this.writer) {
+                        try {
+                            await this.writer.close();
+                        } catch (e) {
+                            uartLog("关闭写入器时出错: " + e);
+                        }
+                    }
+                    if (this.port) {
+                        try {
+                            await this.port.close();
+                        } catch (e) {
+                            uartLog("关闭端口时出错: " + e);
+                        }
+                    }
+                    uart_connect_btn.value = '打开';
+                    uart_connect_btn.opened = false;
+                    uart_bunlock_btn.disabled = true;
+                    uart_berase_btn.disabled = true;
+                    uart_breset_btn.disabled = true;
+                    uart_load_server_fw_btn.disabled = true;
+                    uart_write_device_type_btn.disabled = true;
+                    uartLog('USB-COM 已关闭。');
+                    uart_connect_btn.disabled = false;
+                }
+            }
+            var uartSerialController = new UARTSerialController();
+        })();
+
+        let currentBlePayload = PRESETS[0]?.payload ?? "";
+
+        function buildPresetChips() {
+            const container = document.getElementById('presetContainer');
+            container.innerHTML = '';
+            PRESETS.forEach((p, idx) => {
+                const chip = document.createElement('span');
+                chip.className = 'preset-chip' + (idx === 0 ? ' active' : '');
+                chip.textContent = p.name;
+                chip.onclick = () => {
+                    document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    currentBlePayload = p.payload;
+                    document.getElementById('customPayload').value = p.payload;
+                    addLog('已切换预设：' + p.name);
+                };
+                container.appendChild(chip);
+            });
+            if (PRESETS.length > 0) document.getElementById('customPayload').value = PRESETS[0].payload;
+        }
+
+        function useCustomPayload() {
+            const raw = document.getElementById('customPayload').value.trim();
+            if (raw.length !== 184 || !/^[0-9A-Fa-f]+$/.test(raw)) { alert('预设必须为 92 字节(184 个十六进制字符)'); return; }
+            currentBlePayload = raw.toUpperCase();
+            document.getElementById('customPayload').value = currentBlePayload;
+            addLog('已使用自定义预设');
+        }
+
+        async function bleReadConfig() { if (!bleChar) return; addLog('发送读取命令 (0011)'); await bleChar.writeValueWithoutResponse(new Uint8Array([0x00,0x11])); }
+        async function bleWriteConfig() {
+            if (!bleChar || currentBlePayload.length !== 184) { alert('预设无效'); return; }
+            const bytes = new Uint8Array(currentBlePayload.match(/../g).map(b=>parseInt(b,16)));
+            await bleChar.writeValueWithoutResponse(new Uint8Array([0x00,0x10,...bytes]));
+            addLog('发送写入命令 (0010 + 92字节)');
+        }
+
+
+    </script>
+</body>
+</html>
